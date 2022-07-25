@@ -617,6 +617,10 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.thermal_model:
       hname = 'h_{{}}_JetPt_R{}_{{}}_Rmax{}'.format(jetR, R_max)
       self.fill_unmatched_jet_histograms(jet, jetR, hname)
+
+    if self.is_pp:
+      hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname)
   
   #---------------------------------------------------------------
   # This function is called once for each jet
