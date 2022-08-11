@@ -49,6 +49,10 @@ class CommonUtils(common_base.CommonBase):
       return [obs_config_dict[name]['beta'] for name in obs_subconfig_list]
     elif observable == 'jet_ENC_RL':
       return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
+    elif observable == 'jet_EEC_noweight_RL':
+      return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
+    elif observable == 'jet_pair_dist':
+      return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
 
     # Else observable not implemented
     return [None for _ in obs_subconfig_list]
