@@ -11,10 +11,13 @@ namespace EnergyCorrelators
 			CorrelatorsContainer();
 			virtual ~CorrelatorsContainer();
 			void addwr(const double &w, const double &r);
+			void addwr(const double &w, const double &r, const double &w1, const double &w2);
 			void clear();
 			std::vector<double> *weights();
 			std::vector<double> *rs();
 			std::vector<double> *rxw();
+			std::vector<double> *weights1(); // weight of object 1 in the pair
+			std::vector<double> *weights2(); // weight of object 2 in the pair
 
 			const double *wa();
 			const double *ra();
@@ -23,6 +26,8 @@ namespace EnergyCorrelators
 			std::vector<double> fr;
 			std::vector<double> fw;
 			std::vector<double> frxw;
+			std::vector<double> fw1;
+			std::vector<double> fw2;
 	};
 
 	class CorrelatorBuilder

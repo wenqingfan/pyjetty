@@ -9,6 +9,8 @@ namespace EnergyCorrelators
     : fr()
     , fw()
     , frxw()
+    , fw1()
+    , fw2()
     {
         ;
     }
@@ -23,12 +25,22 @@ namespace EnergyCorrelators
         fw.clear();
         fr.clear();
         frxw.clear();
+        fw1.clear();
+        fw2.clear();
     }
 
     void CorrelatorsContainer::addwr(const double &w, const double &r)
     {
         fw.push_back(w);
         fr.push_back(r);
+    }
+
+    void CorrelatorsContainer::addwr(const double &w, const double &r, const double &w1, const double &w2)
+    {
+        fw.push_back(w);
+        fr.push_back(r);
+        fw1.push_back(w1);
+        fw2.push_back(w2);
     }
 
     std::vector<double> *CorrelatorsContainer::weights()
@@ -39,6 +51,16 @@ namespace EnergyCorrelators
     std::vector<double> *CorrelatorsContainer::rs()
     {
         return &fr;
+    }
+
+    std::vector<double> *CorrelatorsContainer::weights1()
+    {
+        return &fw1;
+    }
+
+    std::vector<double> *CorrelatorsContainer::weights2()
+    {
+        return &fw2;
     }
 
     const double *CorrelatorsContainer::wa()
@@ -100,7 +122,8 @@ namespace EnergyCorrelators
             {
                 double _d12 = parts[i].delta_R(parts[j]);
                 double _w2 = parts[i].perp() * parts[j].perp() / std::pow(scale, 2);
-                fec[2 - 2]->addwr(_w2, _d12);
+                // fec[2 - 2]->addwr(_w2, _d12);
+                fec[2 - 2]->addwr(_w2, _d12, parts[i].perp(), parts[j].perp());
                 if (fncmax < 3)
                     continue;
                 for (size_t k = 0; k < parts.size(); k++)
