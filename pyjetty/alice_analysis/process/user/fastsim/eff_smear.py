@@ -16,8 +16,12 @@ import argparse
 import time
 import pandas as pd
 import numpy as np
+import math
+import random
+import ROOT
 
 from pyjetty.alice_analysis.process.base import process_io
+from pyjetty.alice_analysis.process.base import process_io_gen
 from pyjetty.cstoy import alice_efficiency
 
 
@@ -30,7 +34,6 @@ def sigma_pt(pt):
     # else: approximately valid for at least pt < 90 GeV
     return pt * (0.0015 * pt - 0.035)
 
-
 #################################################################################
 class eff_smear:
 
@@ -41,6 +44,14 @@ class eff_smear:
         self.input_file = inputFile
         self.output_dir = outputDir
         self.is_jetscape = is_jetscape
+        self.pair_eff_file = ROOT.TFile.Open("PairEff.root","READ")
+        self.dpbin = 4;
+        self.dp_lo = [0, 0.2, 0.4, 1]
+        self.dp_hi = [0.2, 0.4, 1, 2]
+        self.h1d_eff_vs_dR_in_dq_over_p = []
+        for idp in range(self.dpbin):
+            hname = 'h1d_eff_vs_dR_in_dq_over_p_{}'.format(idp)
+            self.h1d_eff_vs_dR_in_dq_over_p.append( ROOT.TH1D(self.pair_eff_file.Get(hname)) )
 
     #---------------------------------------------------------------
     # Main processing function
@@ -62,12 +73,20 @@ class eff_smear:
         self.hist_list.append( ("truth_pt", self.build_pt_hist()) )
         print('--- {} seconds ---'.format(time.time() - start_time))
 
+        print("Building truth-level track pid histogram...")
+        self.hist_list.append( ("truth_pid", self.build_pid_hist()) )
+        print('--- {} seconds ---'.format(time.time() - start_time))
+
         # Apply eta cut at the end of the TPC
         self.df_fjparticles = self.apply_eta_cut(self.df_fjparticles)
         print('--- {} seconds ---'.format(time.time() - start_time))
 
         # Apply efficiency cut
         self.df_fjparticles = self.apply_eff_cut(self.df_fjparticles)
+        print('--- {} seconds ---'.format(time.time() - start_time))
+
+        # Apply pair efficiency cut
+        self.df_fjparticles = self.apply_pair_eff_cut(self.df_fjparticles)
         print('--- {} seconds ---'.format(time.time() - start_time))
 
         # Build truth-level histogram of track pT multiplicity after efficiency cuts
@@ -100,7 +119,7 @@ class eff_smear:
     def init_df(self):
         # Use IO helper class to convert truth-level ROOT TTree into
         # a SeriesGroupBy object of fastjet particles per event
-        self.io = process_io.ProcessIO(input_file=self.input_file, output_dir=self.output_dir,
+        self.io = process_io_gen.ProcessIO(input_file=self.input_file, output_dir=self.output_dir,
                                         tree_dir='PWGHF_TreeCreator',
                                         track_tree_name='tree_Particle_gen',
                                         use_ev_id_ext=False,
@@ -112,6 +131,11 @@ class eff_smear:
         print(f'columns: {list(self.df_fjparticles.columns)}')
         # Initialize a list of histograms to be written to file
         self.hist_list = []
+
+        ev_id = self.df_fjparticles['ev_id'].to_numpy()
+        ev_id_unique = np.unique(ev_id)
+        self.nevents = len(ev_id_unique)
+        print("original event size",self.nevents)
 
     #---------------------------------------------------------------
     # Apply eta cuts
@@ -132,6 +156,13 @@ class eff_smear:
         return np.histogram(self.df_fjparticles["ParticlePt"], bins=bins)
 
     #---------------------------------------------------------------
+    # Build histogram of PID values and return it (FIX ME: can be deleted later)
+    #---------------------------------------------------------------
+    def build_pid_hist(self):
+        bins = np.arange(-500, 500, 1)
+        return np.histogram(self.df_fjparticles["ParticlePID"], bins=bins)
+
+    #---------------------------------------------------------------
     # Apply efficiency cuts
     #---------------------------------------------------------------
     def apply_eff_cut(self, df):
@@ -141,6 +172,103 @@ class eff_smear:
         df = df[df["ParticlePt"].map(lambda x: eff_smearer.pass_eff_cut(x))]
         print("%i out of %i total truth tracks deleted after efficiency cut." % \
               (self.nTracks_truth - len(df), self.nTracks_truth))
+        return df
+
+    def pass_pair_eff(self, dist, dq_over_p):
+        idpbin = -9999
+        for idp in range(self.dpbin):
+            if math.fabs(dq_over_p)>=self.dp_lo[idp] and math.fabs(dq_over_p)<self.dp_hi[idp]:
+                idpbin = idp
+        
+        pair_eff = 1 # set pair efficeincy to 1 if dq_over_p>=2
+        if idpbin>=0:
+            if math.log10(dist)<0 and math.log10(dist)>-3:
+                ibin = self.h1d_eff_vs_dR_in_dq_over_p[idpbin].FindBin(math.log10(dist))
+                pair_eff = self.h1d_eff_vs_dR_in_dq_over_p[idpbin].GetBinContent(ibin)
+            elif math.log10(dist)>=0:
+                pair_eff = 1 # overflow
+            else:
+                pair_eff = 0 # underflow
+        # print("pair distance",dist,"with eff",pair_eff)
+        # pair_eff = 1+0.2*math.log10(dist) # 100% at log(dist)=0 and 40% at log(dist)=-3
+        if random.random() < pair_eff:
+            return True
+        else:
+            return False
+
+    #---------------------------------------------------------------
+    # Apply pair efficiency cuts
+    # 1. Loop through every pair of entries in the data-frame
+    # 2. Get pair efficiency for each pair, sample the pairs to be
+    #    thrown away. For such pairs, randomly pick one track and
+    #    save it to a list
+    # 3. Remove the saved list of tracks from the data-frame
+    #--------------------------------------------------------------- 
+    def apply_pair_eff_cut(self, df):
+        # appl some random PID cut
+        pt = df['ParticlePt'].to_numpy()
+        phi = df['ParticlePhi'].to_numpy()
+        eta = df['ParticleEta'].to_numpy()
+        ev_id = df['ev_id'].to_numpy()
+        ev_id_unique = np.unique(ev_id)
+        print("unique event id",ev_id_unique)
+
+        trk_status_list = np.array([])
+        truth_dR_list = np.array([])
+        truth_dq_over_p_list = np.array([])
+        reco_dR_list = np.array([])
+        reco_dq_over_p_list = np.array([])
+
+        for ievt in range(self.nevents):
+            pt_evt = pt[ev_id==ievt]
+            phi_evt = phi[ev_id==ievt]
+            eta_evt = eta[ev_id==ievt]
+            # print("check evt id",ev_id,"pt",pt_evt,"phi",phi_evt,"eta",eta_evt)
+            throw_pair_list = np.array([])
+
+            for itrk1 in range(len(pt_evt)):
+                for itrk2 in range(itrk1+1,len(pt_evt)):
+                    dphiabs = math.fabs(phi_evt[itrk1] - phi_evt[itrk2])
+                    dphi = dphiabs
+                    if dphiabs > math.pi:
+                        dphi = 2*math.pi - dphiabs
+                    deta = eta[itrk1] - eta[itrk2]
+                    dist = math.sqrt(deta*deta + dphi*dphi)
+                    dq_over_p = 1/pt_evt[itrk1]-1/pt_evt[itrk2]
+                    # print("pair track",itrk1,"+",itrk2,"with distance",dist)
+                    # print("trk1 pt",pt_evt[itrk1],"phi",phi_evt[itrk1],"eta",eta_evt[itrk1])
+                    # print("trk2 pt",pt_evt[itrk2],"phi",phi_evt[itrk2],"eta",eta_evt[itrk2])
+
+                    truth_dR_list = np.append(truth_dR_list, math.log10(dist))
+                    truth_dq_over_p_list = np.append(truth_dq_over_p_list, math.fabs(dq_over_p))
+                    if  self.pass_pair_eff(dist, dq_over_p)==False:
+                        # print("pair not passing pair efficiency check")
+                        throw_pair_list = np.append(throw_pair_list, itrk1) # FIX ME: or itrk2
+                    else:
+                        reco_dR_list = np.append(reco_dR_list, math.log10(dist))
+                        reco_dq_over_p_list = np.append(reco_dq_over_p_list, math.fabs(dq_over_p))
+            throw_pair_unique_list = np.unique(throw_pair_list)
+
+            # for current events, mark the status for all tracks (True means to be selected)
+            for itrk in range(len(pt_evt)):
+                if itrk in throw_pair_unique_list:
+                    trk_status_list = np.append(trk_status_list,False)
+                else:
+                    trk_status_list = np.append(trk_status_list,True)
+
+        df['status'] = trk_status_list
+        df = df[df["status"]==True]
+        print(df)
+
+        df = df.drop('status', axis=1)
+
+        bins = np.arange(-3, 0, 0.03)
+        for idp, (dp_lo, dp_hi) in enumerate(zip(self.dp_lo,self.dp_hi)):
+            truth_mask = np.where((truth_dq_over_p_list>=dp_lo) & (truth_dq_over_p_list<dp_hi), True, False)
+            self.hist_list.append( ('h1d_truth_vs_dR_{}'.format(idp), np.histogram(truth_dR_list[truth_mask], bins=bins)) )
+            reco_mask = np.where((reco_dq_over_p_list>=dp_lo) & (reco_dq_over_p_list<dp_hi), True, False)
+            self.hist_list.append( ('h1d_reco_vs_dR_{}'.format(idp), np.histogram(reco_dR_list[reco_mask], bins=bins)) )
+
         return df
 
     #---------------------------------------------------------------
