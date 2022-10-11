@@ -20,6 +20,11 @@ import math
 import random
 import ROOT
 
+import fastjet as fj
+import fjext
+
+import ecorrel
+
 from pyjetty.alice_analysis.process.base import process_io
 from pyjetty.alice_analysis.process.base import process_io_gen
 from pyjetty.cstoy import alice_efficiency
@@ -212,6 +217,7 @@ class eff_smear:
         ev_id = df['ev_id'].to_numpy()
         ev_id_unique = np.unique(ev_id)
         print("unique event id",ev_id_unique)
+        # df = df[df["ev_id"]<2000]
 
         trk_status_list = np.array([])
         truth_dR_list = np.array([])
@@ -220,33 +226,35 @@ class eff_smear:
         reco_dq_over_p_list = np.array([])
 
         for ievt in range(self.nevents):
+            if ievt % 100 == 0:
+                print("Processing event ",ievt,"/",self.nevents)
             pt_evt = pt[ev_id==ievt]
             phi_evt = phi[ev_id==ievt]
             eta_evt = eta[ev_id==ievt]
             # print("check evt id",ev_id,"pt",pt_evt,"phi",phi_evt,"eta",eta_evt)
             throw_pair_list = np.array([])
 
-            for itrk1 in range(len(pt_evt)):
-                for itrk2 in range(itrk1+1,len(pt_evt)):
-                    dphiabs = math.fabs(phi_evt[itrk1] - phi_evt[itrk2])
-                    dphi = dphiabs
-                    if dphiabs > math.pi:
-                        dphi = 2*math.pi - dphiabs
-                    deta = eta[itrk1] - eta[itrk2]
-                    dist = math.sqrt(deta*deta + dphi*dphi)
+            parts_evt = fjext.vectorize_pt_eta_phi(pt_evt, eta_evt, phi_evt)
+
+            new_corr = ecorrel.CorrelatorBuilder(parts_evt, 1.0, 2, 1)
+
+            for index in range(new_corr.correlator(2).rs().size()):
+                itrk1 = new_corr.correlator(2).indices1()[index]
+                itrk2 = new_corr.correlator(2).indices2()[index]
+                
+                if itrk1 < itrk2:  # FIX ME: full two loops in the CorrelatorBuilder
+                    dist = new_corr.correlator(2).rs()[index]
                     dq_over_p = 1/pt_evt[itrk1]-1/pt_evt[itrk2]
-                    # print("pair track",itrk1,"+",itrk2,"with distance",dist)
-                    # print("trk1 pt",pt_evt[itrk1],"phi",phi_evt[itrk1],"eta",eta_evt[itrk1])
-                    # print("trk2 pt",pt_evt[itrk2],"phi",phi_evt[itrk2],"eta",eta_evt[itrk2])
 
                     truth_dR_list = np.append(truth_dR_list, math.log10(dist))
                     truth_dq_over_p_list = np.append(truth_dq_over_p_list, math.fabs(dq_over_p))
-                    if  self.pass_pair_eff(dist, dq_over_p)==False:
-                        # print("pair not passing pair efficiency check")
-                        throw_pair_list = np.append(throw_pair_list, itrk1) # FIX ME: or itrk2
+                    if self.pass_pair_eff(dist, dq_over_p)==False:
+                            # print("pair not passing pair efficiency check")
+                            throw_pair_list = np.append(throw_pair_list, itrk1) # FIX ME: or itrk2
                     else:
                         reco_dR_list = np.append(reco_dR_list, math.log10(dist))
                         reco_dq_over_p_list = np.append(reco_dq_over_p_list, math.fabs(dq_over_p))
+
             throw_pair_unique_list = np.unique(throw_pair_list)
 
             # for current events, mark the status for all tracks (True means to be selected)
