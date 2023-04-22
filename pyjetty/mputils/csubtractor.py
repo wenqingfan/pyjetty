@@ -3,7 +3,7 @@
 
 import fastjet as fj
 import fjcontrib
-from pyjetty.mputils import MPBase
+from pyjetty.mputils.mputils import MPBase
 
 class CEventSubtractor(MPBase):
 	def __init__(self, **kwargs):
@@ -58,7 +58,7 @@ class CEventSubtractor(MPBase):
 		# print(self.subtractor.description())
 
 	def process_event(self, full_event):
-		self.bge_rho.set_particles(full_event);
+		self.bge_rho.set_particles(full_event)
 		# the correction of the whole event with ConstituentSubtractor
 		# self.corrected_event = self.subtractor.subtract_event(full_event, self.max_eta)
 		self.corrected_event = self.subtractor.subtract_event(full_event)
