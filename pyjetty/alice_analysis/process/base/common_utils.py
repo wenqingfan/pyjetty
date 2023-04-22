@@ -18,14 +18,10 @@ import uproot
 import pandas
 import numpy as np
 import ROOT
-from silx.io.dictdump import dicttoh5, h5todict
 
 # Fastjet via python (from external library fjpydev)
-try:
-    import fastjet as fj
-    import fjext
-except ImportError:
-    pass
+import fastjet as fj
+import fjext
 
 # Base class
 from pyjetty.alice_analysis.process.base import common_base
@@ -152,23 +148,3 @@ class CommonUtils(common_base.CommonBase):
     
     string = str(text)
     return string.replace('.', '')
-
-  #---------------------------------------------------------------
-  # Write nested dictionary of ndarray to hdf5 file
-  # Note: all keys should be strings
-  #---------------------------------------------------------------
-  def write_data(self, results, output_dir, filename = 'results.h5'):
-      print(f'Writing results to {output_dir}/{filename}...')
-      dicttoh5(results, os.path.join(output_dir, filename), overwrite_data=True)
-      print('done.')
-      print()
-  
-  #---------------------------------------------------------------
-  # Read dictionary of ndarrays from hdf5
-  # Note: all keys should be strings
-  #---------------------------------------------------------------
-  def read_data(self, input_file):
-      print(f'Loading results from {input_file}...')
-      results = h5todict(input_file)
-      print('done.')
-      return results

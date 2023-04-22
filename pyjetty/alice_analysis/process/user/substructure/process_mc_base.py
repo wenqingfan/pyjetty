@@ -45,7 +45,7 @@ from pyjetty.alice_analysis.process.base import process_io_emb
 from pyjetty.alice_analysis.process.base import process_base
 from pyjetty.alice_analysis.process.base import thermal_generator
 from pyjetty.alice_analysis.process.base import jet_info
-from pyjetty.mputils import CEventSubtractor
+from pyjetty.mputils.csubtractor import CEventSubtractor
 
 # Prevent ROOT from stealing focus when plotting
 ROOT.gROOT.SetBatch(True)
