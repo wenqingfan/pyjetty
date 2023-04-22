@@ -19,6 +19,7 @@ import numpy as np
 import math
 import random
 import ROOT
+import datetime
 
 import fastjet as fj
 import fjext
@@ -45,18 +46,24 @@ class eff_smear:
     #---------------------------------------------------------------
     # Constructor
     #---------------------------------------------------------------
-    def __init__(self, inputFile='', outputDir='', is_jetscape=False):
+    def __init__(self, inputFile='', outputDir='', is_jetscape=False, is_ENC=False, numberOfEvents=0, numberOfSkipEvents=0):
         self.input_file = inputFile
         self.output_dir = outputDir
         self.is_jetscape = is_jetscape
+        self.is_ENC = is_ENC
+        self.numberOfEvents = numberOfEvents
+        self.numberOfSkipEvents = numberOfSkipEvents
         self.pair_eff_file = ROOT.TFile.Open("PairEff.root","READ")
         self.dpbin = 4;
         self.dp_lo = [0, 0.2, 0.4, 1]
         self.dp_hi = [0.2, 0.4, 1, 2]
         self.h1d_eff_vs_dR_in_dq_over_p = []
+        self.h1d_ratio_2missing_vs_dR_in_dq_over_p = []
         for idp in range(self.dpbin):
             hname = 'h1d_eff_vs_dR_in_dq_over_p_{}'.format(idp)
             self.h1d_eff_vs_dR_in_dq_over_p.append( ROOT.TH1D(self.pair_eff_file.Get(hname)) )
+            hname = 'h1d_ratio_2missing_vs_dR_in_dq_over_p_{}'.format(idp)
+            self.h1d_ratio_2missing_vs_dR_in_dq_over_p.append( ROOT.TH1D(self.pair_eff_file.Get(hname)) )
 
     #---------------------------------------------------------------
     # Main processing function
@@ -70,6 +77,11 @@ class eff_smear:
         # Initialize dataframes from data
         self.init_df()
         print('--- {} seconds ---'.format(time.time() - start_time))
+
+        if self.is_ENC:
+            # Add MC index column to reconstructed particles
+            self.df_fjparticles = self.add_mc_index(self.df_fjparticles)
+            print('--- {} seconds ---'.format(time.time() - start_time))
 
         # ------------------------------------------------------------------------
 
@@ -90,9 +102,15 @@ class eff_smear:
         self.df_fjparticles = self.apply_eff_cut(self.df_fjparticles)
         print('--- {} seconds ---'.format(time.time() - start_time))
 
-        # Apply pair efficiency cut
-        self.df_fjparticles = self.apply_pair_eff_cut(self.df_fjparticles)
-        print('--- {} seconds ---'.format(time.time() - start_time))
+        # comment this part and try to appy pair efficiency later in the analysis code
+        # # uncomment this for now to check the pair efficiency
+        # if self.is_ENC:
+        #     # Apply pair efficiency cut
+        #     self.df_fjparticles = self.apply_pair_eff_cut(self.df_fjparticles)
+        #     print('--- {} seconds ---'.format(time.time() - start_time))
+        #     # Re-calculate the pair efficiency after the cut
+        #     self.df_fjparticles = self.calculate_pair_eff(self.df_fjparticles)
+        #     print('--- {} seconds ---'.format(time.time() - start_time))
 
         # Build truth-level histogram of track pT multiplicity after efficiency cuts
         print("Building truth-level track pT histogram after efficiency cuts...")
@@ -114,7 +132,7 @@ class eff_smear:
         print(self.df_fjparticles)
         print("Writing fast simulation to ROOT TTree...")
         self.io.save_dataframe("AnalysisResultsFastSim.root", self.df_fjparticles,
-                               df_true=True, histograms=self.hist_list, is_jetscape=self.is_jetscape)
+                               df_true=True, histograms=self.hist_list, is_jetscape=self.is_jetscape, is_ENC=self.is_ENC)
         print('--- {} seconds ---'.format(time.time() - start_time))
 
 
@@ -128,8 +146,8 @@ class eff_smear:
                                         tree_dir='PWGHF_TreeCreator',
                                         track_tree_name='tree_Particle_gen',
                                         use_ev_id_ext=False,
-                                        is_jetscape=self.is_jetscape)
-        self.df_fjparticles = self.io.load_dataframe()
+                                        is_jetscape=self.is_jetscape, is_ENC=self.is_ENC)
+        self.df_fjparticles = self.io.load_dataframe(self.numberOfSkipEvents,self.numberOfSkipEvents+self.numberOfEvents)
         self.nTracks_truth = len(self.df_fjparticles)
         print("DataFrame loaded from data.")
         print(self.df_fjparticles)
@@ -139,8 +157,36 @@ class eff_smear:
 
         ev_id = self.df_fjparticles['ev_id'].to_numpy()
         ev_id_unique = np.unique(ev_id)
-        self.nevents = len(ev_id_unique)
-        print("original event size",self.nevents)
+        print("original event size",len(ev_id_unique))
+        if self.numberOfEvents == 0:
+            self.numberOfEvents = len(ev_id_unique) 
+        self.evt_range_lo = self.numberOfSkipEvents 
+        self.evt_range_hi = self.numberOfSkipEvents+self.numberOfEvents
+        if self.evt_range_hi > int(ev_id_unique[len(ev_id_unique)-1]+1): # if higher limit exceed the last event number, reset higher limit
+            self.evt_range_hi = int(ev_id_unique[len(ev_id_unique)-1]+1)
+        print("processing event from",self.evt_range_lo,"to",self.evt_range_hi)
+
+    #---------------------------------------------------------------
+    # Add MC Index (perform this step before any efficiency cut)
+    #---------------------------------------------------------------
+    def add_mc_index(self, df):
+        # associated mc index
+        trk_mc_index_list = np.array([])
+
+        pt = df['ParticlePt'].to_numpy()
+        ev_id = df['ev_id'].to_numpy()
+        ev_id_unique = np.unique(ev_id)
+
+        for ievt in range(self.evt_range_lo, self.evt_range_hi):
+            if ievt % 100 == 0:
+                print("Processing event ",ievt,"/ [",self.evt_range_lo,"-",self.evt_range_hi,"]",datetime.datetime.now(),flush=True)
+            pt_evt = pt[ev_id==ievt]
+            for itrk in range(len(pt_evt)):
+                trk_mc_index_list = np.append(trk_mc_index_list, itrk)
+
+        # print('size of indices',len(trk_mc_index_list))
+        df['ParticleMCIndex'] = trk_mc_index_list
+        return df
 
     #---------------------------------------------------------------
     # Apply eta cuts
@@ -180,26 +226,33 @@ class eff_smear:
         return df
 
     def pass_pair_eff(self, dist, dq_over_p):
+        # 1st return value: true means pair efficient
+        # 2nd return value: true means only throw one track if pair is inefficient
         idpbin = -9999
         for idp in range(self.dpbin):
             if math.fabs(dq_over_p)>=self.dp_lo[idp] and math.fabs(dq_over_p)<self.dp_hi[idp]:
                 idpbin = idp
         
         pair_eff = 1 # set pair efficeincy to 1 if dq_over_p>=2
+        ratio_2missing = 1 # ratio of missing pairs with 2 tracks missing 
         if idpbin>=0:
             if math.log10(dist)<0 and math.log10(dist)>-3:
                 ibin = self.h1d_eff_vs_dR_in_dq_over_p[idpbin].FindBin(math.log10(dist))
                 pair_eff = self.h1d_eff_vs_dR_in_dq_over_p[idpbin].GetBinContent(ibin)
+                ratio_2missing = self.h1d_ratio_2missing_vs_dR_in_dq_over_p[idpbin].GetBinContent(ibin)
             elif math.log10(dist)>=0:
                 pair_eff = 1 # overflow
             else:
                 pair_eff = 0 # underflow
         # print("pair distance",dist,"with eff",pair_eff)
         # pair_eff = 1+0.2*math.log10(dist) # 100% at log(dist)=0 and 40% at log(dist)=-3
-        if random.random() < pair_eff:
-            return True
+        random_number = random.random()
+        if random_number < pair_eff:
+            return True, False # keep this pair
+        elif random_number < pair_eff+(1-pair_eff)*ratio_2missing:
+            return False, False # throw both tracks inside this pair
         else:
-            return False
+            return False, True # throw one track inside this pair
 
     #---------------------------------------------------------------
     # Apply pair efficiency cuts
@@ -210,30 +263,56 @@ class eff_smear:
     # 3. Remove the saved list of tracks from the data-frame
     #--------------------------------------------------------------- 
     def apply_pair_eff_cut(self, df):
-        # appl some random PID cut
         pt = df['ParticlePt'].to_numpy()
         phi = df['ParticlePhi'].to_numpy()
         eta = df['ParticleEta'].to_numpy()
+        pid = df['ParticlePID'].to_numpy()
         ev_id = df['ev_id'].to_numpy()
         ev_id_unique = np.unique(ev_id)
-        print("unique event id",ev_id_unique)
-        # df = df[df["ev_id"]<2000]
+        # print("unique event id",ev_id_unique)
+        # df = df[(df["ev_id"]<self.evt_range_hi) & (df["ev_id"]>=self.evt_range_lo)]
 
+        # make charge array from pid info, needed for pair efficiency determination
+        charge = np.array([])
+        for itrk in range(len(pt)):
+            # charged hadrons
+            if abs(pid[itrk])==211 or abs(pid[itrk])==321 or abs(pid[itrk])==2212:
+                if pid[itrk]>0:
+                    charge = np.append(charge, 1)
+                else:
+                    charge = np.append(charge, -1)
+            # electrons and muons
+            elif abs(pid[itrk])==11 or abs(pid[itrk])==13:
+                if pid[itrk]>0:
+                    charge = np.append(charge, -1)
+                else:
+                    charge = np.append(charge, 1)
+            # long lived weak decay particles (<2% of the total number of charged particles)
+            # for now mark as charge 0 and later NOT applying pair efficiency for 0-charged or 0-0 pairs
+            # NB: this can be avoided by decaying these paritcles within the generation step
+            else:
+                charge = np.append(charge, 0)
+
+        # mark the tracks which failed the pair efficiency check
         trk_status_list = np.array([])
+        # arrays used for filling the diagnostic histograms at the end of this function
         truth_dR_list = np.array([])
         truth_dq_over_p_list = np.array([])
         reco_dR_list = np.array([])
         reco_dq_over_p_list = np.array([])
 
-        for ievt in range(self.nevents):
+        for ievt in range(self.evt_range_lo, self.evt_range_hi):
             if ievt % 100 == 0:
-                print("Processing event ",ievt,"/",self.nevents)
+                print("Processing event ",ievt,"/ [",self.evt_range_lo,"-",self.evt_range_hi,"]",datetime.datetime.now(),flush=True)
             pt_evt = pt[ev_id==ievt]
             phi_evt = phi[ev_id==ievt]
             eta_evt = eta[ev_id==ievt]
+            pid_evt = pid[ev_id==ievt]
+            charge_evt = charge[ev_id==ievt]
             # print("check evt id",ev_id,"pt",pt_evt,"phi",phi_evt,"eta",eta_evt)
             throw_pair_list = np.array([])
 
+            # parts_evt = fj.vectorPJ()
             parts_evt = fjext.vectorize_pt_eta_phi(pt_evt, eta_evt, phi_evt)
 
             new_corr = ecorrel.CorrelatorBuilder(parts_evt, 1.0, 2, 1)
@@ -241,19 +320,28 @@ class eff_smear:
             for index in range(new_corr.correlator(2).rs().size()):
                 itrk1 = new_corr.correlator(2).indices1()[index]
                 itrk2 = new_corr.correlator(2).indices2()[index]
-                
-                if itrk1 < itrk2:  # FIX ME: full two loops in the CorrelatorBuilder
-                    dist = new_corr.correlator(2).rs()[index]
-                    dq_over_p = 1/pt_evt[itrk1]-1/pt_evt[itrk2]
 
-                    truth_dR_list = np.append(truth_dR_list, math.log10(dist))
-                    truth_dq_over_p_list = np.append(truth_dq_over_p_list, math.fabs(dq_over_p))
-                    if self.pass_pair_eff(dist, dq_over_p)==False:
-                            # print("pair not passing pair efficiency check")
-                            throw_pair_list = np.append(throw_pair_list, itrk1) # FIX ME: or itrk2
+                if itrk1 < itrk2:  # NB: full two loops in the CorrelatorBuilder
+                    if charge[itrk1]==0 or charge[itrk2]==0:
+                        pass
                     else:
-                        reco_dR_list = np.append(reco_dR_list, math.log10(dist))
-                        reco_dq_over_p_list = np.append(reco_dq_over_p_list, math.fabs(dq_over_p))
+                        dist = new_corr.correlator(2).rs()[index]
+                        dq_over_p = charge[itrk1]/pt_evt[itrk1]-charge[itrk2]/pt_evt[itrk2]
+
+                        truth_dR_list = np.append(truth_dR_list, math.log10(dist))
+                        truth_dq_over_p_list = np.append(truth_dq_over_p_list, math.fabs(dq_over_p))
+                        
+                        # apply pair efficiency effect: decide whether the pair is efficient or not, and how many tracks to throw if it's an inefficient pair
+                        keep_pair, keep_one_track = self.pass_pair_eff(dist, dq_over_p)
+                        if keep_pair==False and keep_one_track==True:
+                            # print("pair not passing pair efficiency check")
+                            throw_pair_list = np.append(throw_pair_list, itrk1) # FIX ME: or itrk2 (should be okay-ish since the tracks are not sorted by pt)
+                        elif keep_pair==False and keep_one_track==False:
+                            throw_pair_list = np.append(throw_pair_list, itrk1)
+                            throw_pair_list = np.append(throw_pair_list, itrk2)
+                        else:
+                            reco_dR_list = np.append(reco_dR_list, math.log10(dist))
+                            reco_dq_over_p_list = np.append(reco_dq_over_p_list, math.fabs(dq_over_p))
 
             throw_pair_unique_list = np.unique(throw_pair_list)
 
@@ -263,6 +351,8 @@ class eff_smear:
                     trk_status_list = np.append(trk_status_list,False)
                 else:
                     trk_status_list = np.append(trk_status_list,True)
+
+            del new_corr
 
         df['status'] = trk_status_list
         df = df[df["status"]==True]
@@ -279,6 +369,74 @@ class eff_smear:
 
         return df
 
+    def calculate_pair_eff(self, df):
+        pt = df['ParticlePt'].to_numpy()
+        phi = df['ParticlePhi'].to_numpy()
+        eta = df['ParticleEta'].to_numpy()
+        pid = df['ParticlePID'].to_numpy()
+        ev_id = df['ev_id'].to_numpy()
+        ev_id_unique = np.unique(ev_id)
+
+        # make charge array from pid info, needed for deciding which histograms (\Delta q/pT bin) to fill
+        charge = np.array([])
+        for itrk in range(len(pt)):
+            # charged hadrons
+            if abs(pid[itrk])==211 or abs(pid[itrk])==321 or abs(pid[itrk])==2212:
+                if pid[itrk]>0:
+                    charge = np.append(charge, 1)
+                else:
+                    charge = np.append(charge, -1)
+            # electrons and muons
+            elif abs(pid[itrk])==11 or abs(pid[itrk])==13:
+                if pid[itrk]>0:
+                    charge = np.append(charge, -1)
+                else:
+                    charge = np.append(charge, 1)
+            # long lived weak decay particles (<2% of the total number of charged particles)
+            # for now mark as charge 0 and later NOT applying pair efficiency for 0-charged or 0-0 pairs
+            # NB: this can be avoided by decaying these paritcles within the generation step
+            else:
+                charge = np.append(charge, 0)
+
+        # arrays used for filling the number of remaining pairs after the pair efficiency cut
+        pair_dR_list = np.array([])
+        pair_dq_over_p_list = np.array([])
+
+        for ievt in range(self.evt_range_lo, self.evt_range_hi):
+            if ievt % 100 == 0:
+                print("Processing event ",ievt,"/ [",self.evt_range_lo,"-",self.evt_range_hi,"]",datetime.datetime.now(),flush=True)
+            pt_evt = pt[ev_id==ievt]
+            phi_evt = phi[ev_id==ievt]
+            eta_evt = eta[ev_id==ievt]
+            pid_evt = pid[ev_id==ievt]
+            charge_evt = charge[ev_id==ievt]
+
+            parts_evt = fjext.vectorize_pt_eta_phi(pt_evt, eta_evt, phi_evt)
+
+            new_corr = ecorrel.CorrelatorBuilder(parts_evt, 1.0, 2, 1)
+
+            for index in range(new_corr.correlator(2).rs().size()):
+                itrk1 = new_corr.correlator(2).indices1()[index]
+                itrk2 = new_corr.correlator(2).indices2()[index]
+
+                if itrk1 < itrk2:  # NB: full two loops in the CorrelatorBuilder
+                    if charge[itrk1]==0 or charge[itrk2]==0:
+                        pass
+                    else:
+                        dist = new_corr.correlator(2).rs()[index]
+                        dq_over_p = charge[itrk1]/pt_evt[itrk1]-charge[itrk2]/pt_evt[itrk2]
+
+                        pair_dR_list = np.append(pair_dR_list, math.log10(dist))
+                        pair_dq_over_p_list = np.append(pair_dq_over_p_list, math.fabs(dq_over_p))
+                        
+
+        bins = np.arange(-3, 0, 0.03)
+        for idp, (dp_lo, dp_hi) in enumerate(zip(self.dp_lo,self.dp_hi)):
+            pair_mask = np.where((pair_dq_over_p_list>=dp_lo) & (pair_dq_over_p_list<dp_hi), True, False)
+            self.hist_list.append( ('h1d_pair_vs_dR_{}'.format(idp), np.histogram(pair_dR_list[pair_mask], bins=bins)) )
+
+        return df
+
     #---------------------------------------------------------------
     # Apply pt smearing
     #---------------------------------------------------------------
@@ -291,6 +449,11 @@ class eff_smear:
                                "ParticlePhi": df["ParticlePhi"], "z_vtx_reco": df["z_vtx_reco"],
                                "is_ev_rej": df["is_ev_rej"],
                                "status": df["status"]})
+        elif self.is_ENC:
+            df = pd.DataFrame({"run_number": df["run_number"], "ev_id": df["ev_id"],
+                               "ParticlePt": smeared_pt, "ParticleEta": df["ParticleEta"],
+                               "ParticlePhi": df["ParticlePhi"], "ParticleMCIndex": df["ParticleMCIndex"], "z_vtx_reco": df["z_vtx_reco"],
+                               "is_ev_rej": df["is_ev_rej"]})
         else:
             df = pd.DataFrame({"run_number": df["run_number"], "ev_id": df["ev_id"],
                                "ParticlePt": smeared_pt, "ParticleEta": df["ParticleEta"],
@@ -317,17 +480,25 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--outputDir", action="store", type=str, metavar="outputDir",
                         default="./TestOutput", help="Output path for fast sim ROOT TTree")
     parser.add_argument('--jetscape', action='store_true')
+    parser.add_argument('--ENC', action='store_true')
+    parser.add_argument('-nevt', help="# of processing events (0 means all events)", default=0, type=int)
+    parser.add_argument('-nevt_skip', help="# of skipping events", default=0, type=int)
+    # parser.add_argument("-nevt", "--numberOfEvents", action="store_const", type=int, metavar="skipEvent", default=0, help="Skip a certain number of events")
+    # parser.add_argument("-skip", "--skipEvent", action="store_const", type=int, metavar="numberOfEvents", default=0, help="# of events to be processed (0 means all events)")
     args = parser.parse_args()
 
     print('Configuring...')
     print('inputFile: \'{0}\''.format(args.inputFile))
     print('ouputDir: \'{0}\"'.format(args.outputDir))
     print(f'is_jetscape: {args.jetscape}')
+    print(f'is_ENC: {args.ENC}')
+    print('# of processing events: \'{0}\''.format(args.nevt))
+    print('# of skipping events: \'{0}\''.format(args.nevt_skip))
 
     # If invalid inputFile is given, exit
     if not os.path.exists(args.inputFile):
         print('File \"{0}\" does not exist! Exiting!'.format(args.inputFile))
         sys.exit(0)
 
-    processor = eff_smear(inputFile=args.inputFile, outputDir=args.outputDir, is_jetscape=args.jetscape)
+    processor = eff_smear(inputFile=args.inputFile, outputDir=args.outputDir, is_jetscape=args.jetscape, is_ENC=args.ENC, numberOfEvents=args.nevt, numberOfSkipEvents=args.nevt_skip)
     processor.eff_smear()

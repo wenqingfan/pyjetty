@@ -878,7 +878,8 @@ class ProcessPHBase(process_base.ProcessBase):
 
     # Loop through jets and fill response histograms if both det and truth jets are unique match
     for jet_h in jets_h_selected:
-      self.fill_jet_matches(jet_h, jetR, MPI)
+      # self.fill_jet_matches(jet_h, jetR, MPI)
+      self.fill_jet_matches_h_ch(jet_h, jetR, MPI) # Add a control flag here later
 
   #---------------------------------------------------------------
   # Compare two jets and store matching candidates in user_info
@@ -1058,6 +1059,72 @@ class ProcessPHBase(process_base.ProcessBase):
             # Groom p jet
             gshop_p = fjcontrib.GroomerShop(jet_p, jetR, self.reclustering_algorithm)
             jet_p_groomed_lund = self.utils.groom(gshop_p, grooming_setting, jetR)
+            if not jet_p_groomed_lund:
+              continue
+
+            # Groom h jet
+            gshop_h = fjcontrib.GroomerShop(jet_h, jetR, self.reclustering_algorithm)
+            jet_h_groomed_lund = self.utils.groom(gshop_h, grooming_setting, jetR)
+            if not jet_h_groomed_lund:
+              continue
+
+            # Groom ch jet
+            gshop_ch = fjcontrib.GroomerShop(jet_ch, jetR, self.reclustering_algorithm)
+            jet_ch_groomed_lund = self.utils.groom(gshop_ch, grooming_setting, jetR)
+            if not jet_ch_groomed_lund:
+              continue
+
+          # Call user function to fill histos
+          self.fill_matched_jet_histograms(
+            jetR, obs_setting, grooming_setting, obs_label, jet_p, jet_p_groomed_lund,
+            jet_h, jet_h_groomed_lund, jet_ch, jet_ch_groomed_lund,
+            jet_pt_p_ungroomed, jet_pt_h_ungroomed, jet_pt_ch_ungroomed, suffix)
+
+  
+  #---------------------------------------------------------------
+  # Loop through jets and call user function to fill matched
+  # histos if both full and parton jets are unique match.
+  # Parton jets are ignored here
+  #---------------------------------------------------------------
+  def fill_jet_matches_h_ch(self, jet_h, jetR, MPI):
+
+    suffix = "MPI%s_R%s" % (MPI, str(jetR))
+
+    # Get matched jets
+    if jet_h.has_user_info():
+      jet_p = None
+      jet_ch = jet_h.python_info().match_ch
+
+      if jet_ch:
+
+        jet_pt_p_ungroomed = None
+        jet_pt_h_ungroomed = jet_h.pt()
+        jet_pt_ch_ungroomed = jet_ch.pt()
+
+        JES = (jet_pt_ch_ungroomed - jet_pt_h_ungroomed) / jet_pt_h_ungroomed
+        getattr(self, 'hJES_h_ch_%s' % suffix).Fill(jet_pt_h_ungroomed, JES)
+
+        # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
+        observable = self.observable_list[0]
+        for i in range(len(self.obs_settings[observable])):
+
+          obs_setting = self.obs_settings[observable][i]
+          grooming_setting = self.obs_grooming_settings[observable][i]
+          obs_label = self.utils.obs_label(obs_setting, grooming_setting)
+
+          if self.debug_level > 3:
+            print('obs_label: {}'.format(obs_label))
+
+          jet_p_groomed_lund = None
+          jet_h_groomed_lund = None
+          jet_ch_groomed_lund = None
+
+          # Groom jets, if applicable
+          if grooming_setting:
+
+            # Groom p jet
+            gshop_p = None
+            jet_p_groomed_lund = None
             if not jet_p_groomed_lund:
               continue
 

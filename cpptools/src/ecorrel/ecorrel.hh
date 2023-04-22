@@ -11,23 +11,23 @@ namespace EnergyCorrelators
 			CorrelatorsContainer();
 			virtual ~CorrelatorsContainer();
 			void addwr(const double &w, const double &r);
-			void addwr(const double &w, const double &r, const double &w1, const double &w2);
+			void addwr(const double &w, const double &r, const int &indx1, const int &indx2);
 			void clear();
 			std::vector<double> *weights();
-			std::vector<double> *rs();
+			std::vector<double> *rs(); // return the pointer to the list of pair distances
 			std::vector<double> *rxw();
-			std::vector<double> *weights1(); // weight of object 1 in the pair
-			std::vector<double> *weights2(); // weight of object 2 in the pair
+			std::vector<int> *indices1(); // indices of object 1 in the pair
+			std::vector<int> *indices2(); // indices of object 2 in the pair
 
 			const double *wa();
 			const double *ra();
 
 		private:
-			std::vector<double> fr;
-			std::vector<double> fw;
+			std::vector<double> fr; // list of pair distances
+			std::vector<double> fw; // list of pair weights
 			std::vector<double> frxw;
-			std::vector<double> fw1;
-			std::vector<double> fw2;
+			std::vector<int> findx1;
+			std::vector<int> findx2;
 	};
 
 	class CorrelatorBuilder
@@ -35,9 +35,12 @@ namespace EnergyCorrelators
 		public:
 			CorrelatorBuilder();
 			// note by default we use energy correlators - one could use different weighting... future: pass as a param
-			CorrelatorBuilder(const std::vector<fastjet::PseudoJet> &parts, const double &scale, const int &nmax);
+			CorrelatorBuilder(const std::vector<fastjet::PseudoJet> &parts, const double &scale, const int &nmax, const int &power, const double dphi_cut, const double deta_cut);
 			CorrelatorsContainer *correlator(int n);
 			virtual ~CorrelatorBuilder();
+
+			bool ApplyDeltaPhiRejection(const double dphi_cut, const double q1, const double q2, const double pt1, const double pt2, const double phi12);
+			bool ApplyDeltaEtaRejection(const double deta_cut, const double eta12);
 
 		private:
 			int fncmax;

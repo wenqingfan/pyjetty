@@ -1,0 +1,55 @@
+# Configuration for:
+#   (a) Processing of ROOT trees into histograms
+#   (b) Analysis of histograms into final result
+#
+# The observables are structured into observable blocks (e.g. theta_g, subjet_z, etc.)
+# each containing multiple individual subconfigurations (e.g. zcut, beta, subjetR, etc.),
+# where each subconfiguration corresponds to a single unfolded result.
+# One can also specify a list of jetR, which will be looped over.
+#
+# The process step is intended to loop over all observables simultaneously
+# The analysis step is intended to run for a single observable block
+
+process_observables: ['jet_ENC_RL', 'jet_pt']
+jetR: [0.4]
+jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
+reject_tracks_fraction: 0.0
+eta_max: 0.9
+debug_level: 1
+dry_run: False
+fast_simulation: False
+ENC_pair_cut: False
+use_ev_id_ext: True
+
+# Observable block
+jet_ENC_RL:
+
+  common_settings:
+    xtitle: '#it{R_{L}}'
+    ytitle: '#frac{1}{#it{#sigma}_{jet}} #frac{d#it{#sigma}}{d#it{R_{L}}}'
+    pt_bins_reported: [40, 80, 120]
+    max_reg_param: 10
+    plot_overlay_list:
+      - ['config1']
+
+  config1:
+    trk_thrd: 1.0
+
+# Observable block
+jet_pt:
+
+  common_settings:
+    xtitle: '#it{d_{pair}}'
+    ytitle: '#frac{1}{#it{#sigma}_{jet}} #frac{d#it{#sigma}}{d#it{d_{pair}}}'
+    pt_bins_reported: [40, 80, 120]
+    max_reg_param: 10
+    plot_overlay_list:
+      - ['config1']
+  
+  config1:
+    trk_thrd: 1.0
+
+#######################################
+# Theory comparison parameters
+#######################################
+response_levels: [['h','ch','off'], ['h','ch','on']] # FIX ME: turn MPI=on later

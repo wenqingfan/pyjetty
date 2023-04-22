@@ -178,17 +178,31 @@ class ProcessBase(common_base.CommonBase):
   
     # Get/create object to store list of matching candidates
     jet_user_info = None
-    if jet.has_user_info():
+    if jet.has_user_info(): # FIX ME: whether to use has_user_info or this
       jet_user_info = jet.python_info()
+      # print('debug7.1.1--jet python info',jet_user_info)
+      # print('debug7.1.1--jet',jet.pt(),'size',len(jet.constituents()),'matches to jet_match',jet_match.pt(),'size',len(jet_match.constituents()))
+      # print('debug7.1.1--jet phi',jet.phi(),'eta',jet.eta(),'jet_match phi',jet_match.phi(),'eta',jet_match.eta(),'with deltaR',deltaR)
+      # print('debug7.1.1--where current closest_jet_deltaR is',jet_user_info.closest_jet_deltaR)
     else:
       jet_user_info = jet_info.JetInfo()
-      
+      # print('debug7.1.2--jet python info',jet_user_info)
+      # print('debug7.1.2--jet',jet.pt(),'size',len(jet.constituents()),'matches to jet_match',jet_match.pt(),'size',len(jet_match.constituents()))
+      # print('debug7.1.2--jet phi',jet.phi(),'eta',jet.eta(),'jet_match phi',jet_match.phi(),'eta',jet_match.eta(),'with deltaR',deltaR)
+      # print('debug7.1.2--where current closest_jet_deltaR is',jet_user_info.closest_jet_deltaR)
+
     jet_user_info.matching_candidates.append(jet_match)
     if deltaR < jet_user_info.closest_jet_deltaR:
       jet_user_info.closest_jet = jet_match
       jet_user_info.closest_jet_deltaR = deltaR
+      # print('debug7.2--matched pt',jet_user_info.closest_jet.pt())
+      # print('debug7.2--matched constituents size',len(jet_user_info.closest_jet.constituents()))
           
+    last_jet=len(jet_user_info.matching_candidates)
     jet.set_python_info(jet_user_info)
+    # print('debug7.3--jet',jet.pt(),'size',len(jet.constituents()),'matches to jet_match',jet_match.pt(),'size',len(jet_match.constituents()))
+    # print('debug7.3--matched pt',jet.python_info().closest_jet.pt())
+    # print('debug7.3--matched constituents size',len(jet.python_info().closest_jet.constituents()))
 
   #---------------------------------------------------------------
   # Set accepted jet matches for pp case

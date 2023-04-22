@@ -73,6 +73,11 @@ class ProcessDataBase(process_base.ProcessBase):
       self.is_pp = False
     else:
       self.is_pp = True
+
+    if 'ENC_pair_cut' in config:
+        self.ENC_pair_cut = config['ENC_pair_cut']
+    else:
+        self.ENC_pair_cut = False
     
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters

@@ -44,6 +44,7 @@ from pyjetty.alice_analysis.process.base import process_io
 from pyjetty.alice_analysis.process.base import process_io_emb
 from pyjetty.alice_analysis.process.base import process_base
 from pyjetty.alice_analysis.process.base import thermal_generator
+from pyjetty.alice_analysis.process.base import jet_info
 from pyjetty.mputils import CEventSubtractor
 
 # Prevent ROOT from stealing focus when plotting
@@ -76,6 +77,17 @@ class ProcessMCBase(process_base.ProcessBase):
       config = yaml.safe_load(stream)
       
     self.fast_simulation = config['fast_simulation']
+    if self.fast_simulation == True:
+      if 'ENC_fastsim' in config:
+          self.ENC_fastsim = config['ENC_fastsim']
+      else:
+          self.ENC_fastsim = False
+    else: # if not fast simulation, set ENC_fastsim flag to False
+      self.ENC_fastsim = False    
+    if 'ENC_pair_cut' in config:
+        self.ENC_pair_cut = config['ENC_pair_cut']
+    else:
+        self.ENC_pair_cut = False
     if 'jetscape' in config:
         self.jetscape = config['jetscape']
     else:
@@ -112,7 +124,7 @@ class ProcessMCBase(process_base.ProcessBase):
       self.thermal_generator = thermal_generator.ThermalGenerator(N_avg, sigma_N, beta)
     else:
       self.thermal_model = False
-         
+
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
     #   The observable list stores the observable setting, e.g. subjetR
@@ -155,7 +167,7 @@ class ProcessMCBase(process_base.ProcessBase):
       tree_dir = 'PWGHF_TreeCreator'
     io_det = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
                                   track_tree_name='tree_Particle', use_ev_id_ext=False,
-                                  is_jetscape=self.jetscape, event_plane_range=self.event_plane_range)
+                                  is_jetscape=self.jetscape, event_plane_range=self.event_plane_range, is_ENC=self.ENC_fastsim, is_det_level=True)
     df_fjparticles_det = io_det.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction)
     self.nEvents_det = len(df_fjparticles_det.index)
     self.nTracks_det = len(io_det.track_df.index)
@@ -178,11 +190,13 @@ class ProcessMCBase(process_base.ProcessBase):
     # a SeriesGroupBy object of fastjet particles per event
     io_truth = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
                                     track_tree_name='tree_Particle_gen', use_ev_id_ext=False,
-                                    is_jetscape=self.jetscape, event_plane_range=self.event_plane_range)
-    df_fjparticles_truth = io_truth.load_data(m=self.m)
+                                    is_jetscape=self.jetscape, event_plane_range=self.event_plane_range, is_ENC=self.ENC_fastsim, is_det_level=False)
+    df_fjparticles_truth = io_truth.load_data(m=self.m) # no dropping of tracks at truth level (important for the det-truth association because the index of the truth particle is used)
     self.nEvents_truth = len(df_fjparticles_truth.index)
     self.nTracks_truth = len(io_truth.track_df.index)
     print('--- {} seconds ---'.format(time.time() - self.start_time))
+
+    print('Input truth Data Frame',df_fjparticles_truth)
     
     # If jetscape, store also the negative status particles (holes)
     if self.jetscape:
@@ -201,9 +215,16 @@ class ProcessMCBase(process_base.ProcessBase):
     # (Need a structure such that we can iterate event-by-event through both fj_1, fj_2 simultaneously)
     # In the case of jetscape, we merge also the hole collections fj_3, fj_4
     print('Merge det-level and truth-level into a single dataframe grouped by event...')
+    # print('debug df_fjparticles_det',df_fjparticles_det)
+    # print('debug df_fjparticles_truth',df_fjparticles_truth)
     if self.jetscape:
         self.df_fjparticles = pandas.concat([df_fjparticles_det, df_fjparticles_truth, df_fjparticles_det_holes, df_fjparticles_truth_holes], axis=1)
         self.df_fjparticles.columns = ['fj_particles_det', 'fj_particles_truth', 'fj_particles_det_holes', 'fj_particles_truth_holes']
+    elif self.ENC_fastsim:
+        self.df_fjparticles = pandas.concat([df_fjparticles_det, df_fjparticles_truth], axis=1)
+        self.df_fjparticles.columns = ['fj_particles_det', 'ParticleMCIndex', 'fj_particles_truth', 'ParticlePID']
+        print('Merged output',self.df_fjparticles.columns)
+        print(self.df_fjparticles)
     else:
         self.df_fjparticles = pandas.concat([df_fjparticles_det, df_fjparticles_truth], axis=1)
         self.df_fjparticles.columns = ['fj_particles_det', 'fj_particles_truth']
@@ -334,6 +355,8 @@ class ProcessMCBase(process_base.ProcessBase):
     # simultaneously for fj_1 and fj_2 per event, so that I can match jets -- and fill histograms
     if self.jetscape:
         result = [self.analyze_event(fj_particles_det, fj_particles_truth, fj_particles_det_holes, fj_particles_truth_holes) for fj_particles_det, fj_particles_truth, fj_particles_det_holes, fj_particles_truth_holes in zip(self.df_fjparticles['fj_particles_det'], self.df_fjparticles['fj_particles_truth'], self.df_fjparticles['fj_particles_det_holes'], self.df_fjparticles['fj_particles_truth_holes'])]
+    elif self.ENC_fastsim:
+        result = [self.analyze_event(fj_particles_det=fj_particles_det, fj_particles_truth=fj_particles_truth, particles_mcid_det=particles_mcid_det, particles_pid_truth=particles_pid_truth) for fj_particles_det, fj_particles_truth, particles_mcid_det, particles_pid_truth in zip(self.df_fjparticles['fj_particles_det'], self.df_fjparticles['fj_particles_truth'], self.df_fjparticles['ParticleMCIndex'], self.df_fjparticles['ParticlePID'])]
     else:
         result = [self.analyze_event(fj_particles_det, fj_particles_truth) for fj_particles_det, fj_particles_truth in zip(self.df_fjparticles['fj_particles_det'], self.df_fjparticles['fj_particles_truth'])]
     
@@ -363,7 +386,7 @@ class ProcessMCBase(process_base.ProcessBase):
   # Analyze jets of a given event.
   # fj_particles is the list of fastjet pseudojets for a single fixed event.
   #---------------------------------------------------------------
-  def analyze_event(self, fj_particles_det, fj_particles_truth, fj_particles_det_holes=None, fj_particles_truth_holes=None):
+  def analyze_event(self, fj_particles_det, fj_particles_truth, fj_particles_det_holes=None, fj_particles_truth_holes=None, particles_mcid_det=None, particles_pid_truth=None):
   
     self.event_number += 1
     if self.event_number > self.event_number_max:
@@ -371,12 +394,68 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.debug_level > 1:
       print('-------------------------------------------------')
       print('event {}'.format(self.event_number))
+
+    # print('debug5 det parts',fj_particles_det)
+    # print('debug5 mcid',particles_mcid_det)
+    # print('debug5 truth parts',fj_particles_truth)
+    # print('debug5 pid',particles_pid_truth)
+
+    if self.ENC_fastsim:
+      # make charge array from pid info, needed for pair efficiency determination
+        particles_charge_truth = np.array([])
+        for pid in particles_pid_truth:
+            # charged hadrons
+            if abs(pid)==211 or abs(pid)==321 or abs(pid)==2212 or abs(pid)==3222:
+                if pid>0:
+                    particles_charge_truth = np.append(particles_charge_truth, 1)
+                else:
+                    particles_charge_truth = np.append(particles_charge_truth, -1)
+            # electrons and muons
+            elif abs(pid)==11 or abs(pid)==13 or abs(pid)==3112 or abs(pid)==3312 or abs(pid)==3334:
+                if pid>0:
+                    particles_charge_truth = np.append(particles_charge_truth, -1)
+                else:
+                    particles_charge_truth = np.append(particles_charge_truth, 1)
+            # long lived weak decay particles (<2% of the total number of charged particles)
+            # for now mark as charge 0 and later NOT applying pair efficiency for 0-charged or 0-0 pairs
+            # NB: this can be avoided by decaying these paritcles within the generation step
+            else:
+                particles_charge_truth = np.append(particles_charge_truth, 0)
       
     # Check that the entries exist appropriately
     # (need to check how this can happen -- but it is only a tiny fraction of events)
     if type(fj_particles_det) != fj.vectorPJ or type(fj_particles_truth) != fj.vectorPJ:
       print('fj_particles type mismatch -- skipping event')
       return
+    else:
+      # add associated truth info and charge info in fj_particles_det using the JetInfo object
+      if self.ENC_fastsim:
+        for index, mcid in enumerate(particles_mcid_det):
+          if fj_particles_det[index].has_user_info():
+            ecorr_user_info = fj_particles_det[index].python_info()
+          else:
+            ecorr_user_info = jet_info.JetInfo()
+          if mcid>=0 and mcid<len(fj_particles_truth):
+            # print('debug6', p, 'mcid/length', mcid, len(fj_particles_truth))
+            # print('debug6', p, 'truth', fj_particles_truth[int(mcid)])
+            # print('debug6', p, 'charge', particles_charge_truth[int(mcid)])
+            ecorr_user_info.particle_truth = fj_particles_truth[int(mcid)]
+            ecorr_user_info.charge = particles_charge_truth[int(mcid)]
+          else:
+            print("invalid associated MC Index, filling default values (particle_truth = None, charge = 1000)")
+          fj_particles_det[index].set_python_info(ecorr_user_info)
+          # fj_particles_det[index].set_user_index(int(mcid))
+
+        for index in range( len(fj_particles_truth) ):
+          if fj_particles_truth[index].has_user_info():
+            ecorr_user_info = fj_particles_truth[index].python_info()
+          else:
+            ecorr_user_info = jet_info.JetInfo()
+          ecorr_user_info.particle_truth = fj_particles_truth[index]
+          ecorr_user_info.charge = particles_charge_truth[index]
+          fj_particles_truth[index].set_python_info(ecorr_user_info)
+          # fj_particles_truth[index].set_user_index(int(index))
+
     if self.jetscape:
       if type(fj_particles_det_holes) != fj.vectorPJ or type(fj_particles_truth_holes) != fj.vectorPJ:
         print('fj_particles_holes type mismatch -- skipping event')
@@ -387,7 +466,7 @@ class ProcessMCBase(process_base.ProcessBase):
         print('WARNING: Duplicate particles may be present')
         print([p.user_index() for p in fj_particles_truth])
         print([p.pt() for p in fj_particles_truth])
-        
+
     # If Pb-Pb, construct embedded event (do this once, for all jetR)
     if not self.is_pp:
         
@@ -426,7 +505,7 @@ class ProcessMCBase(process_base.ProcessBase):
       return
 
     # Loop through jetR, and process event for each R
-    for jetR in self.jetR_list:
+    for jetR in self.jetR_list:        
     
       # Keep track of whether to fill R-independent histograms
       self.fill_R_indep_hists = (jetR == self.jetR_list[0])
@@ -443,14 +522,40 @@ class ProcessMCBase(process_base.ProcessBase):
       
       # Analyze
       if self.is_pp:
-      
+
         # Find pp det and truth jets
-        cs_det = fj.ClusterSequence(fj_particles_det, jet_def)
+        if self.ENC_fastsim:
+          # FIX ME: should treat long lived charged particle differently (check how the existing fast herwig and pythia handles it)
+          fj_particles_det_ch = fj.vectorPJ()
+          for part in fj_particles_det:
+            if part.python_info().charge!=0:
+              fj_particles_det_ch.append(part)
+          cs_det = fj.ClusterSequence(fj_particles_det_ch, jet_def)
+        else:
+          cs_det = fj.ClusterSequence(fj_particles_det, jet_def)
+        
         jets_det_pp = fj.sorted_by_pt(cs_det.inclusive_jets())
+        # make sure the user info (on the jet side) for jets are all empty right after the jet-clustering 
+        for jet in jets_det_pp:
+          if jet.has_user_info():
+            jet.python_info().clear_jet_info()
         jets_det_pp_selected = jet_selector_det(jets_det_pp)
         
-        cs_truth = fj.ClusterSequence(fj_particles_truth, jet_def)
+        if self.ENC_fastsim:
+          # FIX ME: should treat long lived charged particle differently (check how the existing fast herwig and pythia handles it)
+          fj_particles_truth_ch = fj.vectorPJ()
+          for part in fj_particles_truth:
+            if part.python_info().charge!=0:
+              fj_particles_truth_ch.append(part)
+          cs_truth = fj.ClusterSequence(fj_particles_truth_ch, jet_def)
+        else:
+          cs_truth = fj.ClusterSequence(fj_particles_truth, jet_def)
+
         jets_truth = fj.sorted_by_pt(cs_truth.inclusive_jets())
+        # make sure the user info (on the jet side) for jets are all empty right after the jet-clustering  
+        for jet in jets_truth:
+          if jet.has_user_info():
+            jet.python_info().clear_jet_info()
         jets_truth_selected = jet_selector_det(jets_truth)
         jets_truth_selected_matched = jet_selector_truth_matched(jets_truth)
       
@@ -528,6 +633,14 @@ class ProcessMCBase(process_base.ProcessBase):
         # First fill the combined-to-pp matches, then the pp-to-pp matches
         [[self.set_matching_candidates(jet_det_combined, jet_det_pp, jetR, 'hDeltaR_combined_ppdet_R{{}}_Rmax{}'.format(R_max), fill_jet1_matches_only=True) for jet_det_pp in jets_det_pp_selected] for jet_det_combined in jets_det_selected]
         [[self.set_matching_candidates(jet_det_pp, jet_truth, jetR, 'hDeltaR_ppdet_pptrue_R{{}}_Rmax{}'.format(R_max)) for jet_truth in jets_truth_selected_matched] for jet_det_pp in jets_det_pp_selected]
+
+    # debug
+    # for jet_det in jets_det_selected:
+    #   if jet_det.has_user_info() and jet_det.python_info().closest_jet:
+        # print('debug7.1--jet_det',jet_det.pt())
+        # print('matches to',jet_det.python_info().closest_jet.pt())
+        # print('debug7.1--jet_det',len(jet_det.constituents()))
+        # print('matches to',len(jet_det.python_info().closest_jet.constituents()))
         
     # Loop through jets and set accepted matches
     if self.is_pp:
@@ -663,8 +776,12 @@ class ProcessMCBase(process_base.ProcessBase):
     # Get matched truth jet
     if jet_det.has_user_info():
       jet_truth = jet_det.python_info().match
-      
+
       if jet_truth:
+
+        # print('debug8--jet det', jet_det.pt(), 'size', len(jet_det.constituents()))
+        # print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
+        # debug
         
         jet_pt_det_ungroomed = jet_det.pt()
         jet_pt_truth_ungroomed = jet_truth.pt()
@@ -728,6 +845,9 @@ class ProcessMCBase(process_base.ProcessBase):
                 
             for hadron in holes_in_truth_jet:
                 jet_pt_truth_ungroomed -= hadron.pt()
+
+          # # debug
+          # constituents = fj.sorted_by_pt(jet_truth.constituents())
               
           # Call user function to fill histos
           self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
