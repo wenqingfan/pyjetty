@@ -38,7 +38,7 @@ import fjcontrib
 # Analysis utilities
 from pyjetty.alice_analysis.process.base import process_io
 from pyjetty.alice_analysis.process.base import process_base
-from pyjetty.mputils import CEventSubtractor
+from pyjetty.mputils.csubtractor import CEventSubtractor
 
 # Prevent ROOT from stealing focus when plotting
 ROOT.gROOT.SetBatch(True)
