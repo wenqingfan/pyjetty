@@ -32,6 +32,16 @@ ROOT.gROOT.SetBatch(True)
 ROOT.TH1.SetDefaultSumw2()
 ROOT.TH2.SetDefaultSumw2()
 
+def linbins(xmin, xmax, nbins):
+  lspace = np.linspace(xmin, xmax, nbins+1)
+  arr = array.array('f', lspace)
+  return arr
+
+def logbins(xmin, xmax, nbins):
+  lspace = np.logspace(np.log10(xmin), np.log10(xmax), nbins+1)
+  arr = array.array('f', lspace)
+  return arr
+
 ################################################################
 class PythiaGenENC(process_base.ProcessBase):
 
