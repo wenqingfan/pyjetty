@@ -198,7 +198,7 @@ class PythiaGenENC(process_base.ProcessBase):
             setattr(self, "jet_def_R%s" % jetR_str, jet_def)
             print(jet_def)
 
-        pwarning('max eta for particles after hadronization set to', self.max_eta_hadron)
+        # pwarning('max eta for particles after hadronization set to', self.max_eta_hadron)
 
         pfc_selector1 = fj.SelectorPtMin(1.)
         setattr(self, "pfc_def_10", pfc_selector1)
