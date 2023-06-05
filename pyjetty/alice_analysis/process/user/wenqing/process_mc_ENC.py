@@ -405,6 +405,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         weights_pair.append( 1 )
     return weights_pair
 
+  def is_same_charge(self, corr_builder, ipoint, constituents, index):
+    part1 = corr_builder.correlator(ipoint).indices1()[index]
+    part2 = corr_builder.correlator(ipoint).indices2()[index]
+    q1 = constituents[part1].python_info().charge
+    q2 = constituents[part2].python_info().charge
+
+    if q1*q2 > 0:
+      return True
+    else:
+      return False
+
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
   # Fill 2D histogram of (pt, obs)
@@ -436,10 +447,19 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           for index in range(new_corr.correlator(ipoint).rs().size()):
 
+            # processing only like-sign pairs when self.ENC_pair_like is on
+            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
+              continue
+
+            # processing only unlike-sign pairs when self.ENC_pair_unlike is on
+            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
+              continue
+            
             if 'ENC' in observable:
               if self.ENC_fastsim and (not 'Truth' in hname):
                 getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
                 getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt_ungroomed, jet_pt_ungroomed*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index]) # NB: fill pt*RL
+
               else:
                 getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_ungroomed instead of jet.perp() so if jet_pt_ungroomed is different from jet.perp(), it will be used. This is mainly for matched jets study
                 getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt_ungroomed, jet_pt_ungroomed*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
@@ -544,6 +564,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         holes_in_det_jet = kwargs['holes_in_det_jet']
         holes_in_truth_jet = kwargs['holes_in_truth_jet']
 
+    # Todo: add additonal weight for jet pT spectrum
+    # if self.rewight_pt:
+    #   w_pt = 1+pow(jet_truth,0.2)
+    # else:
+    #   w_pt = 1
+    
     for observable in self.observable_list:
 
       hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
