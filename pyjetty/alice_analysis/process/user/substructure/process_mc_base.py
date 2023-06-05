@@ -88,6 +88,14 @@ class ProcessMCBase(process_base.ProcessBase):
         self.ENC_pair_cut = config['ENC_pair_cut']
     else:
         self.ENC_pair_cut = False
+    if 'ENC_pair_like' in config:
+        self.ENC_pair_like = config['ENC_pair_like']
+    else:
+        self.ENC_pair_like = False
+    if 'ENC_pair_unlike' in config:
+        self.ENC_pair_unlike = config['ENC_pair_unlike']
+    else:
+        self.ENC_pair_unlike = False
     if 'jetscape' in config:
         self.jetscape = config['jetscape']
     else:
@@ -428,6 +436,10 @@ class ProcessMCBase(process_base.ProcessBase):
       print('fj_particles type mismatch -- skipping event')
       return
     else:
+      # Todo
+      ## for full simulation, match det-level and truth level particles
+      ## sort both list by pT, phi and eta first before matching
+
       # add associated truth info and charge info in fj_particles_det using the JetInfo object
       if self.ENC_fastsim:
         for index, mcid in enumerate(particles_mcid_det):
@@ -528,7 +540,7 @@ class ProcessMCBase(process_base.ProcessBase):
           # FIX ME: should treat long lived charged particle differently (check how the existing fast herwig and pythia handles it)
           fj_particles_det_ch = fj.vectorPJ()
           for part in fj_particles_det:
-            if part.python_info().charge!=0:
+            if part.python_info().charge!=0: # only use charged particles
               fj_particles_det_ch.append(part)
           cs_det = fj.ClusterSequence(fj_particles_det_ch, jet_def)
         else:
@@ -545,7 +557,7 @@ class ProcessMCBase(process_base.ProcessBase):
           # FIX ME: should treat long lived charged particle differently (check how the existing fast herwig and pythia handles it)
           fj_particles_truth_ch = fj.vectorPJ()
           for part in fj_particles_truth:
-            if part.python_info().charge!=0:
+            if part.python_info().charge!=0: # only use charged particles
               fj_particles_truth_ch.append(part)
           cs_truth = fj.ClusterSequence(fj_particles_truth_ch, jet_def)
         else:
