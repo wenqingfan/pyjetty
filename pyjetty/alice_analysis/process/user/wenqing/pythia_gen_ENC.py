@@ -81,8 +81,8 @@ class PythiaGenENC(process_base.ProcessBase):
         outf.cd()
 
         mycfg = []
-        pythia = pyconf.create_and_init_pythia_from_args(args, mycfg)
         mycfg.append("HadronLevel:all=off")
+        pythia = pyconf.create_and_init_pythia_from_args(args, mycfg)
 
         # Initialize response histograms
         self.initialize_hist()
