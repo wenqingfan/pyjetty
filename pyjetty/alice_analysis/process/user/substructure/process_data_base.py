@@ -38,7 +38,7 @@ import fjcontrib
 # Analysis utilities
 from pyjetty.alice_analysis.process.base import process_io
 from pyjetty.alice_analysis.process.base import process_base
-from pyjetty.mputils.csubtractor import CEventSubtractor
+from pyjetty.mputils import CEventSubtractor
 
 # Prevent ROOT from stealing focus when plotting
 ROOT.gROOT.SetBatch(True)
@@ -78,6 +78,14 @@ class ProcessDataBase(process_base.ProcessBase):
         self.ENC_pair_cut = config['ENC_pair_cut']
     else:
         self.ENC_pair_cut = False
+    if 'ENC_pair_like' in config:
+        self.ENC_pair_like = config['ENC_pair_like']
+    else:
+        self.ENC_pair_like = False
+    if 'ENC_pair_unlike' in config:
+        self.ENC_pair_unlike = config['ENC_pair_unlike']
+    else:
+        self.ENC_pair_unlike = False
     
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
