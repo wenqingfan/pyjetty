@@ -70,6 +70,11 @@ class PythiaGenENC(process_base.ProcessBase):
         # particle level - ALICE tracking restriction
         self.max_eta_hadron = 0.9
 
+        if 'beyond_jetR' in config:
+            self.beyond_jetR = config['beyond_jetR']
+        else:
+            self.beyond_jetR = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -128,7 +133,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('pT (full jet)')
+                    h.GetXaxis().SetTitle('pT (jet)')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
@@ -138,7 +143,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('pT (full jet)')
+                    h.GetXaxis().SetTitle('pT (jet)')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
@@ -150,7 +155,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (full jet)')
+                        h.GetXaxis().SetTitle('pT (jet)')
                         h.GetYaxis().SetTitle('R_{L}')
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
@@ -160,7 +165,50 @@ class PythiaGenENC(process_base.ProcessBase):
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (full jet)')
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+
+                    # only save histograms beyong jet consitituents for R = 0.4
+                    if self.beyond_jetR and (jetR == 0.4) and (level == "ch"):
+                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
                         h.GetYaxis().SetTitle('R_{L}')
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
@@ -171,7 +219,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 pt_bins = linbins(0,200,200)
                 Nconst_bins = linbins(0,50,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-                h.GetXaxis().SetTitle('pT (full jet)')
+                h.GetXaxis().SetTitle('pT (jet)')
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
@@ -181,7 +229,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 pt_bins = linbins(0,200,200)
                 Nconst_bins = linbins(0,50,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-                h.GetXaxis().SetTitle('pT (full jet)')
+                h.GetXaxis().SetTitle('pT (jet)')
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
@@ -245,6 +293,15 @@ class PythiaGenENC(process_base.ProcessBase):
 
             iev += 1
 
+    def find_parts_around_jets(self, level, jet, parts_pythia, cone_R):
+        # select particles around jet axis
+        parts = fj.vectorPJ()
+        for part in parts_pythia:
+            if jet.delta_R(part) <= cone_R:
+                parts.push_back(part)
+        
+        return parts
+
     #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
     #---------------------------------------------------------------
@@ -303,6 +360,39 @@ class PythiaGenENC(process_base.ProcessBase):
                                 # print("likesign pair ",pythiafjext.getPythia8Particle(c1).id(),pythiafjext.getPythia8Particle(c2).id())
                                 getattr(self, 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
                 
+                if self.beyond_jetR and (jetR == 0.4) and (level == "ch"):
+                    # select beyond constituents
+                    _p_select_cone_max = self.find_parts_around_jets(level, j, parts_pythia, 1.0) # select within dR < 1
+                    _p_select_cone_jetR = self.find_parts_around_jets(level, j, _p_select_cone_max, jetR) # select within previously selected parts
+
+                    _p_select0_cone_max = fj.vectorPJ()
+                    _ = [_p_select0_cone_max.push_back(p) for p in _p_select_cone_max]
+
+                    _p_select1_cone_max = fj.vectorPJ()
+                    _ = [_p_select1_cone_max.push_back(p) for p in pfc_selector1(_p_select_cone_max)]
+
+                    _p_select0_cone_jetR = fj.vectorPJ()
+                    _ = [_p_select0_cone_jetR.push_back(p) for p in _p_select_cone_jetR]
+
+                    _p_select1_cone_jetR = fj.vectorPJ()
+                    _ = [_p_select1_cone_jetR.push_back(p) for p in pfc_selector1(_p_select_cone_jetR)]
+
+                    cb0_cone_max = ecorrel.CorrelatorBuilder(_p_select0_cone_max, j.perp(), npoint, npower, dphi_cut, deta_cut)
+                    cb1_cone_max = ecorrel.CorrelatorBuilder(_p_select1_cone_max, j.perp(), npoint, npower, dphi_cut, deta_cut)
+
+                    cb0_cone_jetR = ecorrel.CorrelatorBuilder(_p_select0_cone_jetR, j.perp(), npoint, npower, dphi_cut, deta_cut)
+                    cb1_cone_jetR = ecorrel.CorrelatorBuilder(_p_select1_cone_jetR, j.perp(), npoint, npower, dphi_cut, deta_cut)
+
+                    for ipoint in range(2, npoint+1):
+                        for index in range(cb0_cone_max.correlator(ipoint).rs().size()):
+                                getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb0_cone_max.correlator(ipoint).rs()[index], cb0_cone_max.correlator(ipoint).weights()[index])
+                        for index in range(cb1_cone_max.correlator(ipoint).rs().size()):
+                                getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1_cone_max.correlator(ipoint).rs()[index], cb1_cone_max.correlator(ipoint).weights()[index])
+                        for index in range(cb0_cone_jetR.correlator(ipoint).rs().size()):
+                                getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb0_cone_jetR.correlator(ipoint).rs()[index], cb0_cone_jetR.correlator(ipoint).weights()[index])
+                        for index in range(cb1_cone_jetR.correlator(ipoint).rs().size()):
+                                getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1_cone_jetR.correlator(ipoint).rs()[index], cb1_cone_jetR.correlator(ipoint).weights()[index])
+
                 getattr(self, 'h_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(j.perp(), len(_c_select0))
                 getattr(self, 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(j.perp(), len(_c_select1))
         
