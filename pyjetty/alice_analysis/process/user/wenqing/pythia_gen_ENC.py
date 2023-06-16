@@ -63,6 +63,8 @@ class PythiaGenENC(process_base.ProcessBase):
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
 
+        self.jet_levels = config["jet_levels"] # levels = ["p", "h", "ch"]
+
         self.jetR_list = config["jetR"] 
 
         self.nev = args.nev
@@ -74,6 +76,16 @@ class PythiaGenENC(process_base.ProcessBase):
             self.beyond_jetR = config['beyond_jetR']
         else:
             self.beyond_jetR = False
+
+        self.ref_jet_level = "ch"
+        self.ref_jetR = 0.4 # hard coded for now 
+        self.part_levels = config["part_levels"] 
+
+        # ENC settings
+        self.dphi_cut = -9999
+        self.deta_cut = -9999
+        self.npoint = 2
+        self.npower = 1
 
     #---------------------------------------------------------------
     # Main processing function
@@ -123,12 +135,10 @@ class PythiaGenENC(process_base.ProcessBase):
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
-            levels = ["p", "h", "ch"]
-
-            for level in levels:
-                # ENC histograms (trk_thrd = 1)
-                for ipoint in range(2, 3):
-                    name = 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)
+            for jet_level in self.jet_levels:
+                # ENC histograms (jet level == part level)
+                for ipoint in range(2, self.npoint+1):
+                    name = 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -138,7 +148,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
-                    name = 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)
+                    name = 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -149,8 +159,8 @@ class PythiaGenENC(process_base.ProcessBase):
                     getattr(self, hist_list_name).append(h)
 
                     # only save charge separation for pT>1GeV for now
-                    if level == "ch":
-                        name = 'h_ENC{}_JetPt_{}_R{}_unlike_trk10'.format(str(ipoint), level, R_label)
+                    if jet_level == "ch":
+                        name = 'h_ENC{}_JetPt_{}_R{}_unlike_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -160,50 +170,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), level, R_label)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
-
-
-                    # only save histograms beyong jet consitituents for R = 0.4
-                    if self.beyond_jetR and (jetR == 0.4) and (level == "ch"):
-                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
-
-                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
-
-                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
-
-                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)
+                        name = 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -214,7 +181,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         getattr(self, hist_list_name).append(h)
 
                 # Jet pt vs N constituents
-                name = 'h_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)
+                name = 'h_Nconst_JetPt_{}_R{}_trk00'.format(jet_level, R_label)
                 print('Initialize histogram',name)
                 pt_bins = linbins(0,200,200)
                 Nconst_bins = linbins(0,50,50)
@@ -224,7 +191,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
 
-                name = 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)
+                name = 'h_Nconst_JetPt_{}_R{}_trk10'.format(jet_level, R_label)
                 print('Initialize histogram',name)
                 pt_bins = linbins(0,200,200)
                 Nconst_bins = linbins(0,50,50)
@@ -233,6 +200,50 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
+
+            # NB: Only do the cone check for one reference radius and charged jets for now
+            if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
+                for part_level in self.part_levels:
+                    for ipoint in range(2, self.npoint+1):
+                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
@@ -273,27 +284,27 @@ class PythiaGenENC(process_base.ProcessBase):
 
             self.event = pythia.event
 
-            parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
+            self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
             hstatus = pythia.forceHadronLevel()
             if not hstatus:
                 continue
 
             # full particle level
-            parts_pythia_h = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True)
+            self.parts_pythia_h = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True)
 
             # charged particle level
-            parts_pythia_ch = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal, pythiafjext.kCharged], 0, True)
+            self.parts_pythia_ch = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal, pythiafjext.kCharged], 0, True)
 
             # Some "accepted" events don't survive hadronization step -- keep track here
             self.hNevents.Fill(0)
-            self.find_jets_fill_trees('p', parts_pythia_p, iev)
-            self.find_jets_fill_trees('h', parts_pythia_h, iev)
-            self.find_jets_fill_trees('ch', parts_pythia_ch, iev)
+
+            for jet_level in self.jet_levels:
+                self.find_jets_fill_trees(jet_level)
 
             iev += 1
 
-    def find_parts_around_jets(self, level, jet, parts_pythia, cone_R):
+    def find_parts_around_jets(self, jet, parts_pythia, cone_R):
         # select particles around jet axis
         parts = fj.vectorPJ()
         for part in parts_pythia:
@@ -303,9 +314,95 @@ class PythiaGenENC(process_base.ProcessBase):
         return parts
 
     #---------------------------------------------------------------
+    # Form EEC using a cone around certain type of jets
+    #---------------------------------------------------------------
+    def fill_beyond_jet_histograms(self, jet_level, part_level, jet, jetR, R_label):
+        # fill EEC histograms for cone around jet axis
+
+        # Get the particles at certain level
+        if part_level == "p":
+            parts_pythia  = self.parts_pythia_p
+        if part_level == "h":
+            parts_pythia  = self.parts_pythia_h
+        if part_level == "ch":
+            parts_pythia  = self.parts_pythia_ch
+
+        pfc_selector1 = getattr(self, "pfc_def_10")
+
+        # select beyond constituents
+        _p_select_cone_max = self.find_parts_around_jets(jet, parts_pythia, 1.0) # select within dR < 1
+        _p_select_cone_jetR = self.find_parts_around_jets(jet, _p_select_cone_max, jetR) # select within previously selected parts
+
+        _p_select0_cone_max = fj.vectorPJ()
+        _ = [_p_select0_cone_max.push_back(p) for p in _p_select_cone_max]
+
+        _p_select1_cone_max = fj.vectorPJ()
+        _ = [_p_select1_cone_max.push_back(p) for p in pfc_selector1(_p_select_cone_max)]
+
+        _p_select0_cone_jetR = fj.vectorPJ()
+        _ = [_p_select0_cone_jetR.push_back(p) for p in _p_select_cone_jetR]
+
+        _p_select1_cone_jetR = fj.vectorPJ()
+        _ = [_p_select1_cone_jetR.push_back(p) for p in pfc_selector1(_p_select_cone_jetR)]
+
+        cb0_cone_max = ecorrel.CorrelatorBuilder(_p_select0_cone_max, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+        cb1_cone_max = ecorrel.CorrelatorBuilder(_p_select1_cone_max, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        cb0_cone_jetR = ecorrel.CorrelatorBuilder(_p_select0_cone_jetR, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+        cb1_cone_jetR = ecorrel.CorrelatorBuilder(_p_select1_cone_jetR, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        for ipoint in range(2, self.npoint+1):
+            for index in range(cb0_cone_max.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb0_cone_max.correlator(ipoint).rs()[index], cb0_cone_max.correlator(ipoint).weights()[index])
+            for index in range(cb1_cone_max.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb1_cone_max.correlator(ipoint).rs()[index], cb1_cone_max.correlator(ipoint).weights()[index])
+            for index in range(cb0_cone_jetR.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb0_cone_jetR.correlator(ipoint).rs()[index], cb0_cone_jetR.correlator(ipoint).weights()[index])
+            for index in range(cb1_cone_jetR.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb1_cone_jetR.correlator(ipoint).rs()[index], cb1_cone_jetR.correlator(ipoint).weights()[index])
+
+    def fill_jet_histograms(self, level, jet, R_label):
+
+        pfc_selector1 = getattr(self, "pfc_def_10")
+
+        # select all constituents with no cut
+        _c_select0 = fj.vectorPJ()
+        _ = [_c_select0.push_back(c) for c in jet.constituents()]
+        cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        # select constituents with 1 GeV cut
+        _c_select1 = fj.vectorPJ()
+        _ = [_c_select1.push_back(c) for c in pfc_selector1(jet.constituents())]
+        cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        for ipoint in range(2, self.npoint+1):
+            for index in range(cb0.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+            for index in range(cb1.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+            
+        if level == "ch":
+            for ipoint in range(2, self.npoint+1):
+                # only fill trk pt > 1 GeV here for now
+                for index in range(cb1.correlator(ipoint).rs().size()):
+                    part1 = cb1.correlator(ipoint).indices1()[index]
+                    part2 = cb1.correlator(ipoint).indices2()[index]
+                    c1 = _c_select1[part1]
+                    c2 = _c_select1[part2]
+                    if pythiafjext.getPythia8Particle(c1).charge()*pythiafjext.getPythia8Particle(c2).charge() < 0:
+                        # print("unlike-sign pair ",pythiafjext.getPythia8Particle(c1).id(),pythiafjext.getPythia8Particle(c2).id())
+                        getattr(self, 'h_ENC{}_JetPt_{}_R{}_unlike_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    else:
+                        # print("likesign pair ",pythiafjext.getPythia8Particle(c1).id(),pythiafjext.getPythia8Particle(c2).id())
+                        getattr(self, 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+
+        getattr(self, 'h_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(jet.perp(), len(_c_select0))
+        getattr(self, 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet.perp(), len(_c_select1))
+
+    #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
     #---------------------------------------------------------------
-    def find_jets_fill_trees(self, level, parts_pythia, iev):
+    def find_jets_fill_trees(self, jet_level):
         # Loop over jet radii
         for jetR in self.jetR_list:
 
@@ -313,89 +410,28 @@ class PythiaGenENC(process_base.ProcessBase):
             jet_selector = getattr(self, "jet_selector_R%s" % jetR_str)
             jet_def = getattr(self, "jet_def_R%s" % jetR_str)
             
-            pfc_selector1 = getattr(self, "pfc_def_10")
- 
             # Get the jets at different levels
-            jets  = fj.sorted_by_pt(jet_selector(jet_def(parts_pythia)))
+            if jet_level == "p":
+                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_p)))
+            if jet_level == "h":
+                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_j)))
+            if jet_level == "ch":
+                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_ch)))
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
-            #-------------------------------------------------
-            # loop over jets
+            #-------------------------------------------------------------
+            # loop over jets and fill EEC histograms with jet constituents
             for j in jets:
+                self.fill_jet_histograms(jet_level, j, R_label)
 
-                dphi_cut = -9999
-                deta_cut = -9999
-                npoint = 2
-                npower = 1
-
-                # select all constituents with no cut
-                _c_select0 = fj.vectorPJ()
-                _ = [_c_select0.push_back(c) for c in j.constituents()]
-                cb0 = ecorrel.CorrelatorBuilder(_c_select0, j.perp(), npoint, npower, dphi_cut, deta_cut)
-       
-                # select constituents with 1 GeV cut
-                _c_select1 = fj.vectorPJ()
-                _ = [_c_select1.push_back(c) for c in pfc_selector1(j.constituents())]
-                cb1 = ecorrel.CorrelatorBuilder(_c_select1, j.perp(), npoint, npower, dphi_cut, deta_cut)
-
-                for ipoint in range(2, npoint+1):
-                    for index in range(cb0.correlator(ipoint).rs().size()):
-                            getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
-                    for index in range(cb1.correlator(ipoint).rs().size()):
-                            getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                    
-                if level == "ch":
-                    for ipoint in range(2, npoint+1):
-                        # only fill trk pt > 1 GeV here for now
-                        for index in range(cb1.correlator(ipoint).rs().size()):
-                            part1 = cb1.correlator(ipoint).indices1()[index]
-                            part2 = cb1.correlator(ipoint).indices2()[index]
-                            c1 = _c_select1[part1]
-                            c2 = _c_select1[part2]
-                            if pythiafjext.getPythia8Particle(c1).charge()*pythiafjext.getPythia8Particle(c2).charge() < 0:
-                                # print("unlike-sign pair ",pythiafjext.getPythia8Particle(c1).id(),pythiafjext.getPythia8Particle(c2).id())
-                                getattr(self, 'h_ENC{}_JetPt_{}_R{}_unlike_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                            else:
-                                # print("likesign pair ",pythiafjext.getPythia8Particle(c1).id(),pythiafjext.getPythia8Particle(c2).id())
-                                getattr(self, 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+            #-------------------------------------------------------------
+            # loop over jets and fill EEC histograms inside a cone around jets
+            if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
+                for j in jets:
+                    for part_level in self.part_levels:
+                        self.fill_beyond_jet_histograms(jet_level, part_level, j, jetR, R_label)
                 
-                if self.beyond_jetR and (jetR == 0.4) and (level == "ch"):
-                    # select beyond constituents
-                    _p_select_cone_max = self.find_parts_around_jets(level, j, parts_pythia, 1.0) # select within dR < 1
-                    _p_select_cone_jetR = self.find_parts_around_jets(level, j, _p_select_cone_max, jetR) # select within previously selected parts
-
-                    _p_select0_cone_max = fj.vectorPJ()
-                    _ = [_p_select0_cone_max.push_back(p) for p in _p_select_cone_max]
-
-                    _p_select1_cone_max = fj.vectorPJ()
-                    _ = [_p_select1_cone_max.push_back(p) for p in pfc_selector1(_p_select_cone_max)]
-
-                    _p_select0_cone_jetR = fj.vectorPJ()
-                    _ = [_p_select0_cone_jetR.push_back(p) for p in _p_select_cone_jetR]
-
-                    _p_select1_cone_jetR = fj.vectorPJ()
-                    _ = [_p_select1_cone_jetR.push_back(p) for p in pfc_selector1(_p_select_cone_jetR)]
-
-                    cb0_cone_max = ecorrel.CorrelatorBuilder(_p_select0_cone_max, j.perp(), npoint, npower, dphi_cut, deta_cut)
-                    cb1_cone_max = ecorrel.CorrelatorBuilder(_p_select1_cone_max, j.perp(), npoint, npower, dphi_cut, deta_cut)
-
-                    cb0_cone_jetR = ecorrel.CorrelatorBuilder(_p_select0_cone_jetR, j.perp(), npoint, npower, dphi_cut, deta_cut)
-                    cb1_cone_jetR = ecorrel.CorrelatorBuilder(_p_select1_cone_jetR, j.perp(), npoint, npower, dphi_cut, deta_cut)
-
-                    for ipoint in range(2, npoint+1):
-                        for index in range(cb0_cone_max.correlator(ipoint).rs().size()):
-                                getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb0_cone_max.correlator(ipoint).rs()[index], cb0_cone_max.correlator(ipoint).weights()[index])
-                        for index in range(cb1_cone_max.correlator(ipoint).rs().size()):
-                                getattr(self, 'h_ENC{}_cone_max_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1_cone_max.correlator(ipoint).rs()[index], cb1_cone_max.correlator(ipoint).weights()[index])
-                        for index in range(cb0_cone_jetR.correlator(ipoint).rs().size()):
-                                getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb0_cone_jetR.correlator(ipoint).rs()[index], cb0_cone_jetR.correlator(ipoint).weights()[index])
-                        for index in range(cb1_cone_jetR.correlator(ipoint).rs().size()):
-                                getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(j.perp(), cb1_cone_jetR.correlator(ipoint).rs()[index], cb1_cone_jetR.correlator(ipoint).weights()[index])
-
-                getattr(self, 'h_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(j.perp(), len(_c_select0))
-                getattr(self, 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(j.perp(), len(_c_select1))
-        
     #---------------------------------------------------------------
     # Initiate scaling of all histograms and print final simulation info
     #---------------------------------------------------------------
