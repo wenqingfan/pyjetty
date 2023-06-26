@@ -87,6 +87,13 @@ class PythiaGenENC(process_base.ProcessBase):
         self.npoint = 2
         self.npower = 1
 
+        if 'do_matching' in config:
+            self.do_matching = config['do_matching']
+        else:
+            self.do_matching = False
+
+        self.jet_matching_distance = config["jet_matching_distance"] 
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -201,11 +208,54 @@ class PythiaGenENC(process_base.ProcessBase):
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
 
-            # NB: Only do the cone check for one reference radius and charged jets for now
-            if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
-                for part_level in self.part_levels:
+                # NB: Only do the cone check for one reference radius and charged jets for now
+                if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
+                    for part_level in self.part_levels:
+                        for ipoint in range(2, self.npoint+1):
+                            name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+            if self.do_matching and (jetR == self.ref_jetR):
+                for jet_level in ['p', 'h', 'ch']:
                     for ipoint in range(2, self.npoint+1):
-                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
+                        name = 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -215,7 +265,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
+                        name = 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -225,25 +275,26 @@ class PythiaGenENC(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
+                    # Jet pt vs N constituents
+                    name = 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    Nconst_bins = linbins(0,50,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
+                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetYaxis().SetTitle('N_{const}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
-                        name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
+                    name = 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    Nconst_bins = linbins(0,50,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
+                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetYaxis().SetTitle('N_{const}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
@@ -259,6 +310,8 @@ class PythiaGenENC(process_base.ProcessBase):
             print(jet_def)
 
         # pwarning('max eta for particles after hadronization set to', self.max_eta_hadron)
+        track_selector_ch = fj.SelectorPtMin(0.15)
+        setattr(self, "track_selector_ch", track_selector_ch)
 
         pfc_selector1 = fj.SelectorPtMin(1.)
         setattr(self, "pfc_def_10", pfc_selector1)
@@ -266,7 +319,7 @@ class PythiaGenENC(process_base.ProcessBase):
         for jetR in self.jetR_list:
             jetR_str = str(jetR).replace('.', '')
             
-            jet_selector = fj.SelectorPtMin(0.15) & fj.SelectorAbsEtaMax(self.max_eta_hadron - jetR)
+            jet_selector = fj.SelectorPtMin(5) & fj.SelectorAbsEtaMax(self.max_eta_hadron - jetR) # FIX ME: use 5 or lower? use it on all ch, h, p jets?
             setattr(self, "jet_selector_R%s" % jetR_str, jet_selector)
 
     #---------------------------------------------------------------
@@ -276,9 +329,10 @@ class PythiaGenENC(process_base.ProcessBase):
         
         iev = 0  # Event loop count
 
-        print('ievt',iev)
-
         while iev < self.nev:
+            if iev % 1 == 0:
+                print('ievt',iev)
+
             if not pythia.next():
                 continue
 
@@ -299,8 +353,7 @@ class PythiaGenENC(process_base.ProcessBase):
             # Some "accepted" events don't survive hadronization step -- keep track here
             self.hNevents.Fill(0)
 
-            for jet_level in self.jet_levels:
-                self.find_jets_fill_trees(jet_level)
+            self.find_jets_fill_trees()
 
             iev += 1
 
@@ -361,8 +414,11 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(cb1_cone_jetR.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb1_cone_jetR.correlator(ipoint).rs()[index], cb1_cone_jetR.correlator(ipoint).weights()[index])
 
+    #---------------------------------------------------------------
+    # Form EEC using jet constituents
+    #---------------------------------------------------------------
     def fill_jet_histograms(self, level, jet, R_label):
-
+        # fill EEC histograms for jet constituents
         pfc_selector1 = getattr(self, "pfc_def_10")
 
         # select all constituents with no cut
@@ -400,38 +456,136 @@ class PythiaGenENC(process_base.ProcessBase):
         getattr(self, 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet.perp(), len(_c_select1))
 
     #---------------------------------------------------------------
+    # Form EEC using jet constituents for matched jets
+    #---------------------------------------------------------------
+    def fill_matched_jet_histograms(self, level, jet, ref_jet, R_label):
+        # use the jet pt for energy weight but use the ref_jet pt when fill jet samples into jet pt bins
+        pfc_selector1 = getattr(self, "pfc_def_10")
+
+        # select all constituents with no cut
+        _c_select0 = fj.vectorPJ()
+        _ = [_c_select0.push_back(c) for c in jet.constituents()]
+        cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        # select constituents with 1 GeV cut
+        _c_select1 = fj.vectorPJ()
+        _ = [_c_select1.push_back(c) for c in pfc_selector1(jet.constituents())]
+        cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+        for ipoint in range(2, self.npoint+1):
+            for index in range(cb0.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+            for index in range(cb1.correlator(ipoint).rs().size()):
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select0))
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select1))
+
+    #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
     #---------------------------------------------------------------
-    def find_jets_fill_trees(self, jet_level):
+    def find_jets_fill_trees(self):
         # Loop over jet radii
         for jetR in self.jetR_list:
 
             jetR_str = str(jetR).replace('.', '')
             jet_selector = getattr(self, "jet_selector_R%s" % jetR_str)
             jet_def = getattr(self, "jet_def_R%s" % jetR_str)
-            
-            # Get the jets at different levels
-            if jet_level == "p":
-                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_p)))
-            if jet_level == "h":
-                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_j)))
-            if jet_level == "ch":
-                jets  = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_ch)))
+            track_selector_ch = getattr(self, "track_selector_ch")
+
+            jets_p = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_p)))
+            jets_h = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_h)))
+            jets_ch = fj.sorted_by_pt(jet_selector(jet_def(track_selector_ch(self.parts_pythia_ch))))
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
-            #-------------------------------------------------------------
-            # loop over jets and fill EEC histograms with jet constituents
-            for j in jets:
-                self.fill_jet_histograms(jet_level, j, R_label)
+            for jet_level in self.jet_levels:
+                # Get the jets at different levels
+                if jet_level == "p":
+                    jets = jets_p
+                if jet_level == "h":
+                    jets = jets_h
+                if jet_level == "ch":
+                    jets = jets_ch
 
-            #-------------------------------------------------------------
-            # loop over jets and fill EEC histograms inside a cone around jets
-            if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
+                #-------------------------------------------------------------
+                # loop over jets and fill EEC histograms with jet constituents
                 for j in jets:
-                    for part_level in self.part_levels:
-                        self.fill_beyond_jet_histograms(jet_level, part_level, j, jetR, R_label)
-                
+                    self.fill_jet_histograms(jet_level, j, R_label)
+
+                #-------------------------------------------------------------
+                # loop over jets and fill EEC histograms inside a cone around jets
+                if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
+                    for j in jets:
+                        for part_level in self.part_levels:
+                            self.fill_beyond_jet_histograms(jet_level, part_level, j, jetR, R_label)
+            
+            if self.do_matching and (jetR == self.ref_jetR):
+                # Loop through jets and find all h jets that can be matched to ch
+                jets_h_matched_to_ch = []
+                for jet_ch in jets_ch:
+                    matched_jets_h = []
+                    for index_jet_h, jet_h in enumerate(jets_h):
+                        if jet_h.perp()/jet_ch.perp() < 0.1:
+                            break
+                        if jet_h.perp()/jet_ch.perp() > 10:
+                            continue
+                        if self.is_geo_matched(jet_ch, jet_h, jetR):
+                            matched_jets_h.append(index_jet_h)
+                    
+                    if len(matched_jets_h)==1: # accept if there is one match only (NB: but mayb be used multiple times)
+                        jets_h_matched_to_ch.append(matched_jets_h[0])
+                    else:
+                        jets_h_matched_to_ch.append(-1)
+
+                # Loop through jets and find all p jets that can be matched to ch
+                jets_p_matched_to_ch = []
+                for jet_ch in jets_ch:
+                    matched_jets_p = []
+                    for index_jet_p, jet_p in enumerate(jets_p):
+                        if jet_p.perp()/jet_ch.perp() < 0.1:
+                            break
+                        if jet_p.perp()/jet_ch.perp() > 10:
+                            continue
+                        if self.is_geo_matched(jet_ch, jet_p, jetR):
+                            matched_jets_p.append(index_jet_p)
+                    
+                    if len(matched_jets_p)==1: # accept if there is one match only (NB: but mayb be used multiple times)
+                        jets_p_matched_to_ch.append(matched_jets_p[0])
+                    else:
+                        jets_p_matched_to_ch.append(-1)
+
+                #-------------------------------------------------------------
+                # loop over matched jets and fill EEC histograms with jet constituents
+                nmatched_ch = 0
+                for index_j_ch, j_ch in enumerate(jets_ch):
+                    imatched_p = jets_p_matched_to_ch[index_j_ch]
+                    imatched_h = jets_h_matched_to_ch[index_j_ch]
+                    if imatched_p > -1 and imatched_h > -1:
+                        j_p = jets_p[imatched_p]
+                        j_h = jets_h[imatched_h]
+                        print('matched ch',j_ch.perp(),'phi',j_ch.phi(),'eta',j_ch.eta())
+                        print('matched h',j_h.perp(),'phi',j_h.phi(),'eta',j_h.eta(),'dR',j_ch.delta_R(j_h))
+                        print('matched p',j_p.perp(),'phi',j_p.phi(),'eta',j_p.eta(),'dR',j_ch.delta_R(j_p))
+                        nmatched_ch += 1
+
+                        self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
+                        self.fill_matched_jet_histograms('p', j_p, j_ch, R_label)
+                        self.fill_matched_jet_histograms('h', j_h, j_ch, R_label)
+                # print('matching efficiency:',nmatched_ch,'/',len(jets_ch))
+                    
+    #---------------------------------------------------------------
+    # Compare two jets and store matching candidates in user_info
+    #---------------------------------------------------------------
+    def is_geo_matched(self, jet1, jet2, jetR):
+        deltaR = jet1.delta_R(jet2)
+      
+        # Add a matching candidate to the list if it is within the geometrical cut
+        if deltaR < self.jet_matching_distance * jetR:
+            return True
+        else:
+            return False
+
     #---------------------------------------------------------------
     # Initiate scaling of all histograms and print final simulation info
     #---------------------------------------------------------------
