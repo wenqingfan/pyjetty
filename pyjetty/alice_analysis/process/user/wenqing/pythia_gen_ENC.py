@@ -330,7 +330,7 @@ class PythiaGenENC(process_base.ProcessBase):
         iev = 0  # Event loop count
 
         while iev < self.nev:
-            if iev % 1 == 0:
+            if iev % 100 == 0:
                 print('ievt',iev)
 
             if not pythia.next():
@@ -461,6 +461,8 @@ class PythiaGenENC(process_base.ProcessBase):
     def fill_matched_jet_histograms(self, level, jet, ref_jet, R_label):
         # use the jet pt for energy weight but use the ref_jet pt when fill jet samples into jet pt bins
         pfc_selector1 = getattr(self, "pfc_def_10")
+        # print(level,'with number of constituents',len(jet.constituents()),'(',len(pfc_selector1(jet.constituents())),')')
+        # print('jet pt',jet.perp(),'ref jet pt',ref_jet.perp())
 
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
@@ -564,9 +566,9 @@ class PythiaGenENC(process_base.ProcessBase):
                     if imatched_p > -1 and imatched_h > -1:
                         j_p = jets_p[imatched_p]
                         j_h = jets_h[imatched_h]
-                        print('matched ch',j_ch.perp(),'phi',j_ch.phi(),'eta',j_ch.eta())
-                        print('matched h',j_h.perp(),'phi',j_h.phi(),'eta',j_h.eta(),'dR',j_ch.delta_R(j_h))
-                        print('matched p',j_p.perp(),'phi',j_p.phi(),'eta',j_p.eta(),'dR',j_ch.delta_R(j_p))
+                        # print('matched ch',j_ch.perp(),'phi',j_ch.phi(),'eta',j_ch.eta())
+                        # print('matched h',j_h.perp(),'phi',j_h.phi(),'eta',j_h.eta(),'dR',j_ch.delta_R(j_h))
+                        # print('matched p',j_p.perp(),'phi',j_p.phi(),'eta',j_p.eta(),'dR',j_ch.delta_R(j_p))
                         nmatched_ch += 1
 
                         self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
