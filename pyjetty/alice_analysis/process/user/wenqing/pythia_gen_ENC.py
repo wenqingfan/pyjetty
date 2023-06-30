@@ -261,7 +261,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 for jet_level in ['p', 'h', 'ch']:
                     tag_levels = ['']
                     if self.do_tagging:
-                        tag_levels = tag_levels + ['1', '2', '3', '4', '5', '6', '21']
+                        tag_levels = ['-1', '1', '2', '3', '4', '5', '6', '21']
                     for tag_level in tag_levels:
                         for ipoint in range(2, self.npoint+1):
                             name = 'h_matched_ENC{}_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
@@ -495,8 +495,10 @@ class PythiaGenENC(process_base.ProcessBase):
         if self.do_tagging:
             if (jet.user_index()>0 and jet.user_index()<7): # quarks (1-6)
                 level=level+str(jet.user_index())
-            if jet.user_index()==9 or jet.user_index()==21: # gluons
+            elif jet.user_index()==9 or jet.user_index()==21: # gluons
                 level=level+'21'
+            else:
+                level=level+'-1'
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
