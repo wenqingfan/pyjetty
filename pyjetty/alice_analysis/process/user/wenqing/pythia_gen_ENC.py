@@ -94,6 +94,11 @@ class PythiaGenENC(process_base.ProcessBase):
 
         self.jet_matching_distance = config["jet_matching_distance"] 
 
+        if 'do_tagging' in config:
+            self.do_tagging = config['do_tagging']
+        else:
+            self.do_tagging = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -254,47 +259,51 @@ class PythiaGenENC(process_base.ProcessBase):
 
             if self.do_matching and (jetR == self.ref_jetR):
                 for jet_level in ['p', 'h', 'ch']:
-                    for ipoint in range(2, self.npoint+1):
-                        name = 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
+                    tag_levels = ['']
+                    if self.do_tagging:
+                        tag_levels = tag_levels + ['1', '2', '3', '4', '5', '6', '21']
+                    for tag_level in tag_levels:
+                        for ipoint in range(2, self.npoint+1):
+                            name = 'h_matched_ENC{}_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_matched_ENC{}_JetPt_{}{}_R{}_trk10'.format(str(ipoint), jet_level, tag_level, R_label)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            RL_bins = logbins(1E-4,1,50)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                            h.GetXaxis().SetTitle('pT (jet)')
+                            h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                        # Jet pt vs N constituents
+                        name = 'h_matched_Nconst_JetPt_{}{}_R{}_trk00'.format(jet_level, tag_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        Nconst_bins = linbins(0,50,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('N_{const}')
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
+                        name = 'h_matched_Nconst_JetPt_{}{}_R{}_trk10'.format(jet_level, tag_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
-                        RL_bins = logbins(1E-4,1,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        Nconst_bins = linbins(0,50,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('N_{const}')
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
-
-                    # Jet pt vs N constituents
-                    name = 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(jet_level, R_label)
-                    print('Initialize histogram',name)
-                    pt_bins = linbins(0,200,200)
-                    Nconst_bins = linbins(0,50,50)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-                    h.GetXaxis().SetTitle('pT (jet)')
-                    h.GetYaxis().SetTitle('N_{const}')
-                    setattr(self, name, h)
-                    getattr(self, hist_list_name).append(h)
-
-                    name = 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(jet_level, R_label)
-                    print('Initialize histogram',name)
-                    pt_bins = linbins(0,200,200)
-                    Nconst_bins = linbins(0,50,50)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-                    h.GetXaxis().SetTitle('pT (jet)')
-                    h.GetYaxis().SetTitle('N_{const}')
-                    setattr(self, name, h)
-                    getattr(self, hist_list_name).append(h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
@@ -337,6 +346,15 @@ class PythiaGenENC(process_base.ProcessBase):
                 continue
 
             self.event = pythia.event
+
+            leading_parton1 = fj.PseudoJet(pythia.event[5].px(),pythia.event[5].py(),pythia.event[5].pz(),pythia.event[5].e())
+            leading_parton2 = fj.PseudoJet(pythia.event[6].px(),pythia.event[6].py(),pythia.event[6].pz(),pythia.event[6].e())
+
+            # save absolute value of pdg id into user index
+            leading_parton1.set_user_index(abs(pythia.event[5].id()))
+            leading_parton2.set_user_index(abs(pythia.event[6].id()))
+            
+            self.parton_parents = [leading_parton1, leading_parton2]
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
@@ -474,6 +492,12 @@ class PythiaGenENC(process_base.ProcessBase):
         _ = [_c_select1.push_back(c) for c in pfc_selector1(jet.constituents())]
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
+        if self.do_tagging:
+            if (jet.user_index()>0 and jet.user_index()<7): # quarks (1-6)
+                level=level+str(jet.user_index())
+            if jet.user_index()==9 or jet.user_index()==21: # gluons
+                level=level+'21'
+
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
                     getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
@@ -498,6 +522,25 @@ class PythiaGenENC(process_base.ProcessBase):
             jets_p = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_p)))
             jets_h = fj.sorted_by_pt(jet_selector(jet_def(self.parts_pythia_h)))
             jets_ch = fj.sorted_by_pt(jet_selector(jet_def(track_selector_ch(self.parts_pythia_ch))))
+
+            #-------------------------------------------------------------
+            # match parton jets to the leading parton pdg id
+            for jet_p in jets_p:
+                matched_parton_parents = []
+                for parton_parent in self.parton_parents:
+                    if parton_parent.perp()/jet_p.perp() < 0.1:
+                        break
+                    if parton_parent.perp()/jet_p.perp() > 10:
+                        continue
+                    if self.is_geo_matched(jet_p, parton_parent, jetR):
+                        matched_parton_parents.append(parton_parent)
+                    
+                if len(matched_parton_parents)==1: # accept if there is one match only (NB: but mayb be used multiple times)
+                    jet_p.set_user_index(matched_parton_parents[0].user_index()) # save pdg id to user index (NB: absolute value)
+                    # print('parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta())
+                    # print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
+                else:
+                    jet_p.set_user_index(-1) # set user index to -1 fr no match case
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
@@ -571,9 +614,15 @@ class PythiaGenENC(process_base.ProcessBase):
                         # print('matched p',j_p.perp(),'phi',j_p.phi(),'eta',j_p.eta(),'dR',j_ch.delta_R(j_p))
                         nmatched_ch += 1
 
+                        # used matched parton jet to tag the ch and h jet (qurak or gluon jet)
+                        j_ch.set_user_index(j_p.user_index())
+                        j_h.set_user_index(j_p.user_index())
+
+                        # fill histograms
                         self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
                         self.fill_matched_jet_histograms('p', j_p, j_ch, R_label)
                         self.fill_matched_jet_histograms('h', j_h, j_ch, R_label)
+
                 # print('matching efficiency:',nmatched_ch,'/',len(jets_ch))
                     
     #---------------------------------------------------------------
