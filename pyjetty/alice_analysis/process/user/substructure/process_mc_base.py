@@ -116,6 +116,8 @@ class ProcessMCBase(process_base.ProcessBase):
     self.reject_tracks_fraction = config['reject_tracks_fraction']
     if 'mc_fraction_threshold' in config:
       self.mc_fraction_threshold = config['mc_fraction_threshold']
+    if 'do_rho_subtraction' in config:
+      self.do_rho_subtraction = config['do_rho_subtraction']
     
     if self.do_constituent_subtraction:
         self.is_pp = False
@@ -504,11 +506,11 @@ class ProcessMCBase(process_base.ProcessBase):
          
         # Perform constituent subtraction for each R_max
         fj_particles_combined = [self.constituent_subtractor[i].process_event(fj_particles_combined_beforeCS) for i, R_max in enumerate(self.max_distance)]
-        for i, R_max in enumerate(self.max_distance):
-          rho = self.constituent_subtractor[i].bge_rho.rho()
-          print('rho is ',rho)
-          for part in fj_particles_combined_beforeCS:
-            print('index checking:',part.user_index())
+        # for i, R_max in enumerate(self.max_distance):
+        #   rho = self.constituent_subtractor[i].bge_rho.rho()
+        #   print('rho is ',rho)
+        # for part in fj_particles_combined_beforeCS:
+        #   print('index checking:',part.user_index(),'pt',part.perp())
         
         if self.debug_level > 3:
           print([p.user_index() for p in fj_particles_truth])
@@ -593,6 +595,7 @@ class ProcessMCBase(process_base.ProcessBase):
           
           # Perform constituent subtraction on det-level, if applicable
           self.fill_background_histograms(fj_particles_combined_beforeCS, fj_particles_combined[i], jetR, i)
+          rho = self.constituent_subtractor[i].bge_rho.rho() 
       
           # Do jet finding (re-do each time, to make sure matching info gets reset)
           cs_det = fj.ClusterSequence(fj_particles_det, jet_def)
@@ -608,20 +611,36 @@ class ProcessMCBase(process_base.ProcessBase):
           jets_combined = fj.sorted_by_pt(cs_combined.inclusive_jets())
           jets_combined_selected = jet_selector_det(jets_combined)
 
-          self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+          if self.do_rho_subtraction:
+            cs_combined_beforeCS = fj.ClusterSequenceArea(fj_particles_combined_beforeCS, jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
+            jets_combined_beforeCS = fj.sorted_by_pt(cs_combined_beforeCS.inclusive_jets())
+            jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
+            self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes)
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
+          else:
+            self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
+                            fj_particles_det_holes = fj_particles_det_holes,
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0)
 
   #---------------------------------------------------------------
   # Analyze jets of a given event.
   #---------------------------------------------------------------
   def analyze_jets(self, jets_det_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                    jets_det_pp_selected = None, R_max = None,
-                   fj_particles_det_holes = None, fj_particles_truth_holes = None):
+                   fj_particles_det_holes = None, fj_particles_truth_holes = None, rho_bge = 0):
   
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
+
+    jets_det_reselected = fj.vectorPJ()
+    if self.do_rho_subtraction and rho_bge > 0:
+      for jet in jets_det_selected:
+        if jet.perp()-rho_bge*jet.area() > 5:
+          jets_det_reselected.append(jet)
+      jets_det_selected = jets_det_reselected
     
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
@@ -635,13 +654,14 @@ class ProcessMCBase(process_base.ProcessBase):
           print('event rejected due to jet acceptance')
         return
       
-      self.fill_det_before_matching(jet_det, jetR, R_max)
+      self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
   
     # Fill truth-level jet histograms (before matching)
     for jet_truth in jets_truth_selected:
     
       if self.is_pp or self.fill_Rmax_indep_hists:
-        self.fill_truth_before_matching(jet_truth, jetR)
+        pass
+        # self.fill_truth_before_matching(jet_truth, jetR)
   
     # Loop through jets and set jet matching candidates for each jet in user_info
     if self.is_pp:
@@ -735,7 +755,7 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   # Fill det jet histograms
   #---------------------------------------------------------------
-  def fill_det_before_matching(self, jet, jetR, R_max):
+  def fill_det_before_matching(self, jet, jetR, R_max, rho_bge = 0):
     
     if self.is_pp or self.fill_Rmax_indep_hists:
       jet_pt = jet.pt()
@@ -743,19 +763,24 @@ class ProcessMCBase(process_base.ProcessBase):
         z = constituent.pt() / jet_pt
         getattr(self, 'hZ_Det_R{}'.format(jetR)).Fill(jet_pt, z)
       
+    # for const in jet.constituents():
+    #   if const.perp()>0.15:
+    #     print('index',const.user_index(),'pt',const.perp())
+    print('fill det hist')
+    
     # Fill groomed histograms
     if self.thermal_model:
       hname = 'h_{{}}_JetPt_R{}_{{}}_Rmax{}'.format(jetR, R_max)
-      self.fill_unmatched_jet_histograms(jet, jetR, hname)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
 
     if self.is_pp:
       hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
-      self.fill_unmatched_jet_histograms(jet, jetR, hname)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
   
   #---------------------------------------------------------------
   # This function is called once for each jet
   #---------------------------------------------------------------
-  def fill_unmatched_jet_histograms(self, jet, jetR, hname):
+  def fill_unmatched_jet_histograms(self, jet, jetR, hname, rho_bge = 0):
 
     # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
     observable = self.observable_list[0]
@@ -774,9 +799,14 @@ class ProcessMCBase(process_base.ProcessBase):
       else:
         jet_groomed_lund = None
         
+      if self.do_rho_subtraction and rho_bge > 0:
+        jet_pt = jet.perp()-rho_bge*jet.area() # use subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      else:
+        jet_pt = jet.perp()
+
       # Call user function to fill histograms
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                      grooming_setting, obs_label, jet.pt())
+                                      grooming_setting, obs_label, jet_pt)
   
   #---------------------------------------------------------------
   # Loop through jets and call user function to fill matched
