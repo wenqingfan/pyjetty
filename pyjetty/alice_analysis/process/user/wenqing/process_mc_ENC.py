@@ -118,72 +118,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         obs_label = self.utils.obs_label(trk_thrd, None) 
 
+        self.pair_type_labels = ['']
+        if self.do_rho_subtraction:
+          self.pair_type_labels = ['_bb','_sb','_ss']
+
         # Init ENC histograms (both det and truth level)
-        if 'ENC' in observable:
-          for ipoint in range(2, 3):
-            name = 'h_{}{}_JetPt_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-
-            name = 'h_{}{}Pt_JetPt_R{}_{}'.format(observable, ipoint, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
-            pt_bins = linbins(0,200,200)
-            ptRL_bins = logbins(1E-3,1E2,60)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
-            setattr(self, name, h)
-
-            # Truth histograms
-            name = 'h_{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-
-            name = 'h_{}{}Pt_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
-            pt_bins = linbins(0,200,200)
-            ptRL_bins = logbins(1E-3,1E2,60)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
-            setattr(self, name, h)
-
-            # Matched det histograms
-            name = 'h_matched_{}{}_JetPt_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-
-            # Matched det histograms (with matched truth jet pT filled to the other axis)
-            name = 'h_matched_extra_{}{}_JetPt_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-
-            # Matched truth histograms
-            name = 'h_matched_{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-            
-            if self.thermal_model:
-              for R_max in self.max_distance:
-                name = 'h_{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, ipoint, jetR, obs_label, R_max)
+        for pair_type_label in self.pair_type_labels:
+            if 'ENC' in observable:
+              for ipoint in range(2, 3):
+                name = 'h_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 RL_bins = logbins(1E-4,1,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -191,60 +134,123 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('R_{L}')
                 setattr(self, name, h)
 
-        if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-          name = 'h_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}')
-          h.GetYaxis().SetTitle('R_{L}')
-          setattr(self, name, h)
+                name = 'h_{}{}{}Pt_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
+                pt_bins = linbins(0,200,200)
+                ptRL_bins = logbins(1E-3,1E2,60)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                setattr(self, name, h)
 
-          # Truth histograms
-          name = 'h_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}')
-          h.GetYaxis().SetTitle('R_{L}')
-          setattr(self, name, h)
+                # Truth histograms
+                name = 'h_{}{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
 
-          # Matched det histograms
-          name = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}')
-          h.GetYaxis().SetTitle('R_{L}')
-          setattr(self, name, h)
+                name = 'h_{}{}{}Pt_JetPt_Truth_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
+                pt_bins = linbins(0,200,200)
+                ptRL_bins = logbins(1E-3,1E2,60)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                setattr(self, name, h)
 
-          # Matched det histograms (with matched truth jet pT filled to the other axis)
-          name = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-          h.GetYaxis().SetTitle('R_{L}')
-          setattr(self, name, h)
+                # Matched det histograms
+                name = 'h_matched_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
 
-          # Matched truth histograms
-          name = 'h_matched_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}')
-          h.GetYaxis().SetTitle('R_{L}')
-          setattr(self, name, h)
-          
-          if self.thermal_model:
-            for R_max in self.max_distance:
-              name = 'h_{}_JetPt_R{}_{}_Rmax{}'.format(observable, jetR, obs_label, R_max)
+                # Matched det histograms (with matched truth jet pT filled to the other axis)
+                name = 'h_matched_extra_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+
+                # Matched truth histograms
+                name = 'h_matched_{}{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+                
+                if self.thermal_model:
+                  for R_max in self.max_distance:
+                    name = 'h_{}{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, ipoint, pair_type_label, jetR, obs_label, R_max)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+
+            if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+              name = 'h_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
               pt_bins = linbins(0,200,200)
               RL_bins = logbins(1E-4,1,50)
               h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}')
               h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
+
+              # Truth histograms
+              name = 'h_{}{}_JetPt_Truth_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
+              # Matched det histograms
+              name = 'h_matched_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
+              # Matched det histograms (with matched truth jet pT filled to the other axis)
+              name = 'h_matched_extra_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
+              # Matched truth histograms
+              name = 'h_matched_{}{}_JetPt_Truth_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+              
+              if self.thermal_model:
+                for R_max in self.max_distance:
+                  name = 'h_{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, pair_type_label, jetR, obs_label, R_max)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
+        
         
         if 'jet_pt' in observable:
           name = 'h_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
@@ -416,6 +422,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     else:
       return False
 
+  def check_pair_type(self, corr_builder, ipoint, constituents, index):
+    part1 = corr_builder.correlator(ipoint).indices1()[index]
+    part2 = corr_builder.correlator(ipoint).indices2()[index]
+    type1 = constituents[part1].user_index()
+    type2 = constituents[part2].user_index()
+    print('check pair type')
+
+    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+    if type1*type2 > 0:
+      if type1 > 0:
+        print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+        return 2 # means sig-sig
+      else:
+        print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+        return 0 # means bkg-bkg
+    else:
+      print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      return 1 # means sig-bkg
+
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
   # Fill 2D histogram of (pt, obs)
@@ -438,7 +463,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     else:
       dphi_cut = -9999
       deta_cut = -9999
-    new_corr = ecorrel.CorrelatorBuilder(c_select, jet.perp(), 2, 1, dphi_cut, deta_cut)
+
+    # NB: use jet_pt_ungroomed instead of jet.perp() for PbPb, which include the UE subtraction
+    if self.do_rho_subtraction:
+      jet_pt = jet_pt_ungroomed
+    else:
+      jet_pt = jet.perp()
+
+    new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
     for observable in self.observable_list:
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         for ipoint in range(2, 3):
@@ -455,29 +487,35 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
               continue
             
+            # separate out sig-sig, sig-bkg, bkg-bkg correlations for EEC pairs
+            pair_type_label = ''
+            if self.do_rho_subtraction:
+              pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
+              pair_type_label = self.pair_type_labels[pair_type]
+
             if 'ENC' in observable:
               if self.ENC_fastsim and (not 'Truth' in hname):
-                getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
-                getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt_ungroomed, jet_pt_ungroomed*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index]) # NB: fill pt*RL
+                getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
+                getattr(self, hname.format(observable + str(ipoint) + pair_type_label + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index]) # NB: fill pt*RL
 
               else:
-                getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_ungroomed instead of jet.perp() so if jet_pt_ungroomed is different from jet.perp(), it will be used. This is mainly for matched jets study
-                getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt_ungroomed, jet_pt_ungroomed*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                getattr(self, hname.format(observable + str(ipoint) + pair_type_label + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
             if ipoint==2 and 'EEC_noweight' in observable:
               if self.ENC_fastsim and (not 'Truth' in hname):
-                getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
+                getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
               else:
-                getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index])
+                getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
               if self.ENC_fastsim and (not 'Truth' in hname):
-                getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index]*weights_pair[index],2))
+                getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index]*weights_pair[index],2))
               else:
-                getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+                getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
       if 'jet_pt' in observable:
-        getattr(self, hname.format(observable,obs_label)).Fill(jet.perp())
+        getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
       
       # NB: for now, only perform this check on data and full sim
       if 'EEC_detail' in observable and self.ENC_fastsim==False: 
@@ -494,16 +532,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             for _, (alpha_lo, alpha_hi) in enumerate(zip(self.trk_alpha_lo,self.trk_alpha_hi)):
               if pt_avg >= pt_lo and pt_avg < pt_hi and alpha >= alpha_lo and alpha < alpha_hi:
                 if 'noweight' in observable:
-                  getattr(self, hname.format(observable + str(pt_lo) + str(pt_hi) + '_' + '{:.1f}'.format(alpha_lo) + '{:.1f}'.format(alpha_hi),obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index])
+                  getattr(self, hname.format(observable + str(pt_lo) + str(pt_hi) + '_' + '{:.1f}'.format(alpha_lo) + '{:.1f}'.format(alpha_hi),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
                 else:
-                  getattr(self, hname.format(observable + str(pt_lo) + str(pt_hi) + '_' + '{:.1f}'.format(alpha_lo) + '{:.1f}'.format(alpha_hi),obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(observable + str(pt_lo) + str(pt_hi) + '_' + '{:.1f}'.format(alpha_lo) + '{:.1f}'.format(alpha_hi),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
                 break
 
           # fill inclusively
           if 'noweight' in observable:
-            getattr(self, hname.format(observable,obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index])
+            getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
           else:
-            getattr(self, hname.format(observable,obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+            getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
         
   #---------------------------------------------------------------
   # This function is called per observable per jet subconfigration 
@@ -528,28 +566,41 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     else:
       dphi_cut = -9999
       deta_cut = -9999
-    new_corr = ecorrel.CorrelatorBuilder(c_select, jet.perp(), 2, 1, dphi_cut, deta_cut)
-    if 'ENC' in observable or 'EEC_noweight' in observable:
+
+    jet_pt = jet.perp()
+
+    new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
+    if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
       for ipoint in range(2, 3):
         if self.ENC_fastsim and (not 'Truth' in hname): # NB: only apply pair efficiency effect for fast sim and det level distributions
           weights_pair = self.get_pair_eff_weights(new_corr, ipoint, c_select)
 
         for index in range(new_corr.correlator(ipoint).rs().size()):
-
+          pair_type_label = ''
+          if self.do_rho_subtraction:
+            pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
+            pair_type_label = self.pair_type_labels[pair_type]
+          
           if 'ENC' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
-              getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
+              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
             else:
-              getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_ungroomed instead of jet.perp() so if jet_pt_ungroomed is different from jet.perp(), it will be used. This is mainly for matched jets study
+              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_ungroomed instead of jet_pt so if jet_pt_ungroomed is different from jet_pt, it will be used. This is mainly for matched jets study
 
           if ipoint==2 and 'EEC_noweight' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
-              getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
             else:
-              getattr(self, hname.format(observable,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index])
+
+          if ipoint==2 and 'EEC_weight2' in observable:
+            if self.ENC_fastsim and (not 'Truth' in hname):
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index]*weights_pair[index],2))
+            else:
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
     if 'jet_pt' in observable:
-      getattr(self, hname.format(observable,obs_label)).Fill(jet.perp())
+      getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
 
   #---------------------------------------------------------------
   # This function is called per jet subconfigration 
@@ -570,23 +621,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     # else:
     #   w_pt = 1
     
+    jet_det_pt = jet_det.perp()
+
     for observable in self.observable_list:
 
       hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
-      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_det.pt())
+      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_det_pt)
 
       hname = 'h_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
       self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt())
 
       # fill RL vs matched truth jet pT for det jets (only fill these extra histograms for ENC or pair distributions)
-      if 'ENC' in observable or 'EEC_noweight' in observable:
+      if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
         self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets. However this also means that two identical histograms will be filled fot jet_pt observable
 
       # Fill correlation between matched det and truth jets
       if 'jet_pt' in observable:
         hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
-        getattr(self, hname).Fill(jet_det.pt(), jet_truth.pt())    
+        getattr(self, hname).Fill(jet_det_pt, jet_truth.pt())    
        
     # # Find all subjets
     # trk_thrd = obs_setting
