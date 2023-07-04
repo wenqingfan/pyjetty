@@ -427,18 +427,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     part2 = corr_builder.correlator(ipoint).indices2()[index]
     type1 = constituents[part1].user_index()
     type2 = constituents[part2].user_index()
-    print('check pair type')
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
     if type1*type2 > 0:
       if type1 > 0:
-        print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
         return 2 # means sig-sig
       else:
-        print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+        # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
         return 0 # means bkg-bkg
     else:
-      print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
 
   #---------------------------------------------------------------
