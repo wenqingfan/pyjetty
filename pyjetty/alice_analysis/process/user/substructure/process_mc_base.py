@@ -660,8 +660,7 @@ class ProcessMCBase(process_base.ProcessBase):
     for jet_truth in jets_truth_selected:
     
       if self.is_pp or self.fill_Rmax_indep_hists:
-        pass
-        # self.fill_truth_before_matching(jet_truth, jetR)
+        self.fill_truth_before_matching(jet_truth, jetR)
   
     # Loop through jets and set jet matching candidates for each jet in user_info
     if self.is_pp:
@@ -766,7 +765,7 @@ class ProcessMCBase(process_base.ProcessBase):
     # for const in jet.constituents():
     #   if const.perp()>0.15:
     #     print('index',const.user_index(),'pt',const.perp())
-    print('fill det hist')
+    # print('fill det hist')
     
     # Fill groomed histograms
     if self.thermal_model:
@@ -774,6 +773,10 @@ class ProcessMCBase(process_base.ProcessBase):
       self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
 
     if self.is_pp:
+      hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
+
+    if self.do_rho_subtraction:
       hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
       self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
   
