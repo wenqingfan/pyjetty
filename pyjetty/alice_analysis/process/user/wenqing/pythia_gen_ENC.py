@@ -346,6 +346,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 continue
 
             self.event = pythia.event
+            # print(self.event)
 
             leading_parton1 = fj.PseudoJet(pythia.event[5].px(),pythia.event[5].py(),pythia.event[5].pz(),pythia.event[5].e())
             leading_parton2 = fj.PseudoJet(pythia.event[6].px(),pythia.event[6].py(),pythia.event[6].pz(),pythia.event[6].e())
@@ -353,6 +354,10 @@ class PythiaGenENC(process_base.ProcessBase):
             # save absolute value of pdg id into user index
             leading_parton1.set_user_index(abs(pythia.event[5].id()))
             leading_parton2.set_user_index(abs(pythia.event[6].id()))
+
+            # print('---------------------------------')
+            # print('parton 1',leading_parton1.user_index(),'pt',leading_parton1.perp(),'phi',leading_parton1.phi(),'eta',leading_parton1.eta())
+            # print('parton 2',leading_parton2.user_index(),'pt',leading_parton2.perp(),'phi',leading_parton2.phi(),'eta',leading_parton2.eta())
             
             self.parton_parents = [leading_parton1, leading_parton2]
 
@@ -495,10 +500,13 @@ class PythiaGenENC(process_base.ProcessBase):
         if self.do_tagging:
             if (jet.user_index()>0 and jet.user_index()<7): # quarks (1-6)
                 level=level+str(jet.user_index())
+                # print('quark', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
             elif jet.user_index()==9 or jet.user_index()==21: # gluons
                 level=level+'21'
+                # print('gluon', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
             else:
                 level=level+'-1'
+                # print('Untagged', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
@@ -531,18 +539,20 @@ class PythiaGenENC(process_base.ProcessBase):
                 matched_parton_parents = []
                 for parton_parent in self.parton_parents:
                     if parton_parent.perp()/jet_p.perp() < 0.1:
-                        break
+                        continue
                     if parton_parent.perp()/jet_p.perp() > 10:
                         continue
-                    if self.is_geo_matched(jet_p, parton_parent, jetR):
+                    if self.is_loose_geo_matched(jet_p, parton_parent, jetR): # NB: using a looser matching criteria for intial parton tagging
                         matched_parton_parents.append(parton_parent)
                     
-                if len(matched_parton_parents)==1: # accept if there is one match only (NB: but mayb be used multiple times)
+                if len(matched_parton_parents)==1: # accept if there is one match only (NB: but may be used multiple times)
                     jet_p.set_user_index(matched_parton_parents[0].user_index()) # save pdg id to user index (NB: absolute value)
-                    # print('parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta())
+                    # print('matched parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta())
                     # print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
                 else:
                     jet_p.set_user_index(-1) # set user index to -1 fr no match case
+
+                # print('all parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta(),'id',jet_p.user_index())
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
@@ -625,7 +635,10 @@ class PythiaGenENC(process_base.ProcessBase):
                         self.fill_matched_jet_histograms('p', j_p, j_ch, R_label)
                         self.fill_matched_jet_histograms('h', j_h, j_ch, R_label)
 
-                # print('matching efficiency:',nmatched_ch,'/',len(jets_ch))
+                # if len(jets_ch)>0:
+                #     print('matching efficiency:',nmatched_ch/len(jets_ch),'=',nmatched_ch,'/',len(jets_ch))
+                # else:
+                #     print('matching efficiency:',nmatched_ch,'/',len(jets_ch))
                     
     #---------------------------------------------------------------
     # Compare two jets and store matching candidates in user_info
@@ -635,6 +648,15 @@ class PythiaGenENC(process_base.ProcessBase):
       
         # Add a matching candidate to the list if it is within the geometrical cut
         if deltaR < self.jet_matching_distance * jetR:
+            return True
+        else:
+            return False
+
+    def is_loose_geo_matched(self, jet1, jet2, jetR):
+        deltaR = jet1.delta_R(jet2)
+      
+        # Add a matching candidate to the list if it is within the geometrical cut
+        if deltaR < jetR:
             return True
         else:
             return False
