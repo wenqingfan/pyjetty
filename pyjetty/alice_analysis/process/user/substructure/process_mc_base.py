@@ -615,7 +615,14 @@ class ProcessMCBase(process_base.ProcessBase):
             cs_combined_beforeCS = fj.ClusterSequenceArea(fj_particles_combined_beforeCS, jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
             jets_combined_beforeCS = fj.sorted_by_pt(cs_combined_beforeCS.inclusive_jets())
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
-            self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
+            
+            jets_combined_reselected_beforeCS = []
+            if self.do_rho_subtraction and rho > 0:
+              for jet in jets_combined_selected_beforeCS:
+                if jet.perp()-rho*jet.area() > 5:
+                  jets_combined_reselected_beforeCS.append(jet)
+
+            self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
@@ -634,13 +641,6 @@ class ProcessMCBase(process_base.ProcessBase):
   
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
-
-    jets_det_reselected = fj.vectorPJ()
-    if self.do_rho_subtraction and rho_bge > 0:
-      for jet in jets_det_selected:
-        if jet.perp()-rho_bge*jet.area() > 5:
-          jets_det_reselected.append(jet)
-      jets_det_selected = jets_det_reselected
     
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
@@ -671,12 +671,12 @@ class ProcessMCBase(process_base.ProcessBase):
         [[self.set_matching_candidates(jet_det_pp, jet_truth, jetR, 'hDeltaR_ppdet_pptrue_R{{}}_Rmax{}'.format(R_max)) for jet_truth in jets_truth_selected_matched] for jet_det_pp in jets_det_pp_selected]
 
     # debug
-    # for jet_det in jets_det_selected:
-    #   if jet_det.has_user_info() and jet_det.python_info().closest_jet:
-        # print('debug7.1--jet_det',jet_det.pt())
-        # print('matches to',jet_det.python_info().closest_jet.pt())
-        # print('debug7.1--jet_det',len(jet_det.constituents()))
-        # print('matches to',len(jet_det.python_info().closest_jet.constituents()))
+    # for jet_det_combined in jets_det_selected:
+    #   print('debug7.1--jet_det',jet_det_combined.pt(),'user_info',jet_det_combined.has_user_info())
+    #   if jet_det_combined.has_user_info() and jet_det_combined.python_info().closest_jet:
+    #     print('matches to',jet_det_combined.python_info().closest_jet.pt())
+    #     print('debug7.1--jet_det',len(jet_det_combined.constituents()))
+    #     print('matches to',len(jet_det_combined.python_info().closest_jet.constituents()))
         
     # Loop through jets and set accepted matches
     if self.is_pp:
@@ -687,7 +687,7 @@ class ProcessMCBase(process_base.ProcessBase):
         [self.set_matches_AA(jet_det_combined, jetR, hname) for jet_det_combined in jets_det_selected]
           
     # Loop through jets and fill response histograms if both det and truth jets are unique match
-    result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes) for jet_det in jets_det_selected]
+    result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge) for jet_det in jets_det_selected]
 
   #---------------------------------------------------------------
   # Fill some background histograms
@@ -815,7 +815,7 @@ class ProcessMCBase(process_base.ProcessBase):
   # Loop through jets and call user function to fill matched
   # histos if both det and truth jets are unique match.
   #---------------------------------------------------------------
-  def fill_jet_matches(self, jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes):
+  def fill_jet_matches(self, jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge = 0):
   
     # Set suffix for filling histograms
     if R_max:
@@ -826,14 +826,18 @@ class ProcessMCBase(process_base.ProcessBase):
     # Get matched truth jet
     if jet_det.has_user_info():
       jet_truth = jet_det.python_info().match
+      if self.do_rho_subtraction and rho_bge > 0:
+        jet_det_pt = jet_det.perp()-rho_bge*jet_det.area() # use subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      else:
+        jet_det_pt = jet_det.perp()
 
       if jet_truth:
 
-        # print('debug8--jet det', jet_det.pt(), 'size', len(jet_det.constituents()))
+        # # debug
+        # print('debug8--jet det', jet_det_pt, 'size', len(jet_det.constituents()))
         # print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
-        # debug
         
-        jet_pt_det_ungroomed = jet_det.pt()
+        jet_pt_det_ungroomed = jet_det_pt
         jet_pt_truth_ungroomed = jet_truth.pt()
         JES = (jet_pt_det_ungroomed - jet_pt_truth_ungroomed) / jet_pt_truth_ungroomed
         getattr(self, 'hJES_R{}{}'.format(jetR, suffix)).Fill(jet_pt_truth_ungroomed, JES)
