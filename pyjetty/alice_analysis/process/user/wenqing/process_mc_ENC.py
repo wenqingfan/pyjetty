@@ -429,13 +429,13 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     type2 = constituents[part2].user_index()
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
-    if type1*type2 > 0:
-      if type1 > 0:
-        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 2 # means sig-sig
-      else:
+    if type1*type2 >= 0:
+      if type1 < 0 or type2 < 0:
         # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
         return 0 # means bkg-bkg
+      else:
+        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+        return 2 # means sig-sig
     else:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
@@ -446,7 +446,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   #---------------------------------------------------------------
   def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
                                  grooming_setting, obs_label, jet_pt_ungroomed):
-    
+    # For ENC in PbPb, jet_pt_ungroomed stores the corrected jet pT
     constituents = fj.sorted_by_pt(jet.constituents())
     c_select = fj.vectorPJ()
     trk_thrd = obs_setting
@@ -610,6 +610,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                                   obs_setting, grooming_setting, obs_label,
                                   jet_pt_det_ungroomed, jet_pt_truth_ungroomed, R_max, suffix, **kwargs):
     # If jetscape, we will need to correct substructure observable for holes (pt is corrected in base class)
+    # For ENC in PbPb, jet_pt_det_ungroomed stores the corrected jet pT
     if self.jetscape:
         holes_in_det_jet = kwargs['holes_in_det_jet']
         holes_in_truth_jet = kwargs['holes_in_truth_jet']
@@ -620,12 +621,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     # else:
     #   w_pt = 1
     
-    jet_det_pt = jet_det.perp()
+    if self.do_rho_subtraction:
+      # print('evt #',self.event_number)
+      # jet_pt_det = jet_pt_det_ungroomed
+      # print('Det: pT',jet_det.perp(),'(',jet_pt_det,')','phi',jet_det.phi(),'eta',jet_det.eta())
+      # print('Truth: pT',jet_truth.perp(),'phi',jet_truth.phi(),'eta',jet_truth.eta())
 
     for observable in self.observable_list:
 
       hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
-      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_det_pt)
+      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det)
 
       hname = 'h_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
       self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt())
@@ -638,7 +643,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       # Fill correlation between matched det and truth jets
       if 'jet_pt' in observable:
         hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
-        getattr(self, hname).Fill(jet_det_pt, jet_truth.pt())    
+        getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())    
        
     # # Find all subjets
     # trk_thrd = obs_setting
