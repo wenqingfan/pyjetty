@@ -621,7 +621,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     # else:
     #   w_pt = 1
     
-    if self.do_rho_subtraction:
+    # if self.do_rho_subtraction:
       # print('evt #',self.event_number)
       # jet_pt_det = jet_pt_det_ungroomed
       # print('Det: pT',jet_det.perp(),'(',jet_pt_det,')','phi',jet_det.phi(),'eta',jet_det.eta())
