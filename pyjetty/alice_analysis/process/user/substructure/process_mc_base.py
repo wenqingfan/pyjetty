@@ -83,7 +83,9 @@ class ProcessMCBase(process_base.ProcessBase):
       else:
           self.ENC_fastsim = False
     else: # if not fast simulation, set ENC_fastsim flag to False
-      self.ENC_fastsim = False    
+      self.ENC_fastsim = False  
+    if self.ENC_fastsim = True:
+      self.pair_eff_file = config['pair_eff_file'] # load pair efficiency input for fastsim
     if 'ENC_pair_cut' in config:
         self.ENC_pair_cut = config['ENC_pair_cut']
     else:
@@ -118,6 +120,8 @@ class ProcessMCBase(process_base.ProcessBase):
       self.mc_fraction_threshold = config['mc_fraction_threshold']
     if 'do_rho_subtraction' in config:
       self.do_rho_subtraction = config['do_rho_subtraction']
+    else:
+      self.do_rho_subtraction = False
     
     if self.do_constituent_subtraction:
         self.is_pp = False
