@@ -59,17 +59,18 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     
     self.observable = self.observable_list[0]
 
-    self.pair_eff_file = ROOT.TFile.Open("/home/software/users/wenqing/pyjetty/pyjetty/alice_analysis/process/user/wenqing/PairEff.root","READ")
-    # self.dpbin = 5
-    # self.dp_lo = [0, 0.1, 0.2, 0.4, 1]
-    # self.dp_hi = [0.1, 0.2, 0.4, 1, 2]
-    self.dpbin = 10
-    self.dp_lo = [0, 0.02, 0.06, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 1]
-    self.dp_hi = [0.02, 0.06, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 1, 2]
-    self.h1d_eff_vs_dR_in_dq_over_p = []
-    for idp in range(self.dpbin):
-        hname = 'h1d_eff_vs_dR_in_dq_over_p_{}'.format(idp)
-        self.h1d_eff_vs_dR_in_dq_over_p.append( ROOT.TH1D(self.pair_eff_file.Get(hname)) )
+    if self.ENC_fastsim:
+      self.pair_eff_file = ROOT.TFile.Open(self.pair_eff_file,"READ")
+      # self.dpbin = 5
+      # self.dp_lo = [0, 0.1, 0.2, 0.4, 1]
+      # self.dp_hi = [0.1, 0.2, 0.4, 1, 2]
+      self.dpbin = 10
+      self.dp_lo = [0, 0.02, 0.06, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 1]
+      self.dp_hi = [0.02, 0.06, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 1, 2]
+      self.h1d_eff_vs_dR_in_dq_over_p = []
+      for idp in range(self.dpbin):
+          hname = 'h1d_eff_vs_dR_in_dq_over_p_{}'.format(idp)
+          self.h1d_eff_vs_dR_in_dq_over_p.append( ROOT.TH1D(self.pair_eff_file.Get(hname)) )
 
   #---------------------------------------------------------------
   # Determine pair efficiency with the pair
@@ -412,19 +413,19 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     return weights_pair
 
   def is_same_charge(self, corr_builder, ipoint, constituents, index):
-    part1 = corr_builder.correlator(ipoint).indices1()[index]
-    part2 = corr_builder.correlator(ipoint).indices2()[index]
-    q1 = constituents[part1].python_info().charge
-    q2 = constituents[part2].python_info().charge
+    part1 = int(corr_builder.correlator(ipoint).indices1()[index])
+    part2 = int(corr_builder.correlator(ipoint).indices2()[index])
+    q1 = int(constituents[part1].python_info().charge)
+    q2 = int(constituents[part2].python_info().charge)
 
     if q1*q2 > 0:
       return True
     else:
       return False
-
+  
   def check_pair_type(self, corr_builder, ipoint, constituents, index):
-    part1 = corr_builder.correlator(ipoint).indices1()[index]
-    part2 = corr_builder.correlator(ipoint).indices2()[index]
+    part1 = int(corr_builder.correlator(ipoint).indices1()[index])
+    part2 = int(corr_builder.correlator(ipoint).indices2()[index])
     type1 = constituents[part1].user_index()
     type2 = constituents[part2].user_index()
 
@@ -548,7 +549,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   # This function is created because we cannot use fill_observable_histograms 
   # directly because observable list loop inside that function
   #---------------------------------------------------------------
-  def fill_matched_observable_histograms(self, hname, observable, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed):
+  def fill_matched_observable_histograms(self, hname, observable, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, jet_pt_matched):
     
     constituents = fj.sorted_by_pt(jet.constituents())
     c_select = fj.vectorPJ()
@@ -566,7 +567,11 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       dphi_cut = -9999
       deta_cut = -9999
 
-    jet_pt = jet.perp()
+    # Only need rho subtraction for det-level jets 
+    if self.do_rho_subtraction and (not 'Truth' in hname):
+      jet_pt = jet_pt_ungroomed
+    else:
+      jet_pt = jet.perp()
 
     new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
     if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
@@ -582,21 +587,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           
           if 'ENC' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
-              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
+              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
             else:
-              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_ungroomed instead of jet_pt so if jet_pt_ungroomed is different from jet_pt, it will be used. This is mainly for matched jets study
+              getattr(self, hname.format(observable + str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: use jet_pt_matched instead of jet_pt so if jet_pt_matched is different from jet_pt, it will be used. This is mainly for matched jets study
 
           if ipoint==2 and 'EEC_noweight' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
-              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index], weights_pair[index])
             else:
-              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index])
 
           if ipoint==2 and 'EEC_weight2' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
-              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index]*weights_pair[index],2))
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index]*weights_pair[index],2))
             else:
-              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_ungroomed, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(observable + pair_type_label,obs_label)).Fill(jet_pt_matched, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
     if 'jet_pt' in observable:
       getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
@@ -621,24 +626,27 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     # else:
     #   w_pt = 1
     
-    # if self.do_rho_subtraction:
+    if self.do_rho_subtraction:
       # print('evt #',self.event_number)
-      # jet_pt_det = jet_pt_det_ungroomed
+      jet_pt_det = jet_pt_det_ungroomed
       # print('Det: pT',jet_det.perp(),'(',jet_pt_det,')','phi',jet_det.phi(),'eta',jet_det.eta())
       # print('Truth: pT',jet_truth.perp(),'phi',jet_truth.phi(),'eta',jet_truth.eta())
+      # print('Difference pT (truth-det)',jet_truth.perp()-jet_pt_det_ungroomed)
+    else:
+      jet_pt_det = jet_det.perp()
 
     for observable in self.observable_list:
 
       hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
-      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det)
+      self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det)
 
       hname = 'h_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
-      self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt())
+      self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt())
 
       # fill RL vs matched truth jet pT for det jets (only fill these extra histograms for ENC or pair distributions)
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
-        self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets. However this also means that two identical histograms will be filled fot jet_pt observable
+        self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets. However this also means that two identical histograms will be filled fot jet_pt observable
 
       # Fill correlation between matched det and truth jets
       if 'jet_pt' in observable:
