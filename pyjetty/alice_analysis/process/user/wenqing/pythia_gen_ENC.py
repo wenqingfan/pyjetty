@@ -15,6 +15,7 @@ import argparse
 import os
 import array
 import numpy as np
+import math
 
 from pyjetty.mputils import *
 
@@ -99,6 +100,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_tagging = False
 
+        if 'do_reshuffle' in config:
+            self.do_reshuffle = config['do_reshuffle']
+        else:
+            self.do_reshuffle = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -169,6 +175,27 @@ class PythiaGenENC(process_base.ProcessBase):
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
+
+                    if self.do_reshuffle:
+                        name = 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('pT (jet)')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
 
                     # only save charge separation for pT>1GeV for now
                     if jet_level == "ch":
@@ -437,10 +464,31 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(cb1_cone_jetR.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)).Fill(jet.perp(), cb1_cone_jetR.correlator(ipoint).rs()[index], cb1_cone_jetR.correlator(ipoint).weights()[index])
 
+    def reshuffle_parts(self, parts, jet, jetR):
+        # rotate parts in azimuthal direction
+        parts_reshuffled = fj.vectorPJ()
+        for part in parts:
+          pt_new = part.pt()
+          m_new = part.m()
+          R_new = 1 # initialize to a big radius
+          while R_new > jetR:
+            phi_new = np.random.uniform(-jetR,+jetR)
+            y_new = np.random.uniform(-jetR,+jetR)
+            R_new = math.sqrt(phi_new*phi_new+y_new*y_new)
+          phi_new = part.phi() + phi_new
+          y_new = part.rapidity() + y_new
+          
+          # print('before',part.phi())
+          part.reset_PtYPhiM(pt_new, y_new, phi_new, m_new)
+          # print('after',part.phi())
+          parts_reshuffled.push_back(part)
+        
+        return parts_reshuffled
+
     #---------------------------------------------------------------
     # Form EEC using jet constituents
     #---------------------------------------------------------------
-    def fill_jet_histograms(self, level, jet, R_label):
+    def fill_jet_histograms(self, level, jet, jetR, R_label):
         # fill EEC histograms for jet constituents
         pfc_selector1 = getattr(self, "pfc_def_10")
 
@@ -464,8 +512,8 @@ class PythiaGenENC(process_base.ProcessBase):
             for ipoint in range(2, self.npoint+1):
                 # only fill trk pt > 1 GeV here for now
                 for index in range(cb1.correlator(ipoint).rs().size()):
-                    part1 = cb1.correlator(ipoint).indices1()[index]
-                    part2 = cb1.correlator(ipoint).indices2()[index]
+                    part1 = int(cb1.correlator(ipoint).indices1()[index])
+                    part2 = int(cb1.correlator(ipoint).indices2()[index])
                     c1 = _c_select1[part1]
                     c2 = _c_select1[part2]
                     if pythiafjext.getPythia8Particle(c1).charge()*pythiafjext.getPythia8Particle(c2).charge() < 0:
@@ -477,6 +525,19 @@ class PythiaGenENC(process_base.ProcessBase):
 
         getattr(self, 'h_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(jet.perp(), len(_c_select0))
         getattr(self, 'h_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet.perp(), len(_c_select1))
+
+        # reshuffled consitituents
+        if self.do_reshuffle:
+            _c_reshuffle0 = self.reshuffle_parts(_c_select0, jet, jetR)
+            cb_reshuffle0 = ecorrel.CorrelatorBuilder(_c_reshuffle0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+            _c_reshuffle1 = self.reshuffle_parts(_c_select1, jet, jetR)
+            cb_reshuffle1 = ecorrel.CorrelatorBuilder(_c_reshuffle1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
+
+            for ipoint in range(2, self.npoint+1):
+                for index in range(cb_reshuffle0.correlator(ipoint).rs().size()):
+                        getattr(self, 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb_reshuffle0.correlator(ipoint).rs()[index], cb_reshuffle0.correlator(ipoint).weights()[index])
+                for index in range(cb_reshuffle1.correlator(ipoint).rs().size()):
+                        getattr(self, 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb_reshuffle1.correlator(ipoint).rs()[index], cb_reshuffle1.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
     # Form EEC using jet constituents for matched jets
@@ -568,7 +629,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 #-------------------------------------------------------------
                 # loop over jets and fill EEC histograms with jet constituents
                 for j in jets:
-                    self.fill_jet_histograms(jet_level, j, R_label)
+                    self.fill_jet_histograms(jet_level, j, jetR, R_label)
 
                 #-------------------------------------------------------------
                 # loop over jets and fill EEC histograms inside a cone around jets
