@@ -181,14 +181,14 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
                 h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
                 setattr(self, name, h)
 
-              if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-                name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-                pt_bins = linbins(0,200,200)
-                RL_bins = logbins(1E-4,1,50)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('p_{T,ch jet}')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
+            if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+              name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
                     
   #---------------------------------------------------------------
   # Calculate pair distance of two fastjet particles
