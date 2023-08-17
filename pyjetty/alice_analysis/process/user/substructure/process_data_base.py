@@ -463,14 +463,13 @@ class ProcessDataBase(process_base.ProcessBase):
       for jet in jets_reselected:
         cone_phi = jet.phi()
         cone_eta = jet.eta()
-        cone_R = math.sqrt(jet.area()/np.pi) # NB: jet area is available only when rho subtraction flag is on
         parts_in_cone = self.find_particles_in_cone(parts, cone_phi, cone_eta, cone_R)
         self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
     else:
       for jet in jets_selected:
-        cone_perp_phi = jet.phi()
-        cone_perp_eta = jet.eta()
-        parts_in_cone = self.find_particles_in_cone(parts, cone_perp_phi, cone_perp_eta, cone_R)
+        cone_phi = jet.phi()
+        cone_eta = jet.eta()
+        parts_in_cone = self.find_particles_in_cone(parts, cone_phi, cone_eta, cone_R)
         self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
 
   def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
