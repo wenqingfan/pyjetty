@@ -389,14 +389,14 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
     # combine sig jet and perp cone with trk threshold cut
     trk_thrd = obs_setting
-    c_combined_select = fj.vectorPJ()
+    c_select = fj.vectorPJ()
 
     cone_parts_sorted = fj.sorted_by_pt(cone_parts)
     # print('perp cone nconst:',len(cone_parts_sorted))
     for part in cone_parts_sorted:
       if part.pt() < trk_thrd:
         break
-      c_combined_select.append(part) # NB: use the break statement since constituents are already sorted
+      c_select.append(part) # NB: use the break statement since constituents are already sorted
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
@@ -411,7 +411,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     else:
       jet_pt = jet.perp()
 
-    new_corr = ecorrel.CorrelatorBuilder(c_combined_select, jet_pt, 2, 1, dphi_cut, deta_cut)
+    new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
     for observable in self.observable_list:
 
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
@@ -419,11 +419,11 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           for index in range(new_corr.correlator(ipoint).rs().size()):
 
             # processing only like-sign pairs when self.ENC_pair_like is on
-            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_combined_select, index)):
+            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
               continue
 
             # processing only unlike-sign pairs when self.ENC_pair_unlike is on
-            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_combined_select, index):
+            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
               continue
 
             if 'ENC' in observable:
