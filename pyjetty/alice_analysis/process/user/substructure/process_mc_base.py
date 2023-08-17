@@ -84,7 +84,7 @@ class ProcessMCBase(process_base.ProcessBase):
           self.ENC_fastsim = False
     else: # if not fast simulation, set ENC_fastsim flag to False
       self.ENC_fastsim = False  
-    if self.ENC_fastsim = True:
+    if self.ENC_fastsim == True:
       self.pair_eff_file = config['pair_eff_file'] # load pair efficiency input for fastsim
     if 'ENC_pair_cut' in config:
         self.ENC_pair_cut = config['ENC_pair_cut']
