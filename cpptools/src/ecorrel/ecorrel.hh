@@ -11,13 +11,15 @@ namespace EnergyCorrelators
 			CorrelatorsContainer();
 			virtual ~CorrelatorsContainer();
 			void addwr(const double &w, const double &r);
-			void addwr(const double &w, const double &r, const int &indx1, const int &indx2);
+			void addwr(const double &w, const double &r, const double &indx1, const double &indx2);
 			void clear();
+			void PrintLists();
 			std::vector<double> *weights();
 			std::vector<double> *rs(); // return the pointer to the list of pair distances
 			std::vector<double> *rxw();
-			std::vector<int> *indices1(); // indices of object 1 in the pair
-			std::vector<int> *indices2(); // indices of object 2 in the pair
+			// have to use double instead of int or there will be errors later when accessing the indices
+			std::vector<double> *indices1(); // indices of object 1 in the pair
+			std::vector<double> *indices2(); // indices of object 2 in the pair
 
 			const double *wa();
 			const double *ra();
@@ -26,8 +28,8 @@ namespace EnergyCorrelators
 			std::vector<double> fr; // list of pair distances
 			std::vector<double> fw; // list of pair weights
 			std::vector<double> frxw;
-			std::vector<int> findx1;
-			std::vector<int> findx2;
+			std::vector<double> findx1;
+			std::vector<double> findx2;
 	};
 
 	class CorrelatorBuilder
