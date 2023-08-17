@@ -25,6 +25,8 @@ namespace EnergyCorrelators
         fw.clear();
         fr.clear();
         frxw.clear();
+        findx1.clear();
+        findx2.clear();
     }
 
     void CorrelatorsContainer::addwr(const double &w, const double &r)
@@ -33,7 +35,7 @@ namespace EnergyCorrelators
         fr.push_back(r);
     }
 
-    void CorrelatorsContainer::addwr(const double &w, const double &r, const int &indx1, const int &indx2)
+    void CorrelatorsContainer::addwr(const double &w, const double &r, const double &indx1, const double &indx2)
     {
         fw.push_back(w);
         fr.push_back(r);
@@ -51,12 +53,12 @@ namespace EnergyCorrelators
         return &fr;
     }
 
-    std::vector<int> *CorrelatorsContainer::indices1()
+    std::vector<double> *CorrelatorsContainer::indices1()
     {
         return &findx1;
     }
 
-    std::vector<int> *CorrelatorsContainer::indices2()
+    std::vector<double> *CorrelatorsContainer::indices2()
     {
         return &findx2;
     }
@@ -81,6 +83,21 @@ namespace EnergyCorrelators
         return &frxw;
     }
 
+    void CorrelatorsContainer::PrintLists()
+    { // print content of the pair lists
+        for (size_t i = 0; i < fr.size(); i++)
+        {
+            if (findx1.size()==fr.size())
+            {
+                std::cout << "pair " << i << " distance " << fr[i] << " weight " << fw[i] << " index1 " << findx1[i] << " index2 " << findx2[i] << std::endl;
+            }
+            else
+            {
+                std::cout << "pair " << i << " distance " << fr[i] << " weight " << fw[i] << std::endl;
+            }
+        }
+    }
+
     std::vector<fastjet::PseudoJet> constituents_as_vector(const fastjet::PseudoJet &jet)
     {
         std::vector<fastjet::PseudoJet> _v;
@@ -102,7 +119,7 @@ namespace EnergyCorrelators
     : fec()
     , fncmax(nmax)
     {
-        // std::cout << "Initializing n point correlator with power " << power << " for " << parts.size() << " paritlces" << std::endl;
+        // std::cout << "Initializing n point correlator with power " << power << " for " << parts.size() << " particles" << std::endl;
         if (fncmax < 2)
         {
             throw std::overflow_error("asking for n-point correlator with n < 2?");
@@ -136,7 +153,7 @@ namespace EnergyCorrelators
                 double _d12 = parts[i].delta_R(parts[j]);
                 double _w2 = parts[i].perp() * parts[j].perp() / std::pow(scale, 2);
                 _w2 = pow(_w2, power);
-                fec[2 - 2]->addwr(_w2, _d12, i, j); // save weight, distance and indices of the pair
+                fec[2 - 2]->addwr(_w2, _d12, (double)(i), (double)(j)); // save weight, distance and indices of the pair
                 if (fncmax < 3)
                     continue;
                 for (size_t k = 0; k < parts.size(); k++)
@@ -146,9 +163,9 @@ namespace EnergyCorrelators
                     double _w3 = parts[i].perp() * parts[j].perp() * parts[k].perp() / std::pow(scale, 3);
                     _w3 = pow(_w3, power);
                     double _d3max = std::max({_d12, _d13, _d23});
-                    if (fabs(_d3max-_d12)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, i, j);
-                    if (fabs(_d3max-_d13)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, i, k);
-                    if (fabs(_d3max-_d23)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, j, k);
+                    if (fabs(_d3max-_d12)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, (double)(i), (double)(j));
+                    if (fabs(_d3max-_d13)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, (double)(i), (double)(k));
+                    if (fabs(_d3max-_d23)<1E-5) fec[3 - 2]->addwr(_w3, _d3max, (double)(j), (double)(k));
                     if (fncmax < 4)
                         continue;
                     for (size_t l = 0; l < parts.size(); l++)
@@ -159,12 +176,12 @@ namespace EnergyCorrelators
                         double _w4 = parts[i].perp() * parts[j].perp() * parts[k].perp() * parts[l].perp() / std::pow(scale, 4);
                         _w4 = pow(_w4, power);
                         double _d4max = std::max({_d12, _d13, _d23, _d14, _d24, _d34});
-                        if (fabs(_d4max-_d12)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, i, j);
-                        if (fabs(_d4max-_d13)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, i, k);
-                        if (fabs(_d4max-_d23)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, j, k);
-                        if (fabs(_d4max-_d14)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, i, l);
-                        if (fabs(_d4max-_d24)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, j, l);
-                        if (fabs(_d4max-_d34)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, k, l);
+                        if (fabs(_d4max-_d12)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(i), (double)(j));
+                        if (fabs(_d4max-_d13)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(i), (double)(k));
+                        if (fabs(_d4max-_d23)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(j), (double)(k));
+                        if (fabs(_d4max-_d14)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(i), (double)(l));
+                        if (fabs(_d4max-_d24)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(j), (double)(l));
+                        if (fabs(_d4max-_d34)<1E-5) fec[4 - 2]->addwr(_w4, _d4max, (double)(k), (double)(l));
                         if (fncmax < 5)
                             continue;
                         for (size_t m = 0; m < parts.size(); m++)
@@ -176,7 +193,16 @@ namespace EnergyCorrelators
                             double _w5 = parts[i].perp() * parts[j].perp() * parts[k].perp() * parts[l].perp() * parts[m].perp() / std::pow(scale, 5);
                             _w5 = pow(_w5, power);
                             double _d5max = std::max({_d12, _d13, _d23, _d14, _d24, _d34, _d15, _d25, _d35, _d45});
-                            fec[5 - 2]->addwr(_w5, _d5max); // the indices not filled for 5-point yet
+                            if (fabs(_d5max-_d12)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(i), (double)(j));
+                            if (fabs(_d5max-_d13)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(i), (double)(k));
+                            if (fabs(_d5max-_d23)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(j), (double)(k));
+                            if (fabs(_d5max-_d14)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(i), (double)(l));
+                            if (fabs(_d5max-_d24)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(j), (double)(l));
+                            if (fabs(_d5max-_d34)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(k), (double)(l));
+                            if (fabs(_d5max-_d15)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(i), (double)(m));
+                            if (fabs(_d5max-_d25)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(j), (double)(m));
+                            if (fabs(_d5max-_d35)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(k), (double)(m));
+                            if (fabs(_d5max-_d35)<1E-5) fec[5 - 2]->addwr(_w5, _d5max, (double)(l), (double)(m));
                         }
                     }
                 }
