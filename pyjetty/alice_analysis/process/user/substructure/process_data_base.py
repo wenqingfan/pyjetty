@@ -97,6 +97,20 @@ class ProcessDataBase(process_base.ProcessBase):
       self.do_perpcone = config['do_perpcone']
     else:
       self.do_perpcone = False
+
+    if 'do_jetcone' in config:
+      self.do_jetcone = config['do_jetcone']
+    else:
+      self.do_jetcone = False
+    if self.do_jetcone and 'jetcone_R' in config:
+      self.jetcone_R = config['jetcone_R']
+    else:
+      self.jetcone_R = 0.4 # NB: set default value to 0.4
+
+    if 'leading_pt' in config:
+        self.leading_pt = config['leading_pt']
+    else:
+        self.leading_pt = -1 # negative means no leading track cut
     
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
@@ -280,7 +294,7 @@ class ProcessDataBase(process_base.ProcessBase):
             getattr(self, 'hRho').Fill(rho)
           
           # Do jet finding (re-do each time, to make sure matching info gets reset)
-          cs = fj.ClusterSequence(fj_particles_subtracted[i], jet_def)
+          cs = fj.ClusterSequence(fj_particles_subtracted[i], jet_def) # FIX ME: not sure whether to enable the area or not
           jets = fj.sorted_by_pt(cs.inclusive_jets())
           jets_selected = jet_selector(jets)
 
@@ -308,8 +322,14 @@ class ProcessDataBase(process_base.ProcessBase):
             self.analyze_jets(jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
             if self.do_perpcone:
               self.analyze_perp_cones(fj_particles, jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
+            if self.do_jetcone:
+              self.analyze_jet_cones(fj_particles, jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
           else:
             self.analyze_jets(jets_selected, jetR, R_max = R_max)
+            if self.do_perpcone:
+              self.analyze_perp_cones(fj_particles, jets_selected, jetR, R_max = R_max)
+            if self.do_jetcone:
+              self.analyze_jet_cones(fj_particles, jets_selected, jetR, R_max = R_max)
 
   #---------------------------------------------------------------
   # Analyze jets of a given event.
@@ -323,16 +343,26 @@ class ProcessDataBase(process_base.ProcessBase):
       suffix = ''
 
     jets_reselected = fj.vectorPJ()
-    if self.do_rho_subtraction and rho_bge > 0:
-      for jet in jets_selected:
-        if jet.perp()-rho_bge*jet.area() > 5:
-          jets_reselected.append(jet)
+    for jet in jets_selected:
+      is_jet_selected = True
+      
+      # leading track selection
+      if self.leading_pt > 0:
+        constituent = fj.sorted_by_pt(jet.constituents())
+        if constituent[0] < self.leading_pt:
+          is_jet_selected = False
+      
+      # if rho subtraction, require jet pt > 5 after subtration
+      if self.do_rho_subtraction and rho_bge > 0:
+        if jet.perp()-rho_bge*jet.area() < 5:
+          # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
+          is_jet_selected = False
+
+      if is_jet_selected:
+        jets_reselected.append(jet)
     
     # Loop through jets and call user function to fill histos
-    if self.do_rho_subtraction and rho_bge > 0:
-      result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
-    else:
-      result = [self.analyze_accepted_jet(jet, jetR, suffix) for jet in jets_selected]
+    result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
 
   #---------------------------------------------------------------
   # Fill histograms
@@ -415,6 +445,34 @@ class ProcessDataBase(process_base.ProcessBase):
     
     return parts_rotated
 
+  def analyze_jet_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
+    # analyze cones around jet axis. NB: maybe can even use WTA axis
+    if R_max:
+      suffix = '_Rmax{}'.format(R_max)
+    else:
+      suffix = ''
+
+    # NB: set cone R to be bigger than jet R
+    cone_R = self.jetcone_R
+    if self.do_rho_subtraction and rho_bge > 0:
+      jets_reselected = []
+      for jet in jets_selected:
+        if jet.perp()-rho_bge*jet.area() > 5:
+          jets_reselected.append(jet)
+
+      for jet in jets_reselected:
+        cone_phi = jet.phi()
+        cone_eta = jet.eta()
+        cone_R = math.sqrt(jet.area()/np.pi) # NB: jet area is available only when rho subtraction flag is on
+        parts_in_cone = self.find_particles_in_cone(parts, cone_phi, cone_eta, cone_R)
+        self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
+    else:
+      for jet in jets_selected:
+        cone_perp_phi = jet.phi()
+        cone_perp_eta = jet.eta()
+        parts_in_cone = self.find_particles_in_cone(parts, cone_perp_phi, cone_perp_eta, cone_R)
+        self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
+
   def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones perpendicular to jet in the azimuthal plane
     if R_max:
@@ -445,8 +503,8 @@ class ProcessDataBase(process_base.ProcessBase):
         parts_in_cone2 = self.find_particles_in_cone(parts, cone_perp_phi2, cone_perp_eta, cone_R)
         parts_in_cone2 = self.rotate_parts(parts_in_cone2, +np.pi/2)
         
-        self.analyze_accepted_cone(parts_in_cone1, jet, jetR, suffix, rho_bge)
-        self.analyze_accepted_cone(parts_in_cone2, jet, jetR, suffix, rho_bge)
+        self.analyze_accepted_cone(True, parts_in_cone1, jet, jetR, suffix, rho_bge)
+        self.analyze_accepted_cone(True, parts_in_cone2, jet, jetR, suffix, rho_bge)
     else:
       for jet in jets_selected:
         cone_perp_phi1 = jet.phi() + np.pi/2
@@ -457,10 +515,10 @@ class ProcessDataBase(process_base.ProcessBase):
         parts_in_cone2 = self.find_particles_in_cone(parts, cone_perp_phi2, cone_perp_eta, cone_R)
         parts_in_cone2 = self.rotate_parts(parts_in_cone2, +np.pi/2)
         
-        self.analyze_accepted_cone(parts_in_cone1, jet, jetR, suffix, rho_bge)
-        self.analyze_accepted_cone(parts_in_cone2, jet, jetR, suffix, rho_bge)
+        self.analyze_accepted_cone(True, parts_in_cone1, jet, jetR, suffix, rho_bge)
+        self.analyze_accepted_cone(True, parts_in_cone2, jet, jetR, suffix, rho_bge)
 
-  def analyze_accepted_cone(self, cone_parts, jet, jetR, suffix, rho_bge = 0):
+  def analyze_accepted_cone(self, is_perp, cone_parts, jet, jetR, suffix, rho_bge = 0):
     
     # Check additional acceptance criteria
     if not self.utils.is_det_jet_accepted(jet):
@@ -491,7 +549,11 @@ class ProcessDataBase(process_base.ProcessBase):
         jet_groomed_lund = None
 
       # Call user function to fill histograms
-      self.fill_perp_cone_histograms(cone_parts, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+      if is_perp:
+        self.fill_perp_cone_histograms(cone_parts, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+      else:
+        self.fill_jet_cone_histograms(cone_parts, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
   #---------------------------------------------------------------
