@@ -163,27 +163,26 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
                 setattr(self, name, h)
 
           if self.do_jetcone:
-            for pair_type_label in self.pair_type_labels:
 
-              if 'ENC' in observable:
-                for ipoint in range(2, 3):
-                  name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable + str(ipoint) + pair_type_label, jetR, trk_thrd)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+            if 'ENC' in observable:
+              for ipoint in range(2, 3):
+                name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable + str(ipoint), jetR, trk_thrd)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
 
-                  name = 'h_jetcone_{}Pt_JetPt_R{}_{}'.format(observable + str(ipoint) + pair_type_label, jetR, trk_thrd)
-                  pt_bins = linbins(0,200,200)
-                  ptRL_bins = logbins(1E-3,1E2,60)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
-                  h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
-                  setattr(self, name, h)
+                name = 'h_jetcone_{}Pt_JetPt_R{}_{}'.format(observable + str(ipoint), jetR, trk_thrd)
+                pt_bins = linbins(0,200,200)
+                ptRL_bins = logbins(1E-3,1E2,60)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                setattr(self, name, h)
 
               if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-                name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable + pair_type_label, jetR, obs_label)
+                name = 'h_jetcone_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 RL_bins = logbins(1E-4,1,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -392,27 +391,12 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     trk_thrd = obs_setting
     c_combined_select = fj.vectorPJ()
 
-    constituents = fj.sorted_by_pt(jet.constituents())
-    # print('jet nconst:',len(constituents))
-    for c in constituents:
-      if c.pt() < trk_thrd:
-        break
-      c.set_user_index(1) # positive index for jet constituents
-      c_combined_select.append(c) # NB: use the break statement since constituents are already sorted
-
-    nconst_jet = len(c_combined_select)
-    # print('jet nconst (with thrd cut):',nconst_jet)
-
     cone_parts_sorted = fj.sorted_by_pt(cone_parts)
     # print('perp cone nconst:',len(cone_parts_sorted))
     for part in cone_parts_sorted:
       if part.pt() < trk_thrd:
         break
-      part.set_user_index(-1) # negative index for perp cone
       c_combined_select.append(part) # NB: use the break statement since constituents are already sorted
-
-    nconst_perp = len(c_combined_select) - nconst_jet
-    # print('perp cone nconst (with thrd cut):',nconst_perp)
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
@@ -442,22 +426,16 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
             if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_combined_select, index):
               continue
 
-            # separate out sig-sig, sig-bkg, bkg-bkg correlations for EEC pairs
-            pair_type_label = ''
-            if self.do_rho_subtraction:
-              pair_type = self.check_pair_type(new_corr, ipoint, c_combined_select, index)
-              pair_type_label = self.pair_type_labels[pair_type]
-
             if 'ENC' in observable:
-              # print('hname is',hname.format(observable + str(ipoint) + pair_type_label, jetR, obs_label))
-              getattr(self, hname.format(observable + str(ipoint) + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(observable + str(ipoint) + pair_type_label + 'Pt', jetR, obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
+              # print('hname is',hname.format(observable + str(ipoint), jetR, obs_label))
+              getattr(self, hname.format(observable + str(ipoint), jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+              getattr(self, hname.format(observable + str(ipoint) + 'Pt', jetR, obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
 
             if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(observable + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(observable + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
 ##################################################################
 if __name__ == '__main__':
