@@ -721,6 +721,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_jetcone_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
         else:
           hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
+        print('match extra hist: det vs truth jet pt',jet_pt_det,jet_truth.pt())
         self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets. However this also means that two identical histograms will be filled fot jet_pt observable
 
       # Fill correlation between matched det and truth jets
