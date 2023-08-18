@@ -430,6 +430,15 @@ class ProcessDataBase(process_base.ProcessBase):
     
     return cone_parts
 
+  def find_parts_around_jets(self, parts, jet, cone_R):
+    # select particles around jet axis
+    parts = fj.vectorPJ()
+    for part in parts:
+        if jet.delta_R(part) <= cone_R:
+            parts.push_back(part)
+    
+    return parts
+
   def rotate_parts(self, parts, rotate_phi):
     # rotate parts in azimuthal direction
     parts_rotated = fj.vectorPJ()
@@ -461,15 +470,11 @@ class ProcessDataBase(process_base.ProcessBase):
           jets_reselected.append(jet)
 
       for jet in jets_reselected:
-        cone_phi = jet.phi()
-        cone_eta = jet.eta()
-        parts_in_cone = self.find_particles_in_cone(parts, cone_phi, cone_eta, cone_R)
+        parts_in_cone = self.find_parts_around_jets(parts, jet, cone_R)
         self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
     else:
       for jet in jets_selected:
-        cone_phi = jet.phi()
-        cone_eta = jet.eta()
-        parts_in_cone = self.find_particles_in_cone(parts, cone_phi, cone_eta, cone_R)
+        parts_in_cone = self.find_parts_around_jets(parts, jet, cone_R)
         self.analyze_accepted_cone(False, parts_in_cone, jet, jetR, suffix, rho_bge)
 
   def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
