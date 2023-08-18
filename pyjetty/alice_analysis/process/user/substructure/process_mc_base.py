@@ -635,13 +635,6 @@ class ProcessMCBase(process_base.ProcessBase):
             self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
-            if self.do_jetcone:
-              print('debug8--det parts',fj_particles_combined_beforeCS)
-              print('debug8--truth parts',fj_particles_truth)
-              self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
-                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
-                            fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth)
           else:
             self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
