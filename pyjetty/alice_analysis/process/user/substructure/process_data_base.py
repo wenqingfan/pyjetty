@@ -434,8 +434,8 @@ class ProcessDataBase(process_base.ProcessBase):
     # select particles around jet axis
     parts = fj.vectorPJ()
     for part in parts:
-        if jet.delta_R(part) <= cone_R:
-            parts.push_back(part)
+      if jet.delta_R(part) <= cone_R:
+        parts.push_back(part)
     
     return parts
 
