@@ -637,6 +637,8 @@ class ProcessMCBase(process_base.ProcessBase):
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
             if self.do_jetcone:
+              print('debug8--det parts',fj_particles_combined_beforeCS)
+              print('debug8--truth parts',fj_particles_truth)
               self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
@@ -726,9 +728,6 @@ class ProcessMCBase(process_base.ProcessBase):
         [self.set_matches_AA(jet_det_combined, jetR, hname) for jet_det_combined in jets_det_selected]
           
     # Loop through jets and fill response histograms if both det and truth jets are unique match
-    if self.do_jetcone:
-      print('debug8--det parts',fj_particles_det_cones)
-      print('debug8--truth parts',fj_particles_truth_cones)
     result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge, fj_particles_det_cones, fj_particles_truth_cones) for jet_det in jets_det_selected]
 
   #---------------------------------------------------------------
