@@ -634,7 +634,7 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
             print('debug8--det parts',fj_particles_combined_beforeCS)
-            print('debug8--truth parts',fj_particles_truth_cones)
+            print('debug8--truth parts',fj_particles_truth)
             self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
