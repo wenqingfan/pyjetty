@@ -633,25 +633,27 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_beforeCS = fj.sorted_by_pt(cs_combined_beforeCS.inclusive_jets())
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
-            self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
-                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
-                            fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
             if self.do_jetcone:
               self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth)
-          else:
-            self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+            else:
+              self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0)
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
+          else:
             if self.do_jetcone:
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
+            else:
+              self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
+                            fj_particles_det_holes = fj_particles_det_holes,
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0)
 
   #---------------------------------------------------------------
   # Analyze jets of a given event.
@@ -710,13 +712,13 @@ class ProcessMCBase(process_base.ProcessBase):
         [[self.set_matching_candidates(jet_det_combined, jet_det_pp, jetR, 'hDeltaR_combined_ppdet_R{{}}_Rmax{}'.format(R_max), fill_jet1_matches_only=True) for jet_det_pp in jets_det_pp_selected] for jet_det_combined in jets_det_selected]
         [[self.set_matching_candidates(jet_det_pp, jet_truth, jetR, 'hDeltaR_ppdet_pptrue_R{{}}_Rmax{}'.format(R_max)) for jet_truth in jets_truth_selected_matched] for jet_det_pp in jets_det_pp_selected]
 
-    # debug
-    for jet_det_combined in jets_det_selected:
-      print('debug7.1--jet_det',jet_det_combined.pt(),'user_info',jet_det_combined.has_user_info())
-      if jet_det_combined.has_user_info() and jet_det_combined.python_info().closest_jet:
-        print('matches to',jet_det_combined.python_info().closest_jet.pt())
-        print('debug7.1--jet_det',len(jet_det_combined.constituents()))
-        print('matches to',len(jet_det_combined.python_info().closest_jet.constituents()))
+    # # debug
+    # for jet_det_combined in jets_det_selected:
+    #   print('debug7.1--jet_det',jet_det_combined.pt(),'user_info',jet_det_combined.has_user_info())
+    #   if jet_det_combined.has_user_info() and jet_det_combined.python_info().closest_jet:
+    #     print('matches to',jet_det_combined.python_info().closest_jet.pt())
+    #     print('debug7.1--jet_det',len(jet_det_combined.constituents()))
+    #     print('matches to',len(jet_det_combined.python_info().closest_jet.constituents()))
         
     # Loop through jets and set accepted matches
     if self.is_pp:
