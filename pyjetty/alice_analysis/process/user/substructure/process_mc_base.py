@@ -801,7 +801,7 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.is_pp or self.fill_Rmax_indep_hists:
       jet_pt = jet.pt()
       if self.do_rho_subtraction:
-        jet_pt = rho_bge*jet.area()
+        jet_pt = jet.pt()-rho_bge*jet.area()
       for constituent in jet.constituents():
         z = constituent.pt() / jet_pt
         getattr(self, 'hZ_Det_R{}'.format(jetR)).Fill(jet_pt, z)
