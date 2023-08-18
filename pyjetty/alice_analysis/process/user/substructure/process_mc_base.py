@@ -33,6 +33,7 @@ from array import *
 import ROOT
 import yaml
 import random
+import math
 
 # Fastjet via python (from external library heppy)
 import fastjet as fj
@@ -633,6 +634,13 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
             self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
+                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
+                            fj_particles_det_holes = fj_particles_det_holes,
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
+            if 1:
+              print('debug8--det parts',fj_particles_combined_beforeCS)
+              print('debug8--truth parts',fj_particles_truth_cones)
+              self.analyze_jets(jets_combined_selected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth)
