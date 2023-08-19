@@ -432,13 +432,12 @@ class ProcessDataBase(process_base.ProcessBase):
 
   def find_parts_around_jets(self, parts, jet, cone_R):
     # select particles around jet axis
-    parts = fj.vectorPJ()
+    cone_parts = fj.vectorPJ()
     for part in parts:
-      print('distance',jet.delta_R(part))
       if jet.delta_R(part) <= cone_R:
-        parts.push_back(part)
+        cone_parts.push_back(part)
     
-    return parts
+    return cone_parts
 
   def rotate_parts(self, parts, rotate_phi):
     # rotate parts in azimuthal direction
