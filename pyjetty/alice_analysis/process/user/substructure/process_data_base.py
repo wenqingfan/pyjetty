@@ -494,12 +494,13 @@ class ProcessDataBase(process_base.ProcessBase):
 
       for jet in jets_reselected:
         # print('jet pt',jet.perp()-rho_bge*jet.area(),'phi',jet.phi(),'eta',jet.eta(),'area',jet.area())
+        cone_R = math.sqrt(jet.area()/np.pi) # NB: jet area is available only when rho subtraction flag is on
+
         perp_jet1 = jet
         perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + np.pi/2, jet.m())
         perp_jet2 = jet
         perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
 
-        cone_R = math.sqrt(jet.area()/np.pi) # NB: jet area is available only when rho subtraction flag is on
         parts_in_cone1 = self.find_parts_around_jet(parts, perp_jet1, cone_R)
         # for part in parts_in_cone1:
         #   print('before rotation',part.phi())
