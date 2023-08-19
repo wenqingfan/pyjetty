@@ -408,28 +408,6 @@ class ProcessDataBase(process_base.ProcessBase):
       self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix)
 
-  def find_particles_in_cone(self, parts, cone_center_phi, cone_center_eta, cone_R):
-    # select particles around cone center
-    # conver cone center phi to [0, 2pi]
-    if cone_center_phi > 2*np.pi:
-        cone_center_phi = cone_center_phi - 2*np.pi
-    if cone_center_phi < 0:
-        cone_center_phi = cone_center_phi + 2*np.pi
-    
-    # print('cone R',cone_R,'phi',cone_center_phi,'eta',cone_center_eta,'area',np.pi*cone_R*cone_R)
-    cone_parts = fj.vectorPJ()
-    for part in parts:
-      dphi = part.phi()-cone_center_phi
-      if dphi > 2*np.pi:
-        dphi = dphi - 2*np.pi 
-      if dphi < 0:
-        dphi = dphi + 2*np.pi 
-      deta = part.eta()-cone_center_eta
-      if math.sqrt(dphi*dphi+deta*deta) <= cone_R:
-        cone_parts.push_back(part)
-    
-    return cone_parts
-
   def find_parts_around_jet(self, parts, jet, cone_R):
     # select particles around jet axis
     cone_parts = fj.vectorPJ()
