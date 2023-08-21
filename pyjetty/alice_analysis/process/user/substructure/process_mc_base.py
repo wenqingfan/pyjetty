@@ -855,24 +855,11 @@ class ProcessMCBase(process_base.ProcessBase):
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
                                       grooming_setting, obs_label, jet_pt)
   
-  def find_particles_in_cone(self, parts, cone_center_phi, cone_center_eta, cone_R):
-    # select particles around cone center
-    # conver cone center phi to [0, 2pi]
-    if cone_center_phi > 2*np.pi:
-        cone_center_phi = cone_center_phi - 2*np.pi
-    if cone_center_phi < 0:
-        cone_center_phi = cone_center_phi + 2*np.pi
-    
-    # print('cone R',cone_R,'phi',cone_center_phi,'eta',cone_center_eta,'area',np.pi*cone_R*cone_R)
+  def find_parts_around_jet(self, parts, jet, cone_R):
+    # select particles around jet axis
     cone_parts = fj.vectorPJ()
     for part in parts:
-      dphi = part.phi()-cone_center_phi
-      if dphi > 2*np.pi:
-        dphi = dphi - 2*np.pi 
-      if dphi < 0:
-        dphi = dphi + 2*np.pi 
-      deta = part.eta()-cone_center_eta
-      if math.sqrt(dphi*dphi+deta*deta) <= cone_R:
+      if jet.delta_R(part) <= cone_R:
         cone_parts.push_back(part)
     
     return cone_parts
@@ -971,8 +958,8 @@ class ProcessMCBase(process_base.ProcessBase):
           cone_parts_in_truth_jet = None
           cone_R = self.jetcone_R
           if self.do_jetcone:
-            cone_parts_in_det_jet = self.find_particles_in_cone(fj_particles_det_cones, jet_det.phi(), jet_det.eta(), cone_R)
-            cone_parts_in_truth_jet = self.find_particles_in_cone(fj_particles_truth_cones, jet_truth.phi(), jet_truth.eta(), cone_R)
+            cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, cone_R)
+            cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, cone_R)
 
           # # debug
           # constituents = fj.sorted_by_pt(jet_truth.constituents())
