@@ -500,9 +500,8 @@ class PythiaGenENC(process_base.ProcessBase):
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
         for c in jet.constituents():
-            if level == "h":
-                print('charge info',pythiafjext.getPythia8Particle(c).charge())
             if self.do_theory_check and pythiafjext.getPythia8Particle(c).charge()!=0:
+                print('charge info',pythiafjext.getPythia8Particle(c).charge())
                 _c_select0.push_back(c)
             else:
                 _c_select0.push_back(c)
