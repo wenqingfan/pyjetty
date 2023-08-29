@@ -500,9 +500,9 @@ class PythiaGenENC(process_base.ProcessBase):
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
         for c in jet.constituents():
-            if self.do_theory_check and pythiafjext.getPythia8Particle(c).charge()!=0:
-                print('charge info',pythiafjext.getPythia8Particle(c).charge())
-                _c_select0.push_back(c)
+            if self.do_theory_check:
+                if pythiafjext.getPythia8Particle(c).charge()!=0:
+                    _c_select0.push_back(c)
             else:
                 _c_select0.push_back(c)
         cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
@@ -510,8 +510,9 @@ class PythiaGenENC(process_base.ProcessBase):
         # select constituents with 1 GeV cut
         _c_select1 = fj.vectorPJ()
         for c in pfc_selector1(jet.constituents()):
-            if self.do_theory_check and pythiafjext.getPythia8Particle(c).charge()!=0:
-                _c_select1.push_back(c)
+            if self.do_theory_check:
+                if pythiafjext.getPythia8Particle(c).charge()!=0:
+                    _c_select1.push_back(c)
             else:
                 _c_select1.push_back(c)
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
