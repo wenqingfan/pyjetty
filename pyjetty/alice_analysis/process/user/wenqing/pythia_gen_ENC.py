@@ -105,6 +105,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_reshuffle = False
 
+        if 'do_theory_check' in config:
+            self.do_theory_check = config['do_theory_check']
+        else:
+            self.do_theory_check = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -494,12 +499,20 @@ class PythiaGenENC(process_base.ProcessBase):
 
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
-        _ = [_c_select0.push_back(c) for c in jet.constituents()]
+        for c in jet.constituents():
+            if self.do_theory_check and pythiafjext.getPythia8Particle(c).charge()!=0:
+                _c_select0.push_back(c)
+            else:
+                _c_select0.push_back(c)
         cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         # select constituents with 1 GeV cut
         _c_select1 = fj.vectorPJ()
-        _ = [_c_select1.push_back(c) for c in pfc_selector1(jet.constituents())]
+        for c in pfc_selector1(jet.constituents()):
+            if self.do_theory_check and pythiafjext.getPythia8Particle(c).charge()!=0:
+                _c_select1.push_back(c)
+            else:
+                _c_select1.push_back(c)
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         for ipoint in range(2, self.npoint+1):
