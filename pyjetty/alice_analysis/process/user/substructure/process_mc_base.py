@@ -665,27 +665,27 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
 
-    # jets_det_reselected = fj.vectorPJ()
-    # for jet in jets_det_selected:
-    #   is_jet_selected = True
+    jets_det_reselected = fj.vectorPJ()
+    for jet in jets_det_selected:
+      is_jet_selected = True
       
-    #   # leading track selection
-    #   if self.leading_pt > 0:
-    #     constituent = fj.sorted_by_pt(jet.constituents())
-    #     if constituent[0] < self.leading_pt:
-    #       is_jet_selected = False
+      # leading track selection
+      if self.leading_pt > 0:
+        constituent = fj.sorted_by_pt(jet.constituents())
+        if constituent[0] < self.leading_pt:
+          is_jet_selected = False
       
-    #   # if rho subtraction, require jet pt > 5 after subtration
-    #   if self.do_rho_subtraction and rho_bge > 0:
-    #     if jet.perp()-rho_bge*jet.area() < 5:
-    #       # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
-    #       is_jet_selected = False
+      # if rho subtraction, require jet pt > 5 after subtration
+      if self.do_rho_subtraction and rho_bge > 0:
+        if jet.perp()-rho_bge*jet.area() < 5:
+          # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
+          is_jet_selected = False
 
-    #   if is_jet_selected:
-    #     jets_det_reselected.append(jet)
+      if is_jet_selected:
+        jets_det_reselected.append(jet)
     
     # Fill det-level jet histograms (before matching)
-    for jet_det in jets_det_selected:
+    for jet_det in jets_det_reselected:
       
       # Check additional acceptance criteria
       # skip event if not satisfied -- since first jet in event is highest pt
@@ -706,14 +706,14 @@ class ProcessMCBase(process_base.ProcessBase):
   
     # Loop through jets and set jet matching candidates for each jet in user_info
     if self.is_pp:
-        [[self.set_matching_candidates(jet_det, jet_truth, jetR, 'hDeltaR_All_R{}'.format(jetR)) for jet_truth in jets_truth_selected_matched] for jet_det in jets_det_selected]
+        [[self.set_matching_candidates(jet_det, jet_truth, jetR, 'hDeltaR_All_R{}'.format(jetR)) for jet_truth in jets_truth_selected_matched] for jet_det in jets_det_reselected]
     else:
         # First fill the combined-to-pp matches, then the pp-to-pp matches
-        [[self.set_matching_candidates(jet_det_combined, jet_det_pp, jetR, 'hDeltaR_combined_ppdet_R{{}}_Rmax{}'.format(R_max), fill_jet1_matches_only=True) for jet_det_pp in jets_det_pp_selected] for jet_det_combined in jets_det_selected]
+        [[self.set_matching_candidates(jet_det_combined, jet_det_pp, jetR, 'hDeltaR_combined_ppdet_R{{}}_Rmax{}'.format(R_max), fill_jet1_matches_only=True) for jet_det_pp in jets_det_pp_selected] for jet_det_combined in jets_det_reselected]
         [[self.set_matching_candidates(jet_det_pp, jet_truth, jetR, 'hDeltaR_ppdet_pptrue_R{{}}_Rmax{}'.format(R_max)) for jet_truth in jets_truth_selected_matched] for jet_det_pp in jets_det_pp_selected]
 
     # # debug
-    # for jet_det_combined in jets_det_selected:
+    # for jet_det_combined in jets_det_reselected:
     #   print('debug7.1--jet_det',jet_det_combined.pt(),'user_info',jet_det_combined.has_user_info())
     #   if jet_det_combined.has_user_info() and jet_det_combined.python_info().closest_jet:
     #     print('matches to',jet_det_combined.python_info().closest_jet.pt())
@@ -723,13 +723,13 @@ class ProcessMCBase(process_base.ProcessBase):
     # Loop through jets and set accepted matches
     if self.is_pp:
         hname = 'hJetMatchingQA_R{}'.format(jetR)
-        [self.set_matches_pp(jet_det, hname) for jet_det in jets_det_selected]
+        [self.set_matches_pp(jet_det, hname) for jet_det in jets_det_reselected]
     else:
         hname = 'hJetMatchingQA_R{}_Rmax{}'.format(jetR, R_max)
-        [self.set_matches_AA(jet_det_combined, jetR, hname) for jet_det_combined in jets_det_selected]
+        [self.set_matches_AA(jet_det_combined, jetR, hname) for jet_det_combined in jets_det_reselected]
           
     # Loop through jets and fill response histograms if both det and truth jets are unique match
-    result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge, fj_particles_det_cones, fj_particles_truth_cones) for jet_det in jets_det_selected]
+    result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge, fj_particles_det_cones, fj_particles_truth_cones) for jet_det in jets_det_reselected]
 
   #---------------------------------------------------------------
   # Fill some background histograms
@@ -855,11 +855,24 @@ class ProcessMCBase(process_base.ProcessBase):
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
                                       grooming_setting, obs_label, jet_pt)
   
-  def find_parts_around_jet(self, parts, jet, cone_R):
-    # select particles around jet axis
+  def find_particles_in_cone(self, parts, cone_center_phi, cone_center_eta, cone_R):
+    # select particles around cone center
+    # conver cone center phi to [0, 2pi]
+    if cone_center_phi > 2*np.pi:
+        cone_center_phi = cone_center_phi - 2*np.pi
+    if cone_center_phi < 0:
+        cone_center_phi = cone_center_phi + 2*np.pi
+    
+    # print('cone R',cone_R,'phi',cone_center_phi,'eta',cone_center_eta,'area',np.pi*cone_R*cone_R)
     cone_parts = fj.vectorPJ()
     for part in parts:
-      if jet.delta_R(part) <= cone_R:
+      dphi = part.phi()-cone_center_phi
+      if dphi > 2*np.pi:
+        dphi = dphi - 2*np.pi 
+      if dphi < 0:
+        dphi = dphi + 2*np.pi 
+      deta = part.eta()-cone_center_eta
+      if math.sqrt(dphi*dphi+deta*deta) <= cone_R:
         cone_parts.push_back(part)
     
     return cone_parts
@@ -958,8 +971,8 @@ class ProcessMCBase(process_base.ProcessBase):
           cone_parts_in_truth_jet = None
           cone_R = self.jetcone_R
           if self.do_jetcone:
-            cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, cone_R)
-            cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, cone_R)
+            cone_parts_in_det_jet = self.find_particles_in_cone(fj_particles_det_cones, jet_det.phi(), jet_det.eta(), cone_R)
+            cone_parts_in_truth_jet = self.find_particles_in_cone(fj_particles_truth_cones, jet_truth.phi(), jet_truth.eta(), cone_R)
 
           # # debug
           # constituents = fj.sorted_by_pt(jet_truth.constituents())
