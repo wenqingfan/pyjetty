@@ -618,14 +618,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if c.pt() < trk_thrd:
           break
         c_select.append(c) # NB: use the break statement since constituents are already sorted
-      if 'Truth' in hname:
+      if 'ENC' in observable and 'Truth' in hname:
         print('Nconst inside cone:',len(c_select),'pt>',trk_thrd)
     else:
       for c in constituents:
         if c.pt() < trk_thrd:
           break
         c_select.append(c) # NB: use the break statement since constituents are already sorted
-      if 'Truth' in hname:
+      if 'ENC' in observable and 'Truth' in hname:
         print('Nconst inside jet:',len(c_select),'pt>',trk_thrd)
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
