@@ -873,7 +873,7 @@ class ProcessMCBase(process_base.ProcessBase):
     # select particles around jet axis
     cone_parts = fj.vectorPJ()
     for part in parts:
-      if jet.delta_R(part) <= 10000:
+      if jet.delta_R(part) <= cone_R:
         cone_parts.push_back(part)
     
     return cone_parts
@@ -970,14 +970,10 @@ class ProcessMCBase(process_base.ProcessBase):
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
             for jetcone_R in self.jetcone_R_list:
-              print('total parts for cone',jetcone_R,'search at det level',len(fj_particles_det_cones))
-              print('total parts for cone',jetcone_R,'search at truth level',len(fj_particles_truth_cones))
-
+              
               cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, jetcone_R)
               cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, jetcone_R)
-              print('total parts inside cone',jetcone_R,'at det level',len(cone_parts_in_det_jet))
-              print('total parts inside cone',jetcone_R,'at truth level',len(cone_parts_in_truth_jet))
-              
+
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
                                  jet_truth_groomed_lund, jet_pp_det, jetR,
