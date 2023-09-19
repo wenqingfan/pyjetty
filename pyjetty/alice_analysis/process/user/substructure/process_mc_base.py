@@ -633,7 +633,7 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_beforeCS = fj.sorted_by_pt(cs_combined_beforeCS.inclusive_jets())
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
-            jets_combined_reselected_beforeCS = reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
+            jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
 
             if self.do_rho_subtraction and rho > 0:
               for jet in jets_combined_selected_beforeCS:
