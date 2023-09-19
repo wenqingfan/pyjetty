@@ -11,7 +11,7 @@
 # The analysis step is intended to run for a single observable block
 
 process_observables: ['jet_ENC_RL', 'jet_pt', 'jet_EEC_weight2_RL']
-jetR: [0.2]
+jetR: [0.4]
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
 mc_fraction_threshold: 0.5
 reject_tracks_fraction: 0.0
@@ -26,10 +26,11 @@ do_rho_subtraction: True
 do_perpcone: True
 do_jetcone: True
 jetcone_R: 0.4
+leading_pt: 10
 
 constituent_subtractor:
-  max_distance: [0.1]
-  main_R_max: 0.1
+  max_distance: [0.25]
+  main_R_max: 0.25
   alpha: 0
   max_eta: 0.9
   bge_rho_grid_size: 1.0
