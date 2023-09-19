@@ -975,6 +975,8 @@ class ProcessMCBase(process_base.ProcessBase):
 
               cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, jetcone_R)
               cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, jetcone_R)
+              print('total parts inside cone',jetcone_R,'at det level',len(cone_parts_in_det_jet))
+              print('total parts inside cone',jetcone_R,'at truth level',len(cone_parts_in_truth_jet))
               
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
