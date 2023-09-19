@@ -970,8 +970,8 @@ class ProcessMCBase(process_base.ProcessBase):
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
             for jetcone_R in self.jetcone_R_list:
-              print('total parts for cone search at det level',len(fj_particles_det_cones))
-              print('total parts for cone search at truth level',len(fj_particles_truth_cones))
+              print('total parts for cone',jetcone_R,'search at det level',len(fj_particles_det_cones))
+              print('total parts for cone',jetcone_R,'search at truth level',len(fj_particles_truth_cones))
               cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, jetcone_R)
               cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, jetcone_R)
               
