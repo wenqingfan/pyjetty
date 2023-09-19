@@ -697,6 +697,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       cone_parts_in_truth_jet = kwargs['cone_parts_in_truth_jet']
       cone_R = kwargs['cone_R']
 
+      print('total parts inside cone',jetcone_R,'at det level',len(cone_parts_in_det_jet))
+      print('total parts inside cone',jetcone_R,'at truth level',len(cone_parts_in_truth_jet))
+
     # Todo: add additonal weight for jet pT spectrum
     # if self.rewight_pt:
     #   w_pt = 1+pow(jet_truth,0.2)
