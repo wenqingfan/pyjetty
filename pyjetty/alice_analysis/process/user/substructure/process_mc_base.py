@@ -127,10 +127,10 @@ class ProcessMCBase(process_base.ProcessBase):
       self.do_jetcone = config['do_jetcone']
     else:
       self.do_jetcone = False
-    if self.do_jetcone and 'jetcone_R' in config:
-      self.jetcone_R = config['jetcone_R']
+    if self.do_jetcone and 'jetcone_R_list' in config:
+      self.jetcone_R_list = config['jetcone_R_list']
     else:
-      self.jetcone_R = 0.4 # NB: set default value to 0.4
+      self.jetcone_R_list = [0.4] # NB: set default value to 0.4
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
     else:
@@ -633,7 +633,8 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_beforeCS = fj.sorted_by_pt(cs_combined_beforeCS.inclusive_jets())
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
-            jets_combined_reselected_beforeCS = []
+            jets_combined_reselected_beforeCS = reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
+
             if self.do_rho_subtraction and rho > 0:
               for jet in jets_combined_selected_beforeCS:
                 if jet.perp()-rho*jet.area() > 5:
@@ -643,7 +644,7 @@ class ProcessMCBase(process_base.ProcessBase):
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth)
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth)
             else:
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
@@ -654,12 +655,38 @@ class ProcessMCBase(process_base.ProcessBase):
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0, fj_particles_det_cones=fj_particles_combined_beforeCS, fj_particles_truth_cones=fj_particles_truth) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
             else:
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0)
+
+  #---------------------------------------------------------------
+  # Jet selection cuts.
+  #---------------------------------------------------------------
+  def reselect_jets(self, jets_selected, jetR, rho_bge = 0):
+    # re-apply jet pt > 5GeV cut after rho subtraction and leading track pt cut if there is any. NB: need to be applied inside apply_events to make sure matching work properly
+    jets_reselected = []
+    for jet in jets_selected:
+      is_jet_selected = True
+      
+      # leading track selection
+      if self.leading_pt > 0:
+        constituent = fj.sorted_by_pt(jet.constituents())
+        if constituent[0] < self.leading_pt:
+          is_jet_selected = False
+      
+      # if rho subtraction, require jet pt > 5 after subtration
+      if self.do_rho_subtraction and rho_bge > 0:
+        if jet.perp()-rho_bge*jet.area() < 5:
+          # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
+          is_jet_selected = False
+
+      if is_jet_selected:
+        jets_reselected.append(jet)
+
+    return jets_reselected
 
   #---------------------------------------------------------------
   # Analyze jets of a given event.
@@ -670,25 +697,6 @@ class ProcessMCBase(process_base.ProcessBase):
   
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
-
-    # jets_det_reselected = fj.vectorPJ()
-    # for jet in jets_det_selected:
-    #   is_jet_selected = True
-      
-    #   # leading track selection
-    #   if self.leading_pt > 0:
-    #     constituent = fj.sorted_by_pt(jet.constituents())
-    #     if constituent[0] < self.leading_pt:
-    #       is_jet_selected = False
-      
-    #   # if rho subtraction, require jet pt > 5 after subtration
-    #   if self.do_rho_subtraction and rho_bge > 0:
-    #     if jet.perp()-rho_bge*jet.area() < 5:
-    #       # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
-    #       is_jet_selected = False
-
-    #   if is_jet_selected:
-    #     jets_det_reselected.append(jet)
     
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
@@ -861,24 +869,11 @@ class ProcessMCBase(process_base.ProcessBase):
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
                                       grooming_setting, obs_label, jet_pt)
   
-  def find_particles_in_cone(self, parts, cone_center_phi, cone_center_eta, cone_R):
-    # select particles around cone center
-    # conver cone center phi to [0, 2pi]
-    if cone_center_phi > 2*np.pi:
-        cone_center_phi = cone_center_phi - 2*np.pi
-    if cone_center_phi < 0:
-        cone_center_phi = cone_center_phi + 2*np.pi
-    
-    # print('cone R',cone_R,'phi',cone_center_phi,'eta',cone_center_eta,'area',np.pi*cone_R*cone_R)
+  def find_parts_around_jet(self, parts, jet, cone_R):
+    # select particles around jet axis
     cone_parts = fj.vectorPJ()
     for part in parts:
-      dphi = part.phi()-cone_center_phi
-      if dphi > 2*np.pi:
-        dphi = dphi - 2*np.pi 
-      if dphi < 0:
-        dphi = dphi + 2*np.pi 
-      deta = part.eta()-cone_center_eta
-      if math.sqrt(dphi*dphi+deta*deta) <= cone_R:
+      if jet.delta_R(part) <= cone_R:
         cone_parts.push_back(part)
     
     return cone_parts
@@ -973,23 +968,29 @@ class ProcessMCBase(process_base.ProcessBase):
                 jet_pt_truth_ungroomed -= hadron.pt()
 
           # If check cone, pass the list of cone particles
-          cone_parts_in_det_jet = None
-          cone_parts_in_truth_jet = None
-          cone_R = self.jetcone_R
           if self.do_jetcone:
-            cone_parts_in_det_jet = self.find_particles_in_cone(fj_particles_det_cones, jet_det.phi(), jet_det.eta(), cone_R)
-            cone_parts_in_truth_jet = self.find_particles_in_cone(fj_particles_truth_cones, jet_truth.phi(), jet_truth.eta(), cone_R)
-
-          # # debug
-          # constituents = fj.sorted_by_pt(jet_truth.constituents())
+            for jetcone_R in self.jetcone_R_list:
+              cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, jetcone_R)
+              cone_parts_in_truth_jet = self.find_parts_around_jet(fj_particles_truth_cones, jet_truth, jetcone_R)
               
-          # Call user function to fill histos
-          self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+              # Call user function to fill histos
+              self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
                                  jet_truth_groomed_lund, jet_pp_det, jetR,
                                  obs_setting, grooming_setting, obs_label,
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet)
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R = jetcone_R)
+          else:
+            cone_parts_in_det_jet = None
+            cone_parts_in_truth_jet = None
+
+            # Call user function to fill histos
+            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                 jet_truth_groomed_lund, jet_pp_det, jetR,
+                                 obs_setting, grooming_setting, obs_label,
+                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R = 0)
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
