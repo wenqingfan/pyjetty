@@ -482,14 +482,36 @@ class ProcessDataBase(process_base.ProcessBase):
       perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
 
       for perpcone_R in perpcone_R_list:
-        parts_in_cone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
-        # for part in parts_in_cone1:
+
+        constituents = jet.constituents()
+        # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
+        if perpcone_R != jetR:
+          constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
+        parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
+        # for part in parts_in_perpcone1:
         #   print('before rotation',part.phi())
-        parts_in_cone1 = self.rotate_parts(parts_in_cone1, -np.pi/2)
-        # for part in parts_in_cone1:
+        parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+        # for part in parts_in_perpcone1:
         #   print('after rotation',part.phi())
-        parts_in_cone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R)
-        parts_in_cone2 = self.rotate_parts(parts_in_cone2, +np.pi/2)
+        
+        parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R)
+        parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
+
+        parts_in_cone1 = fj.vectorPJ()
+        for part in constituents:
+          part.set_user_index(1)
+          parts_in_cone1.append(part)
+        for part in parts_in_perpcone1:
+          part.set_user_index(-1)
+          parts_in_cone1.append(part)
+
+        parts_in_cone2 = fj.vectorPJ()
+        for part in constituents:
+          part.set_user_index(1)
+          parts_in_cone2.append(part)
+        for part in parts_in_perpcone2:
+          part.set_user_index(-1)
+          parts_in_cone2.append(part)
 
         self.analyze_accepted_cone(True, parts_in_cone1, perpcone_R, jet, jetR, suffix, rho_bge)
         self.analyze_accepted_cone(True, parts_in_cone2, perpcone_R, jet, jetR, suffix, rho_bge)
