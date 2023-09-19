@@ -618,11 +618,13 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if c.pt() < trk_thrd:
           break
         c_select.append(c) # NB: use the break statement since constituents are already sorted
+      print('Nconst inside cone:',len(c_select))
     else:
       for c in constituents:
         if c.pt() < trk_thrd:
           break
         c_select.append(c) # NB: use the break statement since constituents are already sorted
+      print('Nconst inside jet:',len(c_select))
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
