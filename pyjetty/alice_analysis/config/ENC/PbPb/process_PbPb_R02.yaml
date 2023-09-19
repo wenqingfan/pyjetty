@@ -25,7 +25,7 @@ ENC_pair_cut: False
 do_rho_subtraction: True
 do_perpcone: True
 do_jetcone: True
-jetcone_R: 0.4
+jetcone_R: [0.4]
 
 constituent_subtractor:
   max_distance: [0.1]
