@@ -636,7 +636,7 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_reselected_beforeCS = []
             if self.do_rho_subtraction and rho > 0:
               for jet in jets_combined_selected_beforeCS:
-                if jet.perp()-rho_bge*jet.area() > 5:
+                if jet.perp()-rho*jet.area() > 5:
                   jets_combined_reselected_beforeCS.append(jet)
 
             if self.do_jetcone:
