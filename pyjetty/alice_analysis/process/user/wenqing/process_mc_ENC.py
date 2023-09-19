@@ -610,27 +610,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   def fill_matched_observable_histograms(self, hname, observable, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, jet_pt_matched, cone_parts = None):
     
     constituents = fj.sorted_by_pt(jet.constituents())
+    if cone_parts!=None:
+      constituents = fj.sorted_by_pt(cone_parts)
+
     c_select = fj.vectorPJ()
     trk_thrd = obs_setting
 
-    if cone_parts!=None:
-      for c in cone_parts:
-        if c.pt() < trk_thrd:
-          continue
-        c_select.append(c) # NB: use the break statement since constituents are already sorted
-      if 'ENC' in observable and 'Truth' in hname:
-        print('Truth jet',jet.perp(),'Nconst inside cone:',len(c_select),'pt >',trk_thrd)
-      if 'ENC' in observable and (not 'Truth' in hname):
-        print('Det jet',jet_pt_ungroomed,'Nconst inside cone:',len(c_select),'pt >',trk_thrd)
-    else:
-      for c in constituents:
-        if c.pt() < trk_thrd:
-          break
-        c_select.append(c) # NB: use the break statement since constituents are already sorted
-      if 'ENC' in observable and 'Truth' in hname:
-        print('Truth jet',jet.perp(),'Nconst inside jet:',len(c_select),'pt >',trk_thrd)
-      if 'ENC' in observable and (not 'Truth' in hname):
-        print('Det jet',jet_pt_ungroomed,'Nconst inside jet:',len(c_select),'pt >',trk_thrd)
+    for c in constituents:
+      if c.pt() < trk_thrd:
+        break
+      c_select.append(c) # NB: use the break statement since constituents are already sorted
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
@@ -697,9 +686,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       cone_parts_in_truth_jet = kwargs['cone_parts_in_truth_jet']
       cone_R = kwargs['cone_R']
 
-      print('total parts inside cone',cone_R,'at det level',len(cone_parts_in_det_jet))
-      print('total parts inside cone',cone_R,'at truth level',len(cone_parts_in_truth_jet))
-
     # Todo: add additonal weight for jet pT spectrum
     # if self.rewight_pt:
     #   w_pt = 1+pow(jet_truth,0.2)
@@ -735,8 +721,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_jetcone{}_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_truth_jet)
 
-          # hname = 'h_jetcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
-          # self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet)          
+          hname = 'h_jetcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet)          
 
       # Fill correlation between matched det and truth jets
       if 'jet_pt' in observable:
