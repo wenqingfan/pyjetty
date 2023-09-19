@@ -305,44 +305,38 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
   #---------------------------------------------------------------
   def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
 
-    # calculate perp cone pt after subtraction
+    # calculate perp cone pt after subtraction. Notice that the perp cone already contain the particles from signal "jet". Signal and background can be identified using user_index()
     cone_px = 0
     cone_py = 0
     cone_npart = 0
     for part in cone_parts:
-      cone_px = cone_px + part.px()
-      cone_py = cone_py + part.py()
-      cone_npart = cone_npart + 1
+      if part.user_index() < 0:
+        cone_px = cone_px + part.px()
+        cone_py = cone_py + part.py()
+        cone_npart = cone_npart + 1
     cone_pt = math.sqrt(cone_px*cone_px + cone_py*cone_py)
     # print('cone pt', cone_pt-rho_bge*jet.area(), '(', cone_pt, ')')
-    cone_pt = cone_pt-rho_bge*jet.area()
+    cone_pt = cone_pt-rho_bge*jet.area() # ideally this should fluctuate around 0
     # print('jet pt', jet_pt_ungroomed, '(', jet.perp(), ')')
 
     # combine sig jet and perp cone with trk threshold cut
     trk_thrd = obs_setting
-    c_combined_select = fj.vectorPJ()
-
-    constituents = fj.sorted_by_pt(jet.constituents())
-    # print('jet nconst:',len(constituents))
-    for c in constituents:
-      if c.pt() < trk_thrd:
-        break
-      c.set_user_index(1) # positive index for jet constituents
-      c_combined_select.append(c) # NB: use the break statement since constituents are already sorted
-
-    nconst_jet = len(c_combined_select)
-    # print('jet nconst (with thrd cut):',nconst_jet)
+    c_select = fj.vectorPJ()
+    c_select_perp = fj.vectorPJ()
 
     cone_parts_sorted = fj.sorted_by_pt(cone_parts)
     # print('perp cone nconst:',len(cone_parts_sorted))
     for part in cone_parts_sorted:
       if part.pt() < trk_thrd:
         break
-      part.set_user_index(-1) # negative index for perp cone
-      c_combined_select.append(part) # NB: use the break statement since constituents are already sorted
+      c_select.append(part) # NB: use the break statement since constituents are already sorted
+      if part.user_index() < 0:
+        c_select_perp.append(part)
 
-    nconst_perp = len(c_combined_select) - nconst_jet
-    # print('perp cone nconst (with thrd cut):',nconst_perp)
+    nconst_perp = len(c_select_perp)
+    print('cone R',cone_R)
+    print('total cone nconst (with thrd cut):',len(c_select))
+    print('perp cone nconst (with thrd cut):',nconst_perp)
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
@@ -357,7 +351,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     else:
       jet_pt = jet.perp()
 
-    new_corr = ecorrel.CorrelatorBuilder(c_combined_select, jet_pt, 2, 1, dphi_cut, deta_cut)
+    new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
     for observable in self.observable_list:
 
       if 'jet_pt' in observable:
@@ -369,17 +363,17 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           for index in range(new_corr.correlator(ipoint).rs().size()):
 
             # processing only like-sign pairs when self.ENC_pair_like is on
-            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_combined_select, index)):
+            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
               continue
 
             # processing only unlike-sign pairs when self.ENC_pair_unlike is on
-            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_combined_select, index):
+            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
               continue
 
             # separate out sig-sig, sig-bkg, bkg-bkg correlations for EEC pairs
             pair_type_label = ''
             if self.do_rho_subtraction:
-              pair_type = self.check_pair_type(new_corr, ipoint, c_combined_select, index)
+              pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
               pair_type_label = self.pair_type_labels[pair_type]
 
             if 'ENC' in observable:
