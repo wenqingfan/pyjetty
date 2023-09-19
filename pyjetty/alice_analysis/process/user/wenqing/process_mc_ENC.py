@@ -616,7 +616,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     if cone_parts!=None:
       for c in cone_parts:
         if c.pt() < trk_thrd:
-          break
+          continue
         c_select.append(c) # NB: use the break statement since constituents are already sorted
       if 'ENC' in observable and 'Truth' in hname:
         print('Truth jet',jet.perp(),'Nconst inside cone:',len(c_select),'pt >',trk_thrd)
