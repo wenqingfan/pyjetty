@@ -613,10 +613,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     if cone_parts!=None:
       constituents = fj.sorted_by_pt(cone_parts)
 
-    if cone_parts!=None and 'Truth' in hname:
-      print('Nconst in cone',len(constituents))
-    if cone_parts==None and 'Truth' in hname:
-      print('Nconst in jet',len(constituents))
+    # if cone_parts!=None and 'Truth' in hname:
+    #   print('Nconst in cone',len(constituents))
+    # if cone_parts==None and 'Truth' in hname:
+    #   print('Nconst in jet',len(constituents))
 
     c_select = fj.vectorPJ()
     trk_thrd = obs_setting
