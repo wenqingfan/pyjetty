@@ -334,9 +334,9 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
         c_select_perp.append(part)
 
     nconst_perp = len(c_select_perp)
-    # print('cone R',cone_R)
-    # print('total cone nconst (with thrd cut):',len(c_select))
-    # print('perp cone nconst (with thrd cut):',nconst_perp)
+    print('cone R',cone_R)
+    print('total cone nconst (with thrd cut):',len(c_select))
+    print('perp cone nconst (with thrd cut):',nconst_perp)
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
