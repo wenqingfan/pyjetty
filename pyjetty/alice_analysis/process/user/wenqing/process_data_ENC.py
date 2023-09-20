@@ -309,11 +309,11 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     cone_px = 0
     cone_py = 0
     cone_npart = 0
-    for part in cone_parts:
-      if part.user_index() < 0:
-        cone_px = cone_px + part.px()
-        cone_py = cone_py + part.py()
-        cone_npart = cone_npart + 1
+    # for part in cone_parts:
+    #   if part.user_index() < 0:
+    #     cone_px = cone_px + part.px()
+    #     cone_py = cone_py + part.py()
+    #     cone_npart = cone_npart + 1
     cone_pt = math.sqrt(cone_px*cone_px + cone_py*cone_py)
     # print('cone pt', cone_pt-rho_bge*jet.area(), '(', cone_pt, ')')
     cone_pt = cone_pt-rho_bge*jet.area() # ideally this should fluctuate around 0
@@ -330,8 +330,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       if part.pt() < trk_thrd:
         break
       c_select.append(part) # NB: use the break statement since constituents are already sorted
-      if part.user_index() < 0:
-        c_select_perp.append(part)
+      # if part.user_index() < 0:
+      #   c_select_perp.append(part)
 
     nconst_perp = len(c_select_perp)
     # print('cone R',cone_R)
