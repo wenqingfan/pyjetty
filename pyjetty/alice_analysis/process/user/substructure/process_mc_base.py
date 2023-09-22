@@ -967,6 +967,14 @@ class ProcessMCBase(process_base.ProcessBase):
             for hadron in holes_in_truth_jet:
                 jet_pt_truth_ungroomed -= hadron.pt()
 
+          # Call user function to fill histos
+          self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                               jet_truth_groomed_lund, jet_pp_det, jetR,
+                               obs_setting, grooming_setting, obs_label,
+                               jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                               R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                               holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0)
+
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
             for jetcone_R in self.jetcone_R_list:
@@ -980,18 +988,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                  obs_setting, grooming_setting, obs_label,
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R = jetcone_R)
-          else:
-            cone_parts_in_det_jet = None
-            cone_parts_in_truth_jet = None
-
-            # Call user function to fill histos
-            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
-                                 jet_truth_groomed_lund, jet_pp_det, jetR,
-                                 obs_setting, grooming_setting, obs_label,
-                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
-                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R = 0)
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=jetcone_R)
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
