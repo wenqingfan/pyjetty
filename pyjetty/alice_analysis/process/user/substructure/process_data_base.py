@@ -343,7 +343,6 @@ class ProcessDataBase(process_base.ProcessBase):
       # leading track selection
       if self.leading_pt > 0 and is_perp == False:
         constituents = fj.sorted_by_pt(jet.constituents())
-        print('check leading track pt',constituents[0].perp(),'against cut',self.leading_pt)
         if constituents[0].perp() < self.leading_pt:
           is_jet_selected = False
       
@@ -370,6 +369,9 @@ class ProcessDataBase(process_base.ProcessBase):
       suffix = ''
 
     jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge)
+    for jet in jets_reselected:
+      constituents = fj.sorted_by_pt(jet.constituents())
+      print('check leading track pt after cut',constituents[0].perp())
     
     # Loop through jets and call user function to fill histos
     result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
