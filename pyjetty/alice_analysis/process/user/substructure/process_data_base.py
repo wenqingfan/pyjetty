@@ -341,8 +341,9 @@ class ProcessDataBase(process_base.ProcessBase):
       is_jet_selected = True
       
       # leading track selection
-      if self.leading_pt > 0 and is_perp==True:
+      if self.leading_pt > 0 and is_perp == False:
         constituent = fj.sorted_by_pt(jet.constituents())
+        print('check leading track pt',constituent[0],'against cut',self.leading_pt)
         if constituent[0] < self.leading_pt:
           is_jet_selected = False
       
