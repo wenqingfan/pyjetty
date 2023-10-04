@@ -639,16 +639,6 @@ class ProcessMCBase(process_base.ProcessBase):
               constituents = fj.sorted_by_pt(jet.constituents())
               print('jet pt',jet.perp(),'phi',jet.phi(),'eta',jet.eta(),'leading track',constituents[0].perp())
 
-            if self.do_rho_subtraction and rho > 0:
-              for jet in jets_combined_selected_beforeCS:
-                if jet.perp()-rho*jet.area() > 5:
-                  jets_combined_reselected_beforeCS.append(jet)
-
-            print('********after********')
-            for jet in jets_combined_reselected_beforeCS:
-              constituents = fj.sorted_by_pt(jet.constituents())
-              print('jet pt',jet.perp(),'phi',jet.phi(),'eta',jet.eta(),'leading track',constituents[0].perp())
-
             if self.do_jetcone:
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
