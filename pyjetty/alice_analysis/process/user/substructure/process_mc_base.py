@@ -634,11 +634,20 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
+            print('********before********')
+            for jet in jets_combined_reselected_beforeCS:
+              constituents = fj.sorted_by_pt(jet.constituents())
+              print('jet pt',jet.perp(),'phi',jet.phi(),'eta',jet.eta(),'leading track',constituents[0].perp())
 
             if self.do_rho_subtraction and rho > 0:
               for jet in jets_combined_selected_beforeCS:
                 if jet.perp()-rho*jet.area() > 5:
                   jets_combined_reselected_beforeCS.append(jet)
+
+            print('********after********')
+            for jet in jets_combined_reselected_beforeCS:
+              constituents = fj.sorted_by_pt(jet.constituents())
+              print('jet pt',jet.perp(),'phi',jet.phi(),'eta',jet.eta(),'leading track',constituents[0].perp())
 
             if self.do_jetcone:
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
@@ -674,7 +683,7 @@ class ProcessMCBase(process_base.ProcessBase):
       # leading track selection
       if self.leading_pt > 0:
         constituent = fj.sorted_by_pt(jet.constituents())
-        if constituent[0] < self.leading_pt:
+        if constituents[0].perp() < self.leading_pt:
           is_jet_selected = False
       
       # if rho subtraction, require jet pt > 5 after subtration
