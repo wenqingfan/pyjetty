@@ -682,7 +682,7 @@ class ProcessMCBase(process_base.ProcessBase):
       
       # leading track selection
       if self.leading_pt > 0:
-        constituent = fj.sorted_by_pt(jet.constituents())
+        constituents = fj.sorted_by_pt(jet.constituents())
         if constituents[0].perp() < self.leading_pt:
           is_jet_selected = False
       
