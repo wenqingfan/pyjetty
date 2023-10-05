@@ -24,8 +24,8 @@ ENC_pair_cut: False
 
 do_rho_subtraction: True
 do_perpcone: True
-do_jetcone: True
-jetcone_R_list: [0.2, 0.4, 1.0]
+do_jetcone: False
+jetcone_R_list: [0.2]
 
 constituent_subtractor:
   max_distance: [0.1]
@@ -47,7 +47,7 @@ jet_ENC_RL:
     pt_bins_reported: [40, 80, 120]
     max_reg_param: 10
     plot_overlay_list:
-      - ['config1', 'config2']
+      - ['config1', 'config2', 'config3']
       
   # RM binnings from processing:
   #   pt-truth: 10 GeV
@@ -66,6 +66,15 @@ jet_ENC_RL:
 
   config2:
     trk_thrd: 2.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config3:
+    trk_thrd: 0.5
     pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
     pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
     pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
@@ -82,7 +91,7 @@ jet_EEC_noweight_RL:
     pt_bins_reported: [40, 80, 120]
     max_reg_param: 10
     plot_overlay_list:
-      - ['config1', 'config2']
+      - ['config1', 'config2', 'config3']
       
   # RM binnings from processing:
   #   pt-truth: 10 GeV
@@ -101,6 +110,15 @@ jet_EEC_noweight_RL:
 
   config2:
     trk_thrd: 2.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config3:
+    trk_thrd: 0.5
     pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
     pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
     pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
@@ -117,7 +135,7 @@ jet_EEC_weight2_RL:
     pt_bins_reported: [40, 80, 120]
     max_reg_param: 10
     plot_overlay_list:
-      - ['config1', 'config2']
+      - ['config1', 'config2', 'config3']
       
   # RM binnings from processing:
   #   pt-truth: 10 GeV
@@ -143,6 +161,15 @@ jet_EEC_weight2_RL:
     obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
     obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
 
+  config3:
+    trk_thrd: 0.5
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.7, 0.8, 0.86, 0.9, 0.94, 0.98, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
 # Observable block
 jet_pair_dist:
 
@@ -152,7 +179,7 @@ jet_pair_dist:
     pt_bins_reported: [40, 80, 120]
     max_reg_param: 10
     plot_overlay_list:
-      - ['config1', 'config2']
+      - ['config1', 'config2', 'config3']
       
   # RM binnings from processing:
   #   pt-truth: 10 GeV
@@ -171,6 +198,15 @@ jet_pair_dist:
 
   config2:
     trk_thrd: 2.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config3:
+    trk_thrd: 0.5
     pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
     pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
     pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
@@ -187,7 +223,7 @@ jet_pt:
     pt_bins_reported: [40, 80, 120]
     max_reg_param: 10
     plot_overlay_list:
-      - ['config1', 'config2']
+      - ['config1', 'config2', 'config3']
       
   # RM binnings from processing:
   #   pt-truth: 10 GeV
@@ -206,6 +242,15 @@ jet_pt:
 
   config2:
     trk_thrd: 2.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config3:
+    trk_thrd: 0.5
     pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
     pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
     pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
