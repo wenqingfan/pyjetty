@@ -283,7 +283,6 @@ class PythiaGenDijetENC(process_base.ProcessBase):
 
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
-        for c in jet.constituents():
         cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         # select constituents with 1 GeV cut
