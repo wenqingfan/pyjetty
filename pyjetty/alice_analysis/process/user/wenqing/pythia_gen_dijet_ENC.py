@@ -139,10 +139,33 @@ class PythiaGenDijetENC(process_base.ProcessBase):
 
             for jet_level in self.jet_levels:
                 # ENC histograms (jet level == part level)
+                
+                # Jet pt vs xj
+                name = 'h_xj_in_ljetpt_{}_R{}'.format(jet_level, R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,200,200)
+                xj_bins = linbins(0,1,20)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 20, xj_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                h.GetYaxis().SetTitle('x_{j}')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_xj_in_sljetpt_{}_R{}'.format(jet_level, R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,200,200)
+                xj_bins = linbins(0,1,20)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 20, xj_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                h.GetYaxis().SetTitle('x_{j}')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+                
                 for dijet_label in self.dijet_label_list:
+                    
                     for ipoint in range(2, self.npoint+1):
 
-                        # ENc distributions
+                        # ENC distributions
                         name = 'h_ENC{}_{}_{}_R{}_trk00'.format(str(ipoint), dijet_label, jet_level, R_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
@@ -185,16 +208,16 @@ class PythiaGenDijetENC(process_base.ProcessBase):
                             setattr(self, name, h)
                             getattr(self, hist_list_name).append(h)
 
-                        # Jet pt vs N constituents
-                        name = 'h_Nconst_{}_{}_R{}'.format(dijet_label, jet_level, R_label)
-                        print('Initialize histogram',name)
-                        pt_bins = linbins(0,200,200)
-                        Nconst_bins = linbins(0,50,50)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-                        h.GetXaxis().SetTitle('pT (jet)')
-                        h.GetYaxis().SetTitle('N_{const}')
-                        setattr(self, name, h)
-                        getattr(self, hist_list_name).append(h)
+                    # Jet pt vs N constituents
+                    name = 'h_Nconst_{}_{}_R{}'.format(dijet_label, jet_level, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    Nconst_bins = linbins(0,50,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
+                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetYaxis().SetTitle('N_{const}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
