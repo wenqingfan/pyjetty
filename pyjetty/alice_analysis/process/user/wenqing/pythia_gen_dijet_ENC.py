@@ -340,6 +340,9 @@ class PythiaGenDijetENC(process_base.ProcessBase):
                 if jet_level == "ch":
                     dijets = dijets_ch
 
+                if len(jets)<2:
+                    continue
+                
                 dphi = dijets[0].delta_phi_to(dijets[1])
                 xj = dijets[1].perp()/dijets[0].perp()
 
