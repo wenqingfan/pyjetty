@@ -292,7 +292,7 @@ class PythiaGenDijetENC(process_base.ProcessBase):
         ixjbin = -9999
         for ixj in range(self.xjbin):
             if xj>=self.xj_lo[ixj] and xj<self.xj_hi[ixj]:
-            ixjbin = ixj
+                ixjbin = ixj
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
