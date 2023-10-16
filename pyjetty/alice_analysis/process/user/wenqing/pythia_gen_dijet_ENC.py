@@ -325,11 +325,11 @@ class PythiaGenDijetENC(process_base.ProcessBase):
             for index in range(cb0.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_{}_{}_R{}_trk00'.format(str(ipoint), dijet_label, level, R_label)).Fill(jet_ref.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
                     if ixjbin >= 0:
-                        getattr(self, 'h_ENC{}_{}_{}_R{}_trk00_xj{}'.format(str(ipoint), dijet_label, level, R_label)).Fill(jet_ref.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index],ixjbin)
+                        getattr(self, 'h_ENC{}_{}_{}_R{}_trk00_xj{}'.format(str(ipoint), dijet_label, level, R_label, ixjbin)).Fill(jet_ref.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_{}_{}_R{}_trk10'.format(str(ipoint), dijet_label, level, R_label)).Fill(jet_ref.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
                     if ixjbin >= 0:
-                        getattr(self, 'h_ENC{}_{}_{}_R{}_trk10_xj{}'.format(str(ipoint), dijet_label, level, R_label)).Fill(jet_ref.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index],ixjbin)
+                        getattr(self, 'h_ENC{}_{}_{}_R{}_trk10_xj{}'.format(str(ipoint), dijet_label, level, R_label, ixjbin)).Fill(jet_ref.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
 
         getattr(self, 'h_Nconst_{}_{}_R{}'.format(dijet_label, level, R_label)).Fill(jet_ref.perp(), len(jet.constituents()))
 
