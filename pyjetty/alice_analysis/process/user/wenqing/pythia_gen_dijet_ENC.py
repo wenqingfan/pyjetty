@@ -313,7 +313,7 @@ class PythiaGenDijetENC(process_base.ProcessBase):
         # select constituents with 1 GeV cut
         _c_select1 = fj.vectorPJ()
         for c in pfc_selector1(jet.constituents()):
-            c_select1.push_back(c)
+            _c_select1.push_back(c)
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         ixjbin = -9999
