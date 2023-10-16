@@ -370,7 +370,7 @@ class PythiaGenDijetENC(process_base.ProcessBase):
 
                 dphi = dijets[0].delta_phi_to(dijets[1])
                 xj = dijets[1].perp()/dijets[0].perp()
-                print('dijet xj',xi,'dphi',dphi)
+                print('dijet xj',xj,'dphi',dphi)
 
                 # NB: add knob to enable back-to-back topology cut
                 if self.do_back_to_back and abs(dphi)<5/6*math.pi:
