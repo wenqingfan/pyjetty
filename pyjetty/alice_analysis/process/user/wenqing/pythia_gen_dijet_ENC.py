@@ -306,10 +306,14 @@ class PythiaGenDijetENC(process_base.ProcessBase):
 
         # select all constituents with no cut
         _c_select0 = fj.vectorPJ()
+        for c in jet.constituents():
+            _c_select0.push_back(c)
         cb0 = ecorrel.CorrelatorBuilder(_c_select0, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         # select constituents with 1 GeV cut
         _c_select1 = fj.vectorPJ()
+        for c in pfc_selector1(jet.constituents()):
+            c_select1.push_back(c)
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         ixjbin = -9999
@@ -376,8 +380,8 @@ class PythiaGenDijetENC(process_base.ProcessBase):
                 if self.do_back_to_back and abs(dphi)<5/6*math.pi:
                     pass
                 else:
-                    getattr(self, 'h_xj_in_ljetpt_{}_R{}'.format(jet_level, R_label)).Fill(xj, dijets[0].perp())
-                    getattr(self, 'h_xj_in_sljetpt_{}_R{}'.format(jet_level, R_label)).Fill(xj, dijets[1].perp())
+                    getattr(self, 'h_xj_in_ljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[0].perp(), xj)
+                    getattr(self, 'h_xj_in_sljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[1].perp(), xj)
 
                     #-------------------------------------------------------------
                     # loop over dijets and fill EEC histograms with jet constituents
