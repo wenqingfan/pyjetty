@@ -377,7 +377,7 @@ class PythiaGenDijetENC(process_base.ProcessBase):
                 if self.do_back_to_back and abs(dphi)<5/6*math.pi:
                     pass
                 else:
-                    print('dijet xj',xj,'dphi',dphi)
+                    # print('dijet xj',xj,'dphi',dphi)
                     getattr(self, 'h_xj_in_ljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[0].perp(), xj)
                     getattr(self, 'h_xj_in_sljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[1].perp(), xj)
 
