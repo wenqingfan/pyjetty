@@ -356,8 +356,6 @@ class PythiaGenDijetENC(process_base.ProcessBase):
             dijets_h = jets_h[:2]
             dijets_ch = jets_ch[:2]
 
-            print('size of jets',len(jets_ch),'and dijets',len(dijets_ch))
-
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
             for jet_level in self.jet_levels:
@@ -374,12 +372,12 @@ class PythiaGenDijetENC(process_base.ProcessBase):
 
                 dphi = dijets[0].delta_phi_to(dijets[1])
                 xj = dijets[1].perp()/dijets[0].perp()
-                print('dijet xj',xj,'dphi',dphi)
 
                 # NB: add knob to enable back-to-back topology cut
                 if self.do_back_to_back and abs(dphi)<5/6*math.pi:
                     pass
                 else:
+                    print('dijet xj',xj,'dphi',dphi)
                     getattr(self, 'h_xj_in_ljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[0].perp(), xj)
                     getattr(self, 'h_xj_in_sljetpt_{}_R{}'.format(jet_level, R_label)).Fill(dijets[1].perp(), xj)
 
