@@ -367,14 +367,17 @@ class PythiaGenDijetENC(process_base.ProcessBase):
                 if jet_level == "ch":
                     dijets = dijets_ch
 
-                if len(dijets)<2:
+                if len(dijets) < 2:
                     continue
 
+                if dijets[1].perp() < 15: # minimum pT cut on subleading jet
+                    continue
+                
                 dphi = dijets[0].delta_phi_to(dijets[1])
                 xj = dijets[1].perp()/dijets[0].perp()
 
                 # NB: add knob to enable back-to-back topology cut
-                if self.do_back_to_back and abs(dphi)<5/6*math.pi:
+                if self.do_back_to_back and abs(dphi) < 5/6*math.pi:
                     pass
                 else:
                     # print('dijet xj',xj,'dphi',dphi)
