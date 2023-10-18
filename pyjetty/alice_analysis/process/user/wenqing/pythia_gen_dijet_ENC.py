@@ -233,7 +233,8 @@ class PythiaGenDijetENC(process_base.ProcessBase):
             print(jet_def)
 
         # pwarning('max eta for particles after hadronization set to', self.max_eta_hadron)
-        track_selector_ch = fj.SelectorPtMin(0.15)
+        part_selector_h = fj.SelectorAbsEtaMax(self.max_eta_hadron)
+        track_selector_ch = fj.SelectorPtMin(0.15) & part_selector_h # charged particles with |eta|<0.9 and pT > 0.15
         setattr(self, "track_selector_ch", track_selector_ch)
 
         pfc_selector1 = fj.SelectorPtMin(1.)
