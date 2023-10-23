@@ -396,8 +396,6 @@ class ProcessDataBase(process_base.ProcessBase):
       if len(dijets) < 2:
         return
 
-      print('number of jets (raw)',len(jets_selected))
-
       dphi = dijets[0].delta_phi_to(dijets[1])
       xj = dijets[1].perp()/dijets[0].perp()
 
@@ -409,7 +407,7 @@ class ProcessDataBase(process_base.ProcessBase):
       if dijets[1].perp() < 15:
         return
       
-      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
+      # print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
 
       ixjbin = int(xj/self.xj_interval)
       dijet_xj_label = '_xj{:.1f}{:.1f}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
