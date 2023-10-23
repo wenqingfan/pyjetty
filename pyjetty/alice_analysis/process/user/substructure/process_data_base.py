@@ -498,7 +498,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
   def analyze_jet_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones around jet axis. NB: maybe can even use WTA axis
-    if R_max and !self.do_rho_subtraction:
+    if R_max and (not self.do_rho_subtraction):
       suffix = '_Rmax{}'.format(R_max)
     else:
       suffix = ''
@@ -513,7 +513,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
   def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones perpendicular to jet in the azimuthal plane
-    if R_max and !self.do_rho_subtraction:
+    if R_max and (not self.do_rho_subtraction):
       suffix = '_Rmax{}'.format(R_max)
     else:
       suffix = ''
