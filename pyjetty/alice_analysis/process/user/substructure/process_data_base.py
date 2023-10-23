@@ -123,7 +123,7 @@ class ProcessDataBase(process_base.ProcessBase):
       self.subleading_jet = False
 
     # NB: safeguard, make sure to only process one type at a time
-    if (self.leading_jet and !self.subleading_jet) or (!self.leading_jet and self.subleading_jet):
+    if (self.leading_jet and (not self.subleading_jet)) or ((not self.leading_jet) and self.subleading_jet):
       self.is_dijet = True
       self.xj_interval = 0.2
     else:
