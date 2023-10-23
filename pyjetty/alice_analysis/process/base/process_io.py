@@ -60,7 +60,10 @@ class ProcessIO(common_base.CommonBase):
     # Set the combination of fields that give a unique event id
     self.unique_identifier =  ['run_number', 'ev_id']
     if self.use_ev_id_ext:
-      self.unique_identifier += ['ev_id_ext']
+      if self.is_pp:
+        self.unique_identifier += ['ev_id_ext']
+      else:
+        pass # somehow for PbPb there is no 'ev_id_ext'
       
     # Set relevant columns of event tree
     self.event_columns = self.unique_identifier + ['z_vtx_reco', 'is_ev_rej']
