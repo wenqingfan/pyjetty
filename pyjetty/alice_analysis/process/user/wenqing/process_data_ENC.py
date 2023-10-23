@@ -73,7 +73,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           if self.is_dijet:
             xjbin = int(0.99/self.xj_interval + 1)
             for ixj in range(xjbin):
-              jet_type_labels.append( '_xj{}{}'.format(self.xj_interval*ixj, self.xj_interval*(ixj+1)) )
+              jet_type_labels.append( '_xj{:.1f}{:.1f}'.format(self.xj_interval*ixj, self.xj_interval*(ixj+1)) )
           else:
             jet_type_labels.append( '' )
           
