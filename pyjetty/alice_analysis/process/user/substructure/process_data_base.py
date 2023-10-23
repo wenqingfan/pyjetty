@@ -389,8 +389,8 @@ class ProcessDataBase(process_base.ProcessBase):
     if self.is_dijet:
       
       # in case background subtruction chnaged the ordering
-      jets_selected_sorted = fj.sorted_by_pt(jets_selected)
-      dijets = jets_selected_sorted[:2]
+      jets_reselected_sorted = fj.sorted_by_pt(jets_reselected)
+      dijets = jets_reselected_sorted[:2]
 
       # accept events with # of jets >=2
       if len(dijets) < 2:
@@ -401,16 +401,16 @@ class ProcessDataBase(process_base.ProcessBase):
       dphi = dijets[0].delta_phi_to(dijets[1])
       xj = dijets[1].perp()/dijets[0].perp()
 
-      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
-      
       # back-to-back requirement
       if abs(dphi) < 5/6*math.pi:
         return
       
-      # # minimum pT cut on subleading jet
-      # if dijets[1].perp() < 15:
-      #   return
+      # minimum pT cut on subleading jet
+      if dijets[1].perp() < 15:
+        return
       
+      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
+
       ixjbin = int(xj/self.xj_interval)
       dijet_xj_label = '_xj{:.1f}{:.1f}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
 
