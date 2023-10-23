@@ -526,8 +526,12 @@ class ProcessMCBase(process_base.ProcessBase):
         # for i, R_max in enumerate(self.max_distance):
         #   rho = self.constituent_subtractor[i].bge_rho.rho()
         #   print('rho is ',rho)
-        # for part in fj_particles_combined_beforeCS:
-        #   print('index checking:',part.user_index(),'pt',part.perp())
+        print('Before CS subtraction')
+        for part in fj_particles_combined_beforeCS:
+          print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
+        print('After CS subtraction')
+        for part in fj_particles_combined[0]:
+          print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
         
         if self.debug_level > 3:
           print([p.user_index() for p in fj_particles_truth])
