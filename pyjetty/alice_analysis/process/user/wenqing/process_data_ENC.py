@@ -68,10 +68,37 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
         for trk_thrd in self.obs_settings[observable]:
 
           obs_label = self.utils.obs_label(trk_thrd, None) 
+
+          jet_type_labels = []
+          if self.is_dijet:
+            xjbin = 0.99/self.xj_interval + 1
+            for ixj in range(xjbin):
+              jet_type_labels.append( '_xj{}{}'.format(self.xj_interval*ixj, self.xj_interval*(ixj+1)) )
+          else:
+            jet_type_labels.append( '' )
           
-          if 'ENC' in observable:
-            for ipoint in range(2, 3):
-              name = 'h_{}_JetPt_R{}_{}'.format(observable + str(ipoint), jetR, trk_thrd)
+          # only apply jet type labels for jets (not perpcone nor jetcone). FIX ME: not sure if needed for perpcone (sig-bkg correlations)
+          for jet_type_label in jet_type_labels:
+            if 'ENC' in observable:
+              for ipoint in range(2, 3):
+                name = 'h_{}_JetPt_R{}_{}{}'.format(observable + str(ipoint), jetR, trk_thrd, jet_type_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+
+                name = 'h_{}Pt_JetPt_R{}_{}{}'.format(observable + str(ipoint), jetR, trk_thrd, jet_type_label)
+                pt_bins = linbins(0,200,200)
+                ptRL_bins = logbins(1E-3,1E2,60)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                setattr(self, name, h)
+
+            if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+              name = 'h_{}_JetPt_R{}_{}{}'.format(observable, jetR, obs_label, jet_type_label)
               pt_bins = linbins(0,200,200)
               RL_bins = logbins(1E-4,1,50)
               h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -79,44 +106,27 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
               h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
 
-              name = 'h_{}Pt_JetPt_R{}_{}'.format(observable + str(ipoint), jetR, trk_thrd)
+            if 'jet_pt' in observable:
+              name = 'h_{}_JetPt_R{}_{}{}'.format(observable, jetR, trk_thrd, jet_type_label)
               pt_bins = linbins(0,200,200)
-              ptRL_bins = logbins(1E-3,1E2,60)
-              h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+              h = ROOT.TH1D(name, name, 200, pt_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}')
-              h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+              h.GetYaxis().SetTitle('Counts')
               setattr(self, name, h)
 
-          if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-            name = 'h_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
-
-          if 'jet_pt' in observable:
-            name = 'h_{}_JetPt_R{}_{}'.format(observable, jetR, trk_thrd)
-            pt_bins = linbins(0,200,200)
-            h = ROOT.TH1D(name, name, 200, pt_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('Counts')
-            setattr(self, name, h)
-
-            name = 'h_Nconst_JetPt_R{}_{}'.format(jetR, trk_thrd)
-            pt_bins = linbins(0,200,200)
-            Nconst_bins = linbins(0,50,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('N_{const}')
-            setattr(self, name, h)
+              name = 'h_Nconst_JetPt_R{}_{}{}'.format(jetR, trk_thrd, jet_type_label)
+              pt_bins = linbins(0,200,200)
+              Nconst_bins = linbins(0,50,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('N_{const}')
+              setattr(self, name, h)
 
           # fill perp cone histograms
           self.pair_type_labels = ['']
+
           if self.do_rho_subtraction:
             self.pair_type_labels = ['_bb','_sb','_ss']
-
           
           if self.do_perpcone:
             
@@ -266,7 +276,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       dphi_cut = -9999
       deta_cut = -9999
 
-    hname = 'h_{}_JetPt_R{}_{}'
+    hname = 'h_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
     else:
@@ -287,18 +297,18 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
               continue
 
             if 'ENC' in observable:
-              getattr(self, hname.format(observable + str(ipoint), jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(observable + str(ipoint) + 'Pt', jetR, obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
+              getattr(self, hname.format(observable + str(ipoint), jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+              getattr(self, hname.format(observable + str(ipoint) + 'Pt', jetR, obs_label, suffix)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
 
             if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
       if 'jet_pt' in observable:
-        getattr(self, hname.format(observable, jetR, obs_label)).Fill(jet_pt) 
-        getattr(self, hname.format('Nconst', jetR, obs_label)).Fill(jet_pt, nconst_jet)  
+        getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt) 
+        getattr(self, hname.format('Nconst', jetR, obs_label, suffix)).Fill(jet_pt, nconst_jet)  
           
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -345,7 +355,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       dphi_cut = -9999
       deta_cut = -9999
 
-    hname = 'h_perpcone{}_{}_JetPt_R{}_{}'
+    hname = 'h_perpcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
     else:
@@ -355,8 +365,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     for observable in self.observable_list:
 
       if 'jet_pt' in observable:
-        getattr(self, hname.format(cone_R, 'pt', jetR, obs_label)).Fill(cone_pt)
-        getattr(self, hname.format(cone_R, 'Nconst', jetR, obs_label)).Fill(jet_pt, nconst_perp)
+        getattr(self, hname.format(cone_R, 'pt', jetR, obs_label, suffix)).Fill(cone_pt)
+        getattr(self, hname.format(cone_R, 'Nconst', jetR, obs_label, suffix)).Fill(jet_pt, nconst_perp)
 
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         for ipoint in range(2, 3):
@@ -378,14 +388,14 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
             if 'ENC' in observable:
               # print('hname is',hname.format(cone_R, observable + str(ipoint) + pair_type_label, jetR, obs_label))
-              getattr(self, hname.format(cone_R, observable + str(ipoint) + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(cone_R, observable + str(ipoint) + pair_type_label + 'Pt', jetR, obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
+              getattr(self, hname.format(cone_R, observable + str(ipoint) + pair_type_label, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+              getattr(self, hname.format(cone_R, observable + str(ipoint) + pair_type_label + 'Pt', jetR, obs_label, suffix)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
 
             if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(cone_R, observable + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(cone_R, observable + pair_type_label, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(cone_R, observable + pair_type_label, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(cone_R, observable + pair_type_label, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -410,7 +420,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       dphi_cut = -9999
       deta_cut = -9999
 
-    hname = 'h_jetcone{}_{}_JetPt_R{}_{}'
+    hname = 'h_jetcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
     else:
@@ -433,14 +443,14 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
             if 'ENC' in observable:
               # print('hname is',hname.format(cone_R, observable + str(ipoint), jetR, obs_label))
-              getattr(self, hname.format(cone_R, observable + str(ipoint), jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(cone_R, observable + str(ipoint) + 'Pt', jetR, obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
+              getattr(self, hname.format(cone_R, observable + str(ipoint), jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+              getattr(self, hname.format(cone_R, observable + str(ipoint) + 'Pt', jetR, obs_label, suffix)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
 
             if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(cone_R, observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(cone_R, observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(cone_R, observable, jetR, obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(cone_R, observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
 ##################################################################
 if __name__ == '__main__':
