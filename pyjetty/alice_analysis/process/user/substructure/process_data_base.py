@@ -120,12 +120,14 @@ class ProcessDataBase(process_base.ProcessBase):
     if 'subleading_jet' in config:
       self.subleading_jet = config['subleading_jet']
     else:
-      self.leading_jet = False
+      self.subleading_jet = False
 
     # NB: safeguard, make sure to only process one type at a time
     if (self.leading_jet and !self.subleading_jet) or (!self.leading_jet and self.subleading_jet):
       self.is_dijet = True
       self.xj_interval = 0.2
+    else:
+      self.is_dijet = False
     
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
