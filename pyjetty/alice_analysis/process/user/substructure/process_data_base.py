@@ -407,9 +407,9 @@ class ProcessDataBase(process_base.ProcessBase):
       if abs(dphi) < 5/6*math.pi:
         return
       
-      # minimum pT cut on subleading jet
-      if dijets[1].perp() < 15:
-        return
+      # # minimum pT cut on subleading jet
+      # if dijets[1].perp() < 15:
+      #   return
       
       ixjbin = int(xj/self.xj_interval)
       dijet_xj_label = '_xj{:.1f}{:.1f}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
