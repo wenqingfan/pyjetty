@@ -389,8 +389,8 @@ class ProcessDataBase(process_base.ProcessBase):
     if self.is_dijet:
       
       # in case background subtruction chnaged the ordering
-      jets_reselected_sorted = fj.sorted_by_pt(jets_reselected)
-      dijets = jets_reselected_sorted[:2]
+      jets_selected_sorted = fj.sorted_by_pt(jets_selected)
+      dijets = jets_selected_sorted[:2]
 
       # accept events with # of jets >=2
       if len(dijets) < 2:
