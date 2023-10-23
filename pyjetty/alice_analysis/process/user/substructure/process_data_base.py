@@ -391,6 +391,8 @@ class ProcessDataBase(process_base.ProcessBase):
       # in case background subtruction chnaged the ordering
       jets_reselected_sorted = fj.sorted_by_pt(jets_reselected)
       dijets = jets_reselected_sorted[:2]
+
+      print('number of jets',len(dijets))
       
       # accept events with # of jets >=2
       if len(dijets) < 2:
