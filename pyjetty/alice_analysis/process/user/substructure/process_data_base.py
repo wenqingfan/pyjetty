@@ -144,9 +144,6 @@ class ProcessDataBase(process_base.ProcessBase):
       obs_subconfig_list = [name for name in list(obs_config_dict.keys()) if 'config' in name ]
       self.obs_settings[observable] = self.utils.obs_settings(observable, obs_config_dict, obs_subconfig_list)
       self.obs_grooming_settings[observable] = self.utils.grooming_settings(obs_config_dict)
-
-    for R_max in self.max_distance:
-      print('R_max',R_max,'alpha',self.alpha,'grid size',self.bge_rho_grid_size)
       
     # Construct set of unique grooming settings
     self.grooming_settings = []
