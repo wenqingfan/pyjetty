@@ -380,7 +380,7 @@ class ProcessDataBase(process_base.ProcessBase):
   def analyze_jets(self, jets_selected, jetR, R_max = None, rho_bge = 0):
   
     # Prepare suffix for the CS background subtraction config
-    if R_max and !self.do_rho_subtraction:
+    if R_max and (not self.do_rho_subtraction):
       R_max_label = '_Rmax{}'.format(R_max) # only use this suffix for "real" CS subtraction, not just rho subtraction
     else:
       R_max_label = ''
