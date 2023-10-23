@@ -111,6 +111,21 @@ class ProcessDataBase(process_base.ProcessBase):
         self.leading_pt = config['leading_pt']
     else:
         self.leading_pt = -1 # negative means no leading track cut
+
+    # if only processing dijets 
+    if 'leading_jet' in config:
+      self.leading_jet = config['leading_jet']
+    else:
+      self.leading_jet = False
+    if 'subleading_jet' in config:
+      self.subleading_jet = config['subleading_jet']
+    else:
+      self.leading_jet = False
+
+    # NB: safeguard, make sure to only process one type at a time
+    if (self.leading_jet and !self.subleading_jet) or (!self.leading_jet and self.subleading_jet):
+      self.is_dijet = True
+      self.xj_interval = 0.2
     
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
@@ -362,16 +377,54 @@ class ProcessDataBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   def analyze_jets(self, jets_selected, jetR, R_max = None, rho_bge = 0):
   
-    # Set suffix for filling histograms
-    if R_max:
-      suffix = '_Rmax{}'.format(R_max)
+    # Prepare suffix for the CS background subtraction config
+    if R_max and !self.do_rho_subtraction:
+      R_max_label = '_Rmax{}'.format(R_max) # only use this suffix for "real" CS subtraction, not just rho subtraction
     else:
-      suffix = ''
+      R_max_label = ''
 
+    # reselect jets after background subtraction (for PbPb case)
     jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge)
-    
+
     # Loop through jets and call user function to fill histos
-    result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
+    if self.is_dijet:
+      
+      # in case background subtruction chnaged the ordering
+      jets_reselected_sorted = fj.sorted_by_pt(jets_reselected)
+      dijets = jets_reselected_sorted[:2]
+      
+      # accept events with # of jets >=2
+      if len(dijets) < 2:
+        return
+
+      # minimum pT cut on subleading jet
+      if dijets[1].perp() < 15:
+        return
+      
+      dphi = dijets[0].delta_phi_to(dijets[1])
+      xj = dijets[1].perp()/dijets[0].perp()
+      
+      # back-to-back requirement
+      if abs(dphi) < 5/6*math.pi:
+        return
+      
+      ixjbin = int(xj/self.xj_interval)
+      dijet_xj_label = '_xj{}{}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
+
+      # Set suffix for filling histograms
+      suffix = '{}{}'.format(R_max_label, dijet_xj_label)
+
+      if self.leading_jet: # leading
+        result = self.analyze_accepted_jet(dijets[0], jetR, suffix, rho_bge)
+      else: # subleading
+        result = self.analyze_accepted_jet(dijets[1], jetR, suffix, rho_bge)
+    
+    else:
+
+      # Set suffix for filling histograms
+      suffix = '{}'.format(R_max_label)
+
+      result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
 
   #---------------------------------------------------------------
   # Fill histograms
@@ -443,7 +496,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
   def analyze_jet_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones around jet axis. NB: maybe can even use WTA axis
-    if R_max:
+    if R_max and !self.do_rho_subtraction:
       suffix = '_Rmax{}'.format(R_max)
     else:
       suffix = ''
@@ -458,7 +511,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
   def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones perpendicular to jet in the azimuthal plane
-    if R_max:
+    if R_max and !self.do_rho_subtraction:
       suffix = '_Rmax{}'.format(R_max)
     else:
       suffix = ''
