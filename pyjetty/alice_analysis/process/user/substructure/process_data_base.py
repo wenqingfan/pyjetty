@@ -382,8 +382,6 @@ class ProcessDataBase(process_base.ProcessBase):
     else:
       R_max_label = ''
 
-    print('number of jets (raw)',len(jets_selected))
-
     # reselect jets after background subtraction (for PbPb case)
     jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge)
 
@@ -398,18 +396,21 @@ class ProcessDataBase(process_base.ProcessBase):
       if len(dijets) < 2:
         return
 
-      # minimum pT cut on subleading jet
-      if dijets[1].perp() < 15:
-        return
-      
+      print('number of jets (raw)',len(jets_selected))
+
       dphi = dijets[0].delta_phi_to(dijets[1])
       xj = dijets[1].perp()/dijets[0].perp()
+
+      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
       
       # back-to-back requirement
       if abs(dphi) < 5/6*math.pi:
         return
       
-      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
+      # minimum pT cut on subleading jet
+      if dijets[1].perp() < 15:
+        return
+      
       ixjbin = int(xj/self.xj_interval)
       dijet_xj_label = '_xj{:.1f}{:.1f}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
 
