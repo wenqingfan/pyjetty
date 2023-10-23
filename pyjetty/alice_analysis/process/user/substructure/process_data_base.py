@@ -407,8 +407,9 @@ class ProcessDataBase(process_base.ProcessBase):
       if abs(dphi) < 5/6*math.pi:
         return
       
+      print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
       ixjbin = int(xj/self.xj_interval)
-      dijet_xj_label = '_xj{}{}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
+      dijet_xj_label = '_xj{:.1f}{:.1f}'.format(0.2*ixjbin, 0.2*(ixjbin+1))
 
       # Set suffix for filling histograms
       suffix = '{}{}'.format(R_max_label, dijet_xj_label)
