@@ -382,6 +382,8 @@ class ProcessDataBase(process_base.ProcessBase):
     else:
       R_max_label = ''
 
+    print('number of jets (raw)',len(jets_selected))
+
     # reselect jets after background subtraction (for PbPb case)
     jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge)
 
@@ -392,8 +394,6 @@ class ProcessDataBase(process_base.ProcessBase):
       jets_reselected_sorted = fj.sorted_by_pt(jets_reselected)
       dijets = jets_reselected_sorted[:2]
 
-      print('number of jets',len(dijets))
-      
       # accept events with # of jets >=2
       if len(dijets) < 2:
         return
