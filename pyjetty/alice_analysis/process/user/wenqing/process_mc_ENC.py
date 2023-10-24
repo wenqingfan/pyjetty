@@ -120,7 +120,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         obs_label = self.utils.obs_label(trk_thrd, None) 
 
         self.pair_type_labels = ['']
-        if self.do_rho_subtraction:
+        if self.do_rho_subtraction or self.do_constituent_subtraction:
           self.pair_type_labels = ['_bb','_sb','_ss']
 
         # Init ENC histograms (both det and truth level)
@@ -547,7 +547,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             
             # separate out sig-sig, sig-bkg, bkg-bkg correlations for EEC pairs
             pair_type_label = ''
-            if self.do_rho_subtraction:
+            if self.do_rho_subtraction or self.do_constituent_subtraction:
               pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
               pair_type_label = self.pair_type_labels[pair_type]
 
@@ -647,7 +647,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         for index in range(new_corr.correlator(ipoint).rs().size()):
           pair_type_label = ''
-          if self.do_rho_subtraction:
+          if self.do_rho_subtraction or self.do_constituent_subtraction:
             pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
             pair_type_label = self.pair_type_labels[pair_type]
           
