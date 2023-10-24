@@ -526,27 +526,27 @@ class ProcessMCBase(process_base.ProcessBase):
         # for i, R_max in enumerate(self.max_distance):
         #   rho = self.constituent_subtractor[i].bge_rho.rho()
         #   print('rho is ',rho)
-        print('**************Before CS subtraction*****************')
-        n_sig_before = 0
-        n_bkg_before = 0
-        for part in fj_particles_combined_beforeCS:
-          if part.user_index() < 0:
-            n_bkg_before += 1
-          else:
-            n_sig_before += 1
-            print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
-        print('n_sig',n_sig_before,'n_bkg',n_bkg_before)
-        print('**************After CS subtraction*****************')
-        n_sig_after = 0
-        n_bkg_after = 0
-        for part in fj_particles_combined[0]:
-          if part.user_index() < 0:
-            n_bkg_after += 1
-          else:
-            n_sig_after += 1
-            print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
-        print('n_sig',n_sig_after,'n_bkg',n_bkg_after)
-        print('**************After CS subtraction*****************')
+        # print('**************Before CS subtraction*****************')
+        # n_sig_before = 0
+        # n_bkg_before = 0
+        # for part in fj_particles_combined_beforeCS:
+        #   if part.user_index() < 0:
+        #     n_bkg_before += 1
+        #   else:
+        #     n_sig_before += 1
+        #     print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
+        # print('n_sig',n_sig_before,'n_bkg',n_bkg_before)
+        # print('**************After CS subtraction*****************')
+        # n_sig_after = 0
+        # n_bkg_after = 0
+        # for part in fj_particles_combined[0]:
+        #   if part.user_index() < 0:
+        #     n_bkg_after += 1
+        #   else:
+        #     n_sig_after += 1
+        #     print('index checking:',part.user_index(),'pt',part.perp(),'phi',part.phi(),'eta',part.eta())
+        # print('n_sig',n_sig_after,'n_bkg',n_bkg_after)
+        # print('**************After CS subtraction*****************')
         
         if self.debug_level > 3:
           print([p.user_index() for p in fj_particles_truth])
