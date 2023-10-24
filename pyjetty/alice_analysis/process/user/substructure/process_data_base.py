@@ -404,7 +404,7 @@ class ProcessDataBase(process_base.ProcessBase):
         return
       
       # minimum pT cut on subleading jet
-      if dijets[1].perp() < 15:
+      if dijets[1].perp() < 10:
         return
       
       # print('dijet xj',xj,'(',dijets[1].perp(),'/',dijets[0].perp(),') dphi',dphi)
