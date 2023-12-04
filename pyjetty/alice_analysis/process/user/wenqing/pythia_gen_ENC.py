@@ -110,6 +110,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_theory_check = False
 
+        if 'rm_trk_min_pt' in config:
+            self.rm_trk_min_pt = config['rm_trk_min_pt']
+        else:
+            self.rm_trk_min_pt = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -351,7 +356,11 @@ class PythiaGenENC(process_base.ProcessBase):
             print(jet_def)
 
         # pwarning('max eta for particles after hadronization set to', self.max_eta_hadron)
-        track_selector_ch = fj.SelectorPtMin(0.15)
+        if self.rm_trk_min_pt:
+            track_selector_ch = fj.SelectorPtMin(0)
+        else:
+            track_selector_ch = fj.SelectorPtMin(0.15)
+
         setattr(self, "track_selector_ch", track_selector_ch)
 
         pfc_selector1 = fj.SelectorPtMin(1.)
