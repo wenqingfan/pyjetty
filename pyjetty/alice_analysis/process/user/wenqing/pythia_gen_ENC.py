@@ -115,6 +115,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.rm_trk_min_pt = False
 
+        if 'leading_pt' in config:
+            self.leading_pt = config['leading_pt']
+        else:
+            self.leading_pt = -1 # negative means no leading track cut
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -503,6 +508,12 @@ class PythiaGenENC(process_base.ProcessBase):
     # Form EEC using jet constituents
     #---------------------------------------------------------------
     def fill_jet_histograms(self, level, jet, jetR, R_label):
+        # leading track selection
+        if self.leading_pt > 0:
+            constituents = fj.sorted_by_pt(jet.constituents())
+            if constituents[0].perp() < self.leading_pt:
+                return
+
         # fill EEC histograms for jet constituents
         pfc_selector1 = getattr(self, "pfc_def_10")
 
@@ -568,6 +579,13 @@ class PythiaGenENC(process_base.ProcessBase):
     #---------------------------------------------------------------
     def fill_matched_jet_histograms(self, level, jet, ref_jet, R_label):
         # use the jet pt for energy weight but use the ref_jet pt when fill jet samples into jet pt bins
+
+        # leading track selection
+        if self.leading_pt > 0:
+            constituents = fj.sorted_by_pt(jet.constituents())
+            if constituents[0].perp() < self.leading_pt:
+                return
+        
         pfc_selector1 = getattr(self, "pfc_def_10")
         # print(level,'with number of constituents',len(jet.constituents()),'(',len(pfc_selector1(jet.constituents())),')')
         # print('jet pt',jet.perp(),'ref jet pt',ref_jet.perp())
