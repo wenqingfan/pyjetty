@@ -93,6 +93,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_matching = False
 
+        if 'matched_jet_type' in config:
+            self.matched_jet_type = config['matched_jet_type']
+        else:
+            self.matched_jet_type = 'ch' # default matched jet type set to charged jets
+
         self.jet_matching_distance = config["jet_matching_distance"] 
 
         if 'do_tagging' in config:
@@ -300,6 +305,27 @@ class PythiaGenENC(process_base.ProcessBase):
                             getattr(self, hist_list_name).append(h)
 
             if self.do_matching and (jetR == self.ref_jetR):
+                name = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
+                pt_bins = linbins(0,200,200)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,p jet}')
+                setattr(self, name, h)
+
+                name = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
+                pt_bins = linbins(0,200,200)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,h jet}^{ch}')
+                h.GetYaxis().SetTitle('p_{T,p jet}^{p}')
+                setattr(self, name, h)
+
+                name = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
+                pt_bins = linbins(0,200,200)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{ch}')
+                h.GetYaxis().SetTitle('p_{T,h jet}^{p}')
+                setattr(self, name, h)
+
                 for jet_level in ['p', 'h', 'ch']:
                     tag_levels = ['']
                     if self.do_tagging:
@@ -743,10 +769,36 @@ class PythiaGenENC(process_base.ProcessBase):
                         j_ch.set_user_index(j_p.user_index())
                         j_h.set_user_index(j_p.user_index())
 
-                        # fill histograms
-                        self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
-                        self.fill_matched_jet_histograms('p', j_p, j_ch, R_label)
-                        self.fill_matched_jet_histograms('h', j_h, j_ch, R_label)
+                        # fill histograms (using ch jet as reference) 
+                        if self.matched_jet_type == 'ch':
+                            self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
+                            self.fill_matched_jet_histograms('p', j_p, j_ch, R_label)
+                            self.fill_matched_jet_histograms('h', j_h, j_ch, R_label)
+
+                         # fill histograms (using full jet as reference)
+                        if self.matched_jet_type == 'h':
+                            self.fill_matched_jet_histograms('ch', j_ch, j_h, R_label)
+                            self.fill_matched_jet_histograms('p', j_p, j_h, R_label)
+                            self.fill_matched_jet_histograms('h', j_h, j_h, R_label)
+
+                        # fill histograms (using parton jet as reference)
+                        if self.matched_jet_type == 'p':
+                            self.fill_matched_jet_histograms('ch', j_ch, j_p, R_label)
+                            self.fill_matched_jet_histograms('p', j_p, j_p, R_label)
+                            self.fill_matched_jet_histograms('h', j_h, j_p, R_label)
+
+                        # fill histograms (using the same jets as reference)
+                        if self.matched_jet_type == 'self':
+                            self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
+                            self.fill_matched_jet_histograms('p', j_p, j_p, R_label)
+                            self.fill_matched_jet_histograms('h', j_h, j_h, R_label)
+
+                        hname = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_ch.perp(), j_p.perp())
+                        hname = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_h.perp(), j_p.perp())
+                        hname = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_ch.perp(), j_h.perp())
 
                 # if len(jets_ch)>0:
                 #     print('matching efficiency:',nmatched_ch/len(jets_ch),'=',nmatched_ch,'/',len(jets_ch))
