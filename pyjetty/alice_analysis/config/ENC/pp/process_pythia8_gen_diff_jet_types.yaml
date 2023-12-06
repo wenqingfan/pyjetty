@@ -1,0 +1,19 @@
+# processing parameters
+jet_levels: ['ch', 'h']
+jetR: [0.4]
+
+debug_level: 0
+
+do_matching: True
+jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
+matched_jet_type: 'p'
+reject_tracks_fraction: 0.0
+eta_max: 0.9
+
+do_tagging: False
+do_reshuffle: False
+do_theory_check: True
+
+beyond_jetR: False
+part_levels: ['p', 'h', 'ch']
+
