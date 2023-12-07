@@ -6,7 +6,7 @@ debug_level: 0
 
 do_matching: True
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
-matched_jet_type: 'p'
+matched_jet_type: 'self'
 reject_tracks_fraction: 0.0
 eta_max: 0.9
 
