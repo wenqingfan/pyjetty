@@ -196,6 +196,25 @@ class PythiaGenENC(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
+                    name = 'h_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    ptRL_bins = logbins(1E-3,1E2,60)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
+
+                    name = 'h_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
+                    print('Initialize histogram',name)
+                    ptRL_bins = logbins(1E-3,1E2,60)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
+
                     if self.do_reshuffle:
                         name = 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
@@ -349,6 +368,26 @@ class PythiaGenENC(process_base.ProcessBase):
                             h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
                             h.GetYaxis().SetTitle('R_{L}')
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_matched_ENC{}Pt_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            ptRL_bins = logbins(1E-3,1E2,60)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                            h.GetXaxis().SetTitle('p_{T,ch jet}')
+                            h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                            setattr(self, name, h)
+                            getattr(self, hist_list_name).append(h)
+
+                            name = 'h_matched_ENC{}Pt_JetPt_{}{}_R{}_trk10'.format(str(ipoint), jet_level, tag_level, R_label)
+                            print('Initialize histogram',name)
+                            pt_bins = linbins(0,200,200)
+                            ptRL_bins = logbins(1E-3,1E2,60)
+                            h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                            h.GetXaxis().SetTitle('p_{T,ch jet}')
+                            h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
                             setattr(self, name, h)
                             getattr(self, hist_list_name).append(h)
 
@@ -566,8 +605,10 @@ class PythiaGenENC(process_base.ProcessBase):
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
                     getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
             
         if level == "ch":
             for ipoint in range(2, self.npoint+1):
@@ -650,8 +691,10 @@ class PythiaGenENC(process_base.ProcessBase):
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
                     getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), ref_jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
                     getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), ref_jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
 
         getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select0))
         getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select1))
