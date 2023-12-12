@@ -98,6 +98,18 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.matched_jet_type = 'ch' # default matched jet type set to charged jets
 
+        # whether to use matched reference jet for jet selection (default to True)
+        if 'use_ref_for_jet_selection' in config:
+            self.use_ref_for_jet_selection = config['use_ref_for_jet_selection']
+        else:
+            self.use_ref_for_jet_selection = True
+
+        # whether to use matched reference jet for pt scaling (default to True)
+        if 'use_ref_for_pt_scaling' in config:
+            self.use_ref_for_pt_scaling = config['use_ref_for_pt_scaling']
+        else:
+            self.use_ref_for_pt_scaling = True
+
         self.jet_matching_distance = config["jet_matching_distance"] 
 
         if 'do_tagging' in config:
@@ -334,15 +346,32 @@ class PythiaGenENC(process_base.ProcessBase):
                 name = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,h jet}^{ch}')
-                h.GetYaxis().SetTitle('p_{T,p jet}^{p}')
+                h.GetXaxis().SetTitle('p_{T,h jet}')
+                h.GetYaxis().SetTitle('p_{T,p jet}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,ch jet}^{ch}')
-                h.GetYaxis().SetTitle('p_{T,h jet}^{p}')
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,h jet}')
+                setattr(self, name, h)
+
+                # this ratio is always binned in the jet pt ranges of the jets in the denominator
+                name = 'h_matched_JetPt_p_over_ch_ratio_R{}'.format(R_label)
+                ratio_bins = linbins(0,1,200)
+                pt_bins = linbins(0,200,200)
+                h = ROOT.TH2D(name, name, 200, ratio_bins, 200, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,p jet}/p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,ch jet}')
+                setattr(self, name, h)
+
+                name = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
+                ratio_bins = linbins(0,1,200)
+                pt_bins = linbins(0,200,200)
+                h = ROOT.TH2D(name, name, 200, ratio_bins, 200, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,p jet}/p_{T,h jet}')
+                h.GetYaxis().SetTitle('p_{T,h jet}')
                 setattr(self, name, h)
 
                 for jet_level in ['p', 'h', 'ch']:
@@ -645,7 +674,7 @@ class PythiaGenENC(process_base.ProcessBase):
     # Form EEC using jet constituents for matched jets
     #---------------------------------------------------------------
     def fill_matched_jet_histograms(self, level, jet, ref_jet, R_label):
-        # use the jet pt for energy weight but use the ref_jet pt when fill jet samples into jet pt bins
+        # use the jet pt for energy weight but ref_jet pt can be used when fill jet samples into jet pt bins
 
         # leading track selection
         if self.leading_pt > 0:
@@ -688,16 +717,24 @@ class PythiaGenENC(process_base.ProcessBase):
                 level=level+'-1'
                 # print('Untagged', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
 
+        # by default, use the reference for both jet selection and pt scaling
+        jet_for_selection = ref_jet
+        jet_for_scaling = ref_jet
+        if !self.use_ref_for_jet_selection:
+            jet_for_selection = jet
+        if !self.use_ref_for_pt_scaling:
+            jet_for_scaling = jet
+
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), ref_jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), jet_for_scaling.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), ref_jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), jet_for_scaling.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
 
-        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select0))
-        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select1))
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(jet_for_selection.perp(), len(_c_select0))
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet_for_selection.perp(), len(_c_select1))
 
     #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
@@ -842,6 +879,11 @@ class PythiaGenENC(process_base.ProcessBase):
                         getattr(self, hname).Fill(j_h.perp(), j_p.perp())
                         hname = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
                         getattr(self, hname).Fill(j_ch.perp(), j_h.perp())
+
+                        hname = 'h_matched_JetPt_p_over_ch_ratio_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_p.perp()/j_ch.perp(), j_ch.perp())
+                        hname = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_p.perp()/j_h.perp(), j_h.perp())
 
                 # if len(jets_ch)>0:
                 #     print('matching efficiency:',nmatched_ch/len(jets_ch),'=',nmatched_ch,'/',len(jets_ch))
