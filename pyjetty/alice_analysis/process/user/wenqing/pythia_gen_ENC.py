@@ -720,9 +720,9 @@ class PythiaGenENC(process_base.ProcessBase):
         # by default, use the reference for both jet selection and pt scaling
         jet_for_selection = ref_jet
         jet_for_scaling = ref_jet
-        if !self.use_ref_for_jet_selection:
+        if self.use_ref_for_jet_selection == False:
             jet_for_selection = jet
-        if !self.use_ref_for_pt_scaling:
+        if self.use_ref_for_pt_scaling == False:
             jet_for_scaling = jet
 
         for ipoint in range(2, self.npoint+1):
