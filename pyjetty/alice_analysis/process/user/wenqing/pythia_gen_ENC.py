@@ -690,10 +690,10 @@ class PythiaGenENC(process_base.ProcessBase):
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
                     getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), ref_jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(ref_jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
                     getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), ref_jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
 
         getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(ref_jet.perp(), len(_c_select0))
