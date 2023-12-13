@@ -98,6 +98,12 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.matched_jet_type = 'ch' # default matched jet type set to charged jets
 
+        # if matched jet type is parton and the following variable is True, analyze the matched histograms with leading parton information
+        if 'use_leading_parton' in config:
+            self.use_leading_parton = config['use_leading_parton']
+        else:
+            self.use_leading_parton = False
+
         # whether to use matched reference jet for jet selection (default to True)
         if 'use_ref_for_jet_selection' in config:
             self.use_ref_for_jet_selection = config['use_ref_for_jet_selection']
@@ -500,9 +506,9 @@ class PythiaGenENC(process_base.ProcessBase):
             leading_parton1 = fj.PseudoJet(pythia.event[5].px(),pythia.event[5].py(),pythia.event[5].pz(),pythia.event[5].e())
             leading_parton2 = fj.PseudoJet(pythia.event[6].px(),pythia.event[6].py(),pythia.event[6].pz(),pythia.event[6].e())
 
-            # save absolute value of pdg id into user index
-            leading_parton1.set_user_index(abs(pythia.event[5].id()))
-            leading_parton2.set_user_index(abs(pythia.event[6].id()))
+            # save index of the leading parton inside this event
+            leading_parton1.set_user_index(5)
+            leading_parton2.set_user_index(6)
 
             # print('---------------------------------')
             # print('parton 1',leading_parton1.user_index(),'pt',leading_parton1.perp(),'phi',leading_parton1.phi(),'eta',leading_parton1.eta())
@@ -716,34 +722,44 @@ class PythiaGenENC(process_base.ProcessBase):
         cb1 = ecorrel.CorrelatorBuilder(_c_select1, jet.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut)
 
         if self.do_tagging:
-            if (jet.user_index()>0 and jet.user_index()<7): # quarks (1-6)
-                level=level+str(jet.user_index())
-                # print('quark', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
-            elif jet.user_index()==9 or jet.user_index()==21: # gluons
-                level=level+'21'
-                # print('gluon', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
+            if jet.user_index()>0:
+                leading_parton_id = abs(self.event[jet.user_index()].id())
+                if (leading_parton_id>0 and leading_parton_id<7): # quarks (1-6)
+                    level=level+str(leading_parton_id)
+                    # print('quark', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', leading_parton_id)
+                else leading_parton_id==9 or leading_parton_id==21: # gluons
+                    level=level+'21'
+                    # print('gluon', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
             else:
                 level=level+'-1'
                 # print('Untagged', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
 
         # by default, use the reference for both jet selection and pt scaling
-        jet_for_selection = ref_jet
-        jet_for_scaling = ref_jet
+        jet_pt_for_selection = ref_jet.perp()
+        jet_pt_for_scaling = ref_jet.perp()
+        # if want to use leading parton instead of parton jet as ref_jet
+        if self.matched_jet_type == 'p' and self.use_leading_parton:
+            if jet.user_index()>0:
+                jet_pt_for_selection = self.event[jet.user_index()].pT()
+                jet_pt_for_scaling = self.event[jet.user_index()].pT()
+                print('now using leading parton pt',self.event[jet.user_index()].pT(),'instead of parton jet pt',ref_jet.perp())
+            else:
+                return # skip the histogram filling part if there is no valid ref_jet_pt (although technically, if ref_jet_pt is not used for selection nor scaling, one can still continue with the histogram filling. But we ignore this situation for now)
         if self.use_ref_for_jet_selection == False:
-            jet_for_selection = jet
+            jet_pt_for_selection = jet.perp()
         if self.use_ref_for_pt_scaling == False:
-            jet_for_scaling = jet
+            jet_pt_for_scaling = jet.perp()
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), jet_for_scaling.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_pt_for_selection, cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet_pt_for_selection, jet_pt_for_scaling*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
             for index in range(cb1.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_for_selection.perp(), jet_for_scaling.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_pt_for_selection, cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                    getattr(self, 'h_matched_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet_pt_for_selection, jet_pt_for_scaling*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
 
-        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(jet_for_selection.perp(), len(_c_select0))
-        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet_for_selection.perp(), len(_c_select1))
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk00'.format(level, R_label)).Fill(jet_pt_for_selection, len(_c_select0))
+        getattr(self, 'h_matched_Nconst_JetPt_{}_R{}_trk10'.format(level, R_label)).Fill(jet_pt_for_selection, len(_c_select1))
 
     #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
@@ -774,9 +790,9 @@ class PythiaGenENC(process_base.ProcessBase):
                         matched_parton_parents.append(parton_parent)
                     
                 if len(matched_parton_parents)==1: # accept if there is one match only (NB: but may be used multiple times)
-                    jet_p.set_user_index(matched_parton_parents[0].user_index()) # save pdg id to user index (NB: absolute value)
+                    jet_p.set_user_index(matched_parton_parents[0].user_index()) # save particle index to user index
                     # print('matched parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta())
-                    # print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
+                    print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
                 else:
                     jet_p.set_user_index(-1) # set user index to -1 fr no match case
 
@@ -858,15 +874,20 @@ class PythiaGenENC(process_base.ProcessBase):
                         j_ch.set_user_index(j_p.user_index())
                         j_h.set_user_index(j_p.user_index())
 
-                        # if only want to process gluon (quark) jets but this jet is untagged, skip
-                        if (self.do_gluon_jet or self.do_quark_jet) and jet_p.user_index()<0:
-                            continue
-                        # if only want to process gluon jets but this jet is a quark jet, skip
-                        if self.do_gluon_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
-                            continue
-                        # if only want to process quark jets but this jet is a gluon jet, skip
-                        if self.do_quark_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
-                            continue
+                        if self.do_gluon_jet or self.do_quark_jet:
+                            # skip the rest of processing on matched quark or gluon jets if the matched parton jet is not matched to a leading parton
+                            if j_p.user_index() < 0:
+                                continue
+                            else:
+                                leading_parton_id = abs(self.event[j_p.user_index()].id())
+                                # if only want to process gluon jets but this jet is a quark jet, skip
+                                if self.do_gluon_jet and (leading_parton_id>0 and leading_parton_id<7):
+                                    continue
+                                # if only want to process quark jets but this jet is a gluon jet, skip
+                                if self.do_quark_jet and (leading_parton_id==9 or leading_parton_id==21):
+                                    continue
+                                print('the leading parton index is',j_p.user_index(),'and pdg id is',leading_parton_id)
+                                print('the leading parton pt is',self.event[j_p.user_index()].pT(),'and parton jet pt is',j_p.pepr())
                         
                         # fill histograms (using ch jet as reference) 
                         if self.matched_jet_type == 'ch':
@@ -892,17 +913,23 @@ class PythiaGenENC(process_base.ProcessBase):
                             self.fill_matched_jet_histograms('p', j_p, j_p, R_label)
                             self.fill_matched_jet_histograms('h', j_h, j_h, R_label)
 
+                        ref_parton_pt = j_p.perp()
+                        # if want to use leading parton pt for reference and leading parton is matched to parton jet
+                        if self.use_leading_parton and j_p.user_index() > 0:
+                            leading_parton_pt = self.event[j_p.user_index()].pT()
+                            ref_parton_pt = leading_parton_pt
+
                         hname = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
-                        getattr(self, hname).Fill(j_ch.perp(), j_p.perp())
+                        getattr(self, hname).Fill(j_ch.perp(), ref_parton_pt)
                         hname = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
-                        getattr(self, hname).Fill(j_h.perp(), j_p.perp())
+                        getattr(self, hname).Fill(j_h.perp(), ref_parton_pt)
                         hname = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
                         getattr(self, hname).Fill(j_ch.perp(), j_h.perp())
 
                         hname = 'h_matched_JetPt_p_over_ch_ratio_R{}'.format(R_label)
-                        getattr(self, hname).Fill(j_p.perp()/j_ch.perp(), j_ch.perp())
+                        getattr(self, hname).Fill(ref_parton_pt/j_ch.perp(), j_ch.perp())
                         hname = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
-                        getattr(self, hname).Fill(j_p.perp()/j_h.perp(), j_h.perp())
+                        getattr(self, hname).Fill(ref_parton_pt/j_h.perp(), j_h.perp())
 
                 # if len(jets_ch)>0:
                 #     print('matching efficiency:',nmatched_ch/len(jets_ch),'=',nmatched_ch,'/',len(jets_ch))
