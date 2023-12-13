@@ -758,7 +758,6 @@ class PythiaGenENC(process_base.ProcessBase):
             if jet.user_index()>0:
                 jet_pt_for_selection = self.event[jet.user_index()].pT()
                 jet_pt_for_scaling = self.event[jet.user_index()].pT()
-                print('now using leading parton pt',self.event[jet.user_index()].pT(),'instead of parton jet pt',ref_jet.perp())
             else:
                 return # skip the histogram filling part if there is no valid ref_jet_pt (although technically, if ref_jet_pt is not used for selection nor scaling, one can still continue with the histogram filling. But we ignore this situation for now)
         if self.use_ref_for_jet_selection == False:
@@ -808,7 +807,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 if len(matched_parton_parents)==1: # accept if there is one match only (NB: but may be used multiple times)
                     jet_p.set_user_index(matched_parton_parents[0].user_index()) # save particle index to user index
                     # print('matched parton jet R',jetR,'pt',jet_p.perp(),'phi',jet_p.phi(),'eta',jet_p.eta())
-                    print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
+                    # print('matched leading parton',matched_parton_parents[0].user_index(),'pt',matched_parton_parents[0].perp(),'phi',matched_parton_parents[0].phi(),'eta',matched_parton_parents[0].eta())
                 else:
                     jet_p.set_user_index(-1) # set user index to -1 fr no match case
 
@@ -902,8 +901,6 @@ class PythiaGenENC(process_base.ProcessBase):
                                 # if only want to process quark jets but this jet is a gluon jet, skip
                                 if self.do_quark_jet and (leading_parton_id==9 or leading_parton_id==21):
                                     continue
-                                print('the leading parton index is',j_p.user_index(),'and pdg id is',leading_parton_id)
-                                print('the leading parton pt is',self.event[j_p.user_index()].pT(),'and parton jet pt is',j_p.perp())
                         
                         # fill histograms (using ch jet as reference) 
                         if self.matched_jet_type == 'ch':
@@ -918,6 +915,7 @@ class PythiaGenENC(process_base.ProcessBase):
                             self.fill_matched_jet_histograms('h', j_h, j_h, R_label)
 
                         # fill histograms (using parton jet as reference)
+                        # in this case, if use_leading_parton is enabled and no leading parton is matched to parton jet, fill_matched_jet_histograms() will not fill histograms
                         if self.matched_jet_type == 'p':
                             self.fill_matched_jet_histograms('ch', j_ch, j_p, R_label)
                             self.fill_matched_jet_histograms('p', j_p, j_p, R_label)
@@ -931,13 +929,16 @@ class PythiaGenENC(process_base.ProcessBase):
 
                         ref_parton_pt = j_p.perp()
                         # if want to use leading parton pt for reference and leading parton is matched to parton jet
-                        if self.use_leading_parton and j_p.user_index() > 0:
-                            leading_parton_pt = self.event[j_p.user_index()].pT()
-                            ref_parton_pt = leading_parton_pt
-                            hname = 'h_matched_JetPt_p_vs_p_R{}'.format(R_label)
-                            getattr(self, hname).Fill(j_p.perp(), ref_parton_pt)
-                            hname = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
-                            getattr(self, hname).Fill(ref_parton_pt/j_p.perp(), j_p.perp())
+                        if self.use_leading_parton:
+                            if j_p.user_index() > 0:
+                                leading_parton_pt = self.event[j_p.user_index()].pT()
+                                ref_parton_pt = leading_parton_pt
+                                hname = 'h_matched_JetPt_p_vs_p_R{}'.format(R_label)
+                                getattr(self, hname).Fill(j_p.perp(), ref_parton_pt)
+                                hname = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
+                                getattr(self, hname).Fill(ref_parton_pt/j_p.perp(), j_p.perp())
+                            else:
+                                continue
 
                         hname = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
                         getattr(self, hname).Fill(j_ch.perp(), ref_parton_pt)
