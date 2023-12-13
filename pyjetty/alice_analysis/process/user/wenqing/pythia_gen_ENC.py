@@ -887,7 +887,7 @@ class PythiaGenENC(process_base.ProcessBase):
                                 if self.do_quark_jet and (leading_parton_id==9 or leading_parton_id==21):
                                     continue
                                 print('the leading parton index is',j_p.user_index(),'and pdg id is',leading_parton_id)
-                                print('the leading parton pt is',self.event[j_p.user_index()].pT(),'and parton jet pt is',j_p.pepr())
+                                print('the leading parton pt is',self.event[j_p.user_index()].pT(),'and parton jet pt is',j_p.perp())
                         
                         # fill histograms (using ch jet as reference) 
                         if self.matched_jet_type == 'ch':
