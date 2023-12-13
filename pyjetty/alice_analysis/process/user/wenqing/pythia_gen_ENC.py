@@ -356,14 +356,14 @@ class PythiaGenENC(process_base.ProcessBase):
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
-                h.GetYaxis().SetTitle('p_{T,p jet}')
+                h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,h jet}')
-                h.GetYaxis().SetTitle('p_{T,p jet}')
+                h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
@@ -377,17 +377,33 @@ class PythiaGenENC(process_base.ProcessBase):
                 ratio_bins = linbins(0,10,500)
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, ratio_bins, 200, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,p jet}/p_{T,ch jet}') # this ratio should be mostly within [0,1]
-                h.GetYaxis().SetTitle('p_{T,p jet}')
+                h.GetXaxis().SetTitle('p_{T,p}/p_{T,ch jet}') # this ratio should be mostly within [0,1]
+                h.GetYaxis().SetTitle('p_{T,ch jet}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,10,500)
                 pt_bins = linbins(0,200,200)
                 h = ROOT.TH2D(name, name, 200, ratio_bins, 200, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,p jet}/p_{T,h jet}')  # this ratio should be mostly within [0,1]
+                h.GetXaxis().SetTitle('p_{T,p}/p_{T,h jet}')  # this ratio should be mostly within [0,1]
                 h.GetYaxis().SetTitle('p_{T,h jet}')
                 setattr(self, name, h)
+
+                if self.use_leading_parton:
+                    name = 'h_matched_JetPt_p_vs_p_R{}'.format(R_label)
+                    pt_bins = linbins(0,200,200)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
+                    h.GetXaxis().SetTitle('p_{T,p jet}')
+                    h.GetYaxis().SetTitle('p_{T,p}')
+                    setattr(self, name, h)
+
+                    name = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
+                    ratio_bins = linbins(0,10,500)
+                    pt_bins = linbins(0,200,200)
+                    h = ROOT.TH2D(name, name, 200, ratio_bins, 200, pt_bins)
+                    h.GetXaxis().SetTitle('p_{T,p}/p_{T,p jet}')  # this ratio should be mostly within [0,1]
+                    h.GetYaxis().SetTitle('p_{T,p jet}')
+                    setattr(self, name, h)
 
                 for jet_level in ['p', 'h', 'ch']:
                     tag_levels = ['']
@@ -918,6 +934,10 @@ class PythiaGenENC(process_base.ProcessBase):
                         if self.use_leading_parton and j_p.user_index() > 0:
                             leading_parton_pt = self.event[j_p.user_index()].pT()
                             ref_parton_pt = leading_parton_pt
+                            hname = 'h_matched_JetPt_p_vs_p_R{}'.format(R_label)
+                            getattr(self, hname).Fill(j_p.perp(), ref_parton_pt)
+                            hname = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
+                            getattr(self, hname).Fill(ref_parton_pt/j_p.perp(), j_p.perp())
 
                         hname = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
                         getattr(self, hname).Fill(j_ch.perp(), ref_parton_pt)
