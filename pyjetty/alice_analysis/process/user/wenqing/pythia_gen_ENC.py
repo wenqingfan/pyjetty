@@ -112,6 +112,16 @@ class PythiaGenENC(process_base.ProcessBase):
 
         self.jet_matching_distance = config["jet_matching_distance"] 
 
+        if 'do_gluon_jet' in config:
+            self.do_gluon_jet = config['do_gluon_jet']
+        else:
+            self.do_gluon_jet = False
+
+        if 'do_quark_jet' in config:
+            self.do_quark_jet = config['do_quark_jet']
+        else:
+            self.do_quark_jet = False
+
         if 'do_tagging' in config:
             self.do_tagging = config['do_tagging']
         else:
@@ -847,6 +857,14 @@ class PythiaGenENC(process_base.ProcessBase):
                         # used matched parton jet to tag the ch and h jet (qurak or gluon jet)
                         j_ch.set_user_index(j_p.user_index())
                         j_h.set_user_index(j_p.user_index())
+
+                        # if only want to process gluon jets but this jet is a quark jet, skip
+                        if self.do_gluon_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
+                            continue
+
+                        # if only want to process quark jets but this jet is a gluon jet, skip
+                        if self.do_quark_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
+                            continue
 
                         # fill histograms (using ch jet as reference) 
                         if self.matched_jet_type == 'ch':
