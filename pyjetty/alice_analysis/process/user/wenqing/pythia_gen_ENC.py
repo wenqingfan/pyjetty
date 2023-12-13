@@ -862,10 +862,10 @@ class PythiaGenENC(process_base.ProcessBase):
                         if (self.do_gluon_jet or self.do_quark_jet) and jet_p.user_index()<0:
                             continue
                         # if only want to process gluon jets but this jet is a quark jet, skip
-                        if self.do_quark_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
+                        if self.do_gluon_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
                             continue
                         # if only want to process quark jets but this jet is a gluon jet, skip
-                        if self.do_gluon_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
+                        if self.do_quark_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
                             continue
 
                         print('jet with parent parton id',jet_p.user_index(),'is being processed')
