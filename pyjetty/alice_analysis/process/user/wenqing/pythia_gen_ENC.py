@@ -858,10 +858,12 @@ class PythiaGenENC(process_base.ProcessBase):
                         j_ch.set_user_index(j_p.user_index())
                         j_h.set_user_index(j_p.user_index())
 
-                        # if only want to process gluon jets but this jet is a quark jet, skip
-                        if self.do_gluon_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
+                        # if only want to process gluon (quark) jets but this jet is untagged, skip
+                        if (self.do_gluon_jet or self.do_quark_jet) and jet_p.user_index()<0:
                             continue
-
+                        # if only want to process gluon jets but this jet is a quark jet, skip
+                        if self.do_quark_jet and (jet_p.user_index()>0 and jet_p.user_index()<7):
+                            continue
                         # if only want to process quark jets but this jet is a gluon jet, skip
                         if self.do_quark_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
                             continue
