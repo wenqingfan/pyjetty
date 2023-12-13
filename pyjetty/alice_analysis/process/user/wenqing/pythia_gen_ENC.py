@@ -866,6 +866,8 @@ class PythiaGenENC(process_base.ProcessBase):
                         if self.do_quark_jet and (jet_p.user_index()==9 or jet_p.user_index()==21):
                             continue
 
+                        print('jet with parent parton id',jet_p.user_index(),'is being processed')
+                        
                         # fill histograms (using ch jet as reference) 
                         if self.matched_jet_type == 'ch':
                             self.fill_matched_jet_histograms('ch', j_ch, j_ch, R_label)
