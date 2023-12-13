@@ -727,7 +727,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 if (leading_parton_id>0 and leading_parton_id<7): # quarks (1-6)
                     level=level+str(leading_parton_id)
                     # print('quark', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', leading_parton_id)
-                else leading_parton_id==9 or leading_parton_id==21: # gluons
+                if leading_parton_id==9 or leading_parton_id==21: # gluons
                     level=level+'21'
                     # print('gluon', level, 'jet pt', jet.perp(), 'phi', jet.phi(), 'eta', jet.eta(), 'id', jet.user_index())
             else:
