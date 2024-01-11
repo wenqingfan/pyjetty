@@ -396,7 +396,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 ratio_bins = linbins(0,10,500)
                 pt_bins = linbins(0,500,500)
                 h = ROOT.TH2D(name, name, 200, ratio_bins, 500, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,p}/p_{T,ch jet}') # this ratio should be mostly within [0,1]
+                h.GetXaxis().SetTitle('p_{T,p}/p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,ch jet}')
                 setattr(self, name, h)
 
@@ -404,8 +404,24 @@ class PythiaGenENC(process_base.ProcessBase):
                 ratio_bins = linbins(0,10,500)
                 pt_bins = linbins(0,500,500)
                 h = ROOT.TH2D(name, name, 200, ratio_bins, 500, pt_bins)
-                h.GetXaxis().SetTitle('p_{T,p}/p_{T,h jet}')  # this ratio should be mostly within [0,1]
+                h.GetXaxis().SetTitle('p_{T,p}/p_{T,h jet}')
                 h.GetYaxis().SetTitle('p_{T,h jet}')
+                setattr(self, name, h)
+
+                name = 'h_matched_JetPt_ch_over_p_ratio_R{}'.format(R_label)
+                ratio_bins = linbins(0,1,100)
+                pt_bins = linbins(0,500,500)
+                h = ROOT.TH2D(name, name, 200, ratio_bins, 500, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}/p_{T,p}') # this ratio should be mostly within [0,1]
+                h.GetYaxis().SetTitle('p_{T,p}')
+                setattr(self, name, h)
+
+                name = 'h_matched_JetPt_h_over_p_ratio_R{}'.format(R_label)
+                ratio_bins = linbins(0,1,100)
+                pt_bins = linbins(0,500,500)
+                h = ROOT.TH2D(name, name, 200, ratio_bins, 500, pt_bins)
+                h.GetXaxis().SetTitle('p_{T,h jet}/p_{T,p}')  # this ratio should be mostly within [0,1]
+                h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
                 if self.use_leading_parton:
@@ -994,6 +1010,11 @@ class PythiaGenENC(process_base.ProcessBase):
                         getattr(self, hname).Fill(ref_parton_pt/j_ch.perp(), j_ch.perp())
                         hname = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
                         getattr(self, hname).Fill(ref_parton_pt/j_h.perp(), j_h.perp())
+
+                        hname = 'h_matched_JetPt_ch_over_p_ratio_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_ch.perp()/ref_parton_pt, ref_parton_pt)
+                        hname = 'h_matched_JetPt_h_over_p_ratio_R{}'.format(R_label)
+                        getattr(self, hname).Fill(j_h.perp()/ref_parton_pt, ref_parton_pt)
 
                 # if len(jets_ch)>0:
                 #     print('matching efficiency:',nmatched_ch/len(jets_ch),'=',nmatched_ch,'/',len(jets_ch))
