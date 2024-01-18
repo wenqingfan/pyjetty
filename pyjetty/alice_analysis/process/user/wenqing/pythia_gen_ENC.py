@@ -409,7 +409,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_ch_over_p_ratio_R{}'.format(R_label)
-                ratio_bins = linbins(0,1,100)
+                ratio_bins = linbins(0,2,100)
                 pt_bins = linbins(0,500,500)
                 h = ROOT.TH2D(name, name, 100, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}/p_{T,p}') # this ratio should be mostly within [0,1]
@@ -417,7 +417,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_h_over_p_ratio_R{}'.format(R_label)
-                ratio_bins = linbins(0,1,100)
+                ratio_bins = linbins(0,2,100)
                 pt_bins = linbins(0,500,500)
                 h = ROOT.TH2D(name, name, 100, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,h jet}/p_{T,p}')  # this ratio should be mostly within [0,1]
