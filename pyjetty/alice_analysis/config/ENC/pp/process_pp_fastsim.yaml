@@ -20,7 +20,7 @@ dry_run: False
 fast_simulation: True
 ENC_fastsim: True # only set to True when fast_simulation is set to True
 ENC_pair_cut: False
-pair_eff_file: '/global/cfs/projectdirs/alice/wenqing/PairEff.root'
+pair_eff_file: '/global/cfs/projectdirs/alice/wenqing/ENC/PairEff.root'
 
 # Observable block
 jet_ENC_RL:
