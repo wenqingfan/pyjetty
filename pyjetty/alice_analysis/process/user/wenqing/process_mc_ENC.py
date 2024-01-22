@@ -454,14 +454,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     # NB: currently applying the pair eff weight to both 2 point correlator and higher point correlators. Need to check if the same pair efficiency effect still work well for higher point correlators
     weights_pair = []
     for index in range(corr_builder.correlator(ipoint).rs().size()):
-      part1 = corr_builder.correlator(ipoint).indices1()[index]
-      part2 = corr_builder.correlator(ipoint).indices2()[index]
+      part1 = int(corr_builder.correlator(ipoint).indices1()[index])
+      part2 = int(corr_builder.correlator(ipoint).indices2()[index])
       if part1!=part2: # FIX ME: not sure, but for now only apply pair efficiency for non auto-correlations
         # Need to find the associated truth information for each pair (charge and momentum)
-        part1_truth = constituents[part1].python_info().particle_truth
-        part2_truth = constituents[part2].python_info().particle_truth
-        q1 = constituents[part1].python_info().charge
-        q2 = constituents[part2].python_info().charge
+        part1_truth = int(constituents[part1].python_info().particle_truth)
+        part2_truth = int(constituents[part2].python_info().particle_truth)
+        q1 = int(constituents[part1].python_info().charge)
+        q2 = int(constituents[part2].python_info().charge)
         dist = corr_builder.correlator(ipoint).rs()[index] # NB: use reconstructed distance since it's faster and should be equivalent to true distance because there is no angular smearing on the track momentum. To switch back to the true distance, use: self.calculate_distance(part1_truth, part2_truth)
         dq_over_p = q1/part1_truth.pt()-q2/part2_truth.pt()
         # calculate pair efficeincy and apply it as an additional weight
