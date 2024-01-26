@@ -6,9 +6,9 @@ debug_level: 0
 
 do_matching: True
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
-matched_jet_type: 'self'
+matched_jet_type: 'parton'
 use_leading_parton: False
-use_ref_for_jet_selection: True
+use_ref_for_jet_selection: False
 use_ref_for_pt_scaling: True
 do_gluon_jet: True
 do_quark_jet: False
@@ -18,7 +18,7 @@ eta_max: 0.9
 
 do_tagging: False
 do_reshuffle: False
-do_theory_check: False
+do_theory_check: True
 
 beyond_jetR: False
 part_levels: ['p', 'h', 'ch']
