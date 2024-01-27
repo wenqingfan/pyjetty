@@ -860,7 +860,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         continue
                     if parton_parent.perp()/jet_p.perp() > 10:
                         continue
-                    if self.is_geo_matched(jet_p, parton_parent, jetR): # NB: using a looser matching criteria for intial parton tagging
+                    if self.is_loose_geo_matched(jet_p, parton_parent, jetR): # NB: using a looser matching criteria for intial parton tagging
                         matched_parton_parents.append(parton_parent)
                     
                 if len(matched_parton_parents)==1: # accept if there is one match only (NB: but may be used multiple times)
