@@ -1,5 +1,5 @@
 # processing parameters
-jet_levels: ['ch']
+jet_levels: ['ch', 'h', 'p']
 jetR: [0.4]
 
 debug_level: 0
