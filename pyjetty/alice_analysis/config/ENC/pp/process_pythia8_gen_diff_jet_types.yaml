@@ -1,6 +1,6 @@
 # processing parameters
 jet_levels: ['ch', 'h']
-jetR: [0.8]
+jetR: [0.6]
 
 debug_level: 0
 
@@ -8,6 +8,7 @@ do_matching: True
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
 matched_jet_type: 'p'
 use_leading_parton: False
+ref_jetR: 0.6
 use_ref_for_jet_selection: True
 use_ref_for_pt_scaling: True
 do_gluon_jet: False
