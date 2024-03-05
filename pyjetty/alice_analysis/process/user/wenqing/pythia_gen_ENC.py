@@ -79,7 +79,10 @@ class PythiaGenENC(process_base.ProcessBase):
             self.beyond_jetR = False
 
         self.ref_jet_level = "ch"
-        self.ref_jetR = 0.4 # hard coded for now 
+        if 'ref_jetR' in config:
+            self.ref_jetR = config['ref_jetR']
+        else:
+            self.ref_jetR = 0.4 
         self.part_levels = config["part_levels"] 
 
         # ENC settings
