@@ -196,6 +196,23 @@ class PythiaGenENC(process_base.ProcessBase):
 
         self.hNevents = ROOT.TH1I("hNevents", 'Number accepted events (unscaled)', 2, -0.5, 1.5)
 
+        # Leading parton pT for gluons and quarks
+        name = 'h_JetPt_lp_gjet'
+        print('Initialize histogram',name)
+        pt_bins = linbins(0,1000,500)
+        h = ROOT.TH1D(name, name, 500, pt_bins)
+        h.GetXaxis().SetTitle('pT (jet)')
+        setattr(self, name, h)
+        getattr(self, hist_list_name).append(h)
+
+        name = 'h_JetPt_lp_qjet'
+        print('Initialize histogram',name)
+        pt_bins = linbins(0,1000,500)
+        h = ROOT.TH1D(name, name, 500, pt_bins)
+        h.GetXaxis().SetTitle('pT (jet)')
+        setattr(self, name, h)
+        getattr(self, hist_list_name).append(h)
+
         for jetR in self.jetR_list:
 
             # Store a list of all the histograms just so that we can rescale them later
@@ -327,24 +344,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('pT (jet)')
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                # Leading parton pT for gluons and quarks
-                name = 'h_JetPt_lp_R{}_gjet'.format(R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,1000,500)
-                h = ROOT.TH1D(name, name, 500, pt_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                name = 'h_JetPt_lp_R{}_qjet'.format(R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,1000,500)
-                h = ROOT.TH1D(name, name, 500, pt_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
+                getattr(self, hist_list_name).append(h)                
 
                 # NB: Only do the cone check for one reference radius and charged jets for now
                 if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
@@ -471,6 +471,23 @@ class PythiaGenENC(process_base.ProcessBase):
                 getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_h_R{}_qjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                # Parton jets pT for gluons and quarks
+                name = 'h_matched_JetPt_p_R{}_gjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_matched_JetPt_p_R{}_qjet'.format(R_label)
                 print('Initialize histogram',name)
                 pt_bins = linbins(0,1000,500)
                 h = ROOT.TH1D(name, name, 500, pt_bins)
@@ -644,10 +661,10 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(5, 7):
                 leading_parton_id = pythia.event[index].id()
                 if (leading_parton_id>0 and leading_parton_id<7):
-                    hname = 'h_JetPt_lp_R{}_qjet'.format(R_label)
+                    hname = 'h_JetPt_lp_qjet'
                     getattr(self, hname).Fill(pythia.event[index].perp())
                 if (leading_parton_id==9 or leading_parton_id==21):
-                    hname = 'h_JetPt_lp_R{}_gjet'.format(R_label)
+                    hname = 'h_JetPt_lp_gjet'
                     getattr(self, hname).Fill(pythia.event[index].perp())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
@@ -1018,11 +1035,15 @@ class PythiaGenENC(process_base.ProcessBase):
                                 getattr(self, hname).Fill(j_ch.perp())
                                 hname = 'h_matched_JetPt_h_R{}_qjet'.format(R_label)
                                 getattr(self, hname).Fill(j_h.perp())
+                                hname = 'h_matched_JetPt_p_R{}_qjet'.format(R_label)
+                                getattr(self, hname).Fill(j_p.perp())
                             if (leading_parton_id==9 or leading_parton_id==21):
                                 hname = 'h_matched_JetPt_ch_R{}_gjet'.format(R_label)
                                 getattr(self, hname).Fill(j_ch.perp())
                                 hname = 'h_matched_JetPt_h_R{}_gjet'.format(R_label)
                                 getattr(self, hname).Fill(j_h.perp())
+                                hname = 'h_matched_JetPt_p_R{}_gjet'.format(R_label)
+                                getattr(self, hname).Fill(j_p.perp())
 
                         if self.do_gluon_jet or self.do_quark_jet:
                             # skip the rest of processing on matched quark or gluon jets if the matched parton jet is not matched to a leading parton
