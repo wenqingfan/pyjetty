@@ -197,21 +197,13 @@ class PythiaGenENC(process_base.ProcessBase):
         self.hNevents = ROOT.TH1I("hNevents", 'Number accepted events (unscaled)', 2, -0.5, 1.5)
 
         # Leading parton pT for gluons and quarks
-        name = 'h_JetPt_lp_gjet'
-        print('Initialize histogram',name)
         pt_bins = linbins(0,1000,500)
-        h = ROOT.TH1D(name, name, 500, pt_bins)
-        h.GetXaxis().SetTitle('pT (jet)')
-        setattr(self, name, h)
-        getattr(self, hist_list_name).append(h)
+        self.hJetPt_leading_gluons = ROOT.TH1D("hJetPt_leading_gluons", 'Jet pt spectrum of leading gluons', 500, pt_bins)
+        self.hJetPt_leading_gluons.SetTitle('pT (jet)')
 
-        name = 'h_JetPt_lp_qjet'
-        print('Initialize histogram',name)
         pt_bins = linbins(0,1000,500)
-        h = ROOT.TH1D(name, name, 500, pt_bins)
-        h.GetXaxis().SetTitle('pT (jet)')
-        setattr(self, name, h)
-        getattr(self, hist_list_name).append(h)
+        self.hJetPt_leading_quarks = ROOT.TH1D("hJetPt_leading_quarks", 'Jet pt spectrum of leading quarks', 500, pt_bins)
+        self.hJetPt_leading_quarks.SetTitle('pT (jet)')
 
         for jetR in self.jetR_list:
 
@@ -661,10 +653,10 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(5, 7):
                 leading_parton_id = pythia.event[index].id()
                 if (leading_parton_id>0 and leading_parton_id<7):
-                    hname = 'h_JetPt_lp_qjet'
+                    hname = 'hJetPt_leading_quarks'
                     getattr(self, hname).Fill(pythia.event[index].perp())
                 if (leading_parton_id==9 or leading_parton_id==21):
-                    hname = 'h_JetPt_lp_gjet'
+                    hname = 'hJetPt_leading_gluons'
                     getattr(self, hname).Fill(pythia.event[index].perp())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
@@ -1146,6 +1138,9 @@ class PythiaGenENC(process_base.ProcessBase):
         # Scale all jet histograms by the appropriate factor from generated cross section and the number of accepted events
         scale_f = pythia.info.sigmaGen() / self.hNevents.GetBinContent(1)
         print("scaling factor is",scale_f)
+
+        self.hJetPt_leading_gluons.Scale(scale_f)
+        self.hJetPt_leading_quarks.Scale(scale_f)
 
         for jetR in self.jetR_list:
             hist_list_name = "hist_list_R%s" % str(jetR).replace('.', '') 
