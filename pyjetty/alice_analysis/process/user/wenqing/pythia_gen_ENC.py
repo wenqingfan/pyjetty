@@ -209,7 +209,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 for ipoint in range(2, self.npoint+1):
                     name = 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                     h.GetXaxis().SetTitle('pT (jet)')
@@ -219,7 +219,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                     name = 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                     h.GetXaxis().SetTitle('pT (jet)')
@@ -229,7 +229,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                     name = 'h_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     ptRL_bins = logbins(1E-3,1E2,60)
                     h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                     h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -248,7 +248,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                     name = 'h_ENC{}PtlnPt_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                     print('Initialize histogram',name)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     ptRL_bins = logbins(1E-3,1E2,60)
                     h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                     h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -268,7 +268,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     if self.do_reshuffle:
                         name = 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -278,7 +278,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                         name = 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -290,7 +290,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     if jet_level == "ch":
                         name = 'h_ENC{}_JetPt_{}_R{}_unlike_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -300,7 +300,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                         name = 'h_ENC{}_JetPt_{}_R{}_like_trk10'.format(str(ipoint), jet_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -311,7 +311,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 # Jet pt vs N constituents
                 name = 'h_Nconst_JetPt_{}_R{}_trk00'.format(jet_level, R_label)
                 print('Initialize histogram',name)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 Nconst_bins = linbins(0,50,50)
                 h = ROOT.TH2D(name, name, 500, pt_bins, 50, Nconst_bins)
                 h.GetXaxis().SetTitle('pT (jet)')
@@ -321,11 +321,28 @@ class PythiaGenENC(process_base.ProcessBase):
 
                 name = 'h_Nconst_JetPt_{}_R{}_trk10'.format(jet_level, R_label)
                 print('Initialize histogram',name)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 Nconst_bins = linbins(0,50,50)
                 h = ROOT.TH2D(name, name, 500, pt_bins, 50, Nconst_bins)
                 h.GetXaxis().SetTitle('pT (jet)')
                 h.GetYaxis().SetTitle('N_{const}')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                # Leading parton pT for gluons and quarks
+                name = 'h_JetPt_lp_R{}_gjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_JetPt_lp_R{}_qjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
 
@@ -335,7 +352,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         for ipoint in range(2, self.npoint+1):
                             name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -345,7 +362,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_ENC{}_cone_max_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -355,7 +372,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk00'.format(str(ipoint), jet_level, R_label, part_level)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -365,7 +382,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_ENC{}_cone_jetR_JetPt_{}_R{}_{}_trk10'.format(str(ipoint), jet_level, R_label, part_level)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -375,21 +392,21 @@ class PythiaGenENC(process_base.ProcessBase):
 
             if self.do_matching and (jetR == self.ref_jetR):
                 name = 'h_matched_JetPt_ch_vs_p_R{}'.format(R_label)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,h jet}')
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
                 name = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,h jet}')
@@ -397,7 +414,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                 name = 'h_matched_JetPt_p_over_ch_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,10,500)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 500, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,p}/p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,ch jet}')
@@ -405,7 +422,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                 name = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,10,500)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 500, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,p}/p_{T,h jet}')
                 h.GetYaxis().SetTitle('p_{T,h jet}')
@@ -413,7 +430,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                 name = 'h_matched_JetPt_ch_over_p_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,2,100)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 100, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}/p_{T,p}') # this ratio should be mostly within [0,1]
                 h.GetYaxis().SetTitle('p_{T,p}')
@@ -421,15 +438,49 @@ class PythiaGenENC(process_base.ProcessBase):
 
                 name = 'h_matched_JetPt_h_over_p_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,2,100)
-                pt_bins = linbins(0,500,500)
+                pt_bins = linbins(0,1000,500)
                 h = ROOT.TH2D(name, name, 100, ratio_bins, 500, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,h jet}/p_{T,p}')  # this ratio should be mostly within [0,1]
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
 
+                # Charged jets pT for gluons and quarks
+                name = 'h_matched_JetPt_ch_R{}_gjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_matched_JetPt_ch_R{}_qjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                # Full jets pT for gluons and quarks
+                name = 'h_matched_JetPt_h_R{}_gjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_matched_JetPt_h_R{}_qjet'.format(R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,1000,500)
+                h = ROOT.TH1D(name, name, 500, pt_bins)
+                h.GetXaxis().SetTitle('pT (jet)')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
                 if self.use_leading_parton:
                     name = 'h_matched_JetPt_p_vs_p_R{}'.format(R_label)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
                     h.GetXaxis().SetTitle('p_{T,p jet}')
                     h.GetYaxis().SetTitle('p_{T,p}')
@@ -437,7 +488,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                     name = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
                     ratio_bins = linbins(0,10,500)
-                    pt_bins = linbins(0,500,500)
+                    pt_bins = linbins(0,1000,500)
                     h = ROOT.TH2D(name, name, 200, ratio_bins, 500, pt_bins)
                     h.GetXaxis().SetTitle('p_{T,p}/p_{T,p jet}')  # this ratio should be mostly within [0,1]
                     h.GetYaxis().SetTitle('p_{T,p jet}')
@@ -451,7 +502,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         for ipoint in range(2, self.npoint+1):
                             name = 'h_matched_ENC{}_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -461,7 +512,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_matched_ENC{}_JetPt_{}{}_R{}_trk10'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             RL_bins = logbins(1E-4,1,50)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
                             h.GetXaxis().SetTitle('pT (jet)')
@@ -471,7 +522,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_matched_ENC{}Pt_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             ptRL_bins = logbins(1E-3,1E2,60)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                             h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -481,7 +532,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_matched_ENC{}Pt_JetPt_{}{}_R{}_trk10'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             ptRL_bins = logbins(1E-3,1E2,60)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                             h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -491,7 +542,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_matched_ENC{}PtlnPt_JetPt_{}{}_R{}_trk00'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             ptRL_bins = logbins(1E-3,1E2,60)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                             h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -501,7 +552,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                             name = 'h_matched_ENC{}PtlnPt_JetPt_{}{}_R{}_trk10'.format(str(ipoint), jet_level, tag_level, R_label)
                             print('Initialize histogram',name)
-                            pt_bins = linbins(0,500,500)
+                            pt_bins = linbins(0,1000,500)
                             ptRL_bins = logbins(1E-3,1E2,60)
                             h = ROOT.TH2D(name, name, 500, pt_bins, 60, ptRL_bins)
                             h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -512,7 +563,7 @@ class PythiaGenENC(process_base.ProcessBase):
                         # Jet pt vs N constituents
                         name = 'h_matched_Nconst_JetPt_{}{}_R{}_trk00'.format(jet_level, tag_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         Nconst_bins = linbins(0,50,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, Nconst_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -522,7 +573,7 @@ class PythiaGenENC(process_base.ProcessBase):
 
                         name = 'h_matched_Nconst_JetPt_{}{}_R{}_trk10'.format(jet_level, tag_level, R_label)
                         print('Initialize histogram',name)
-                        pt_bins = linbins(0,500,500)
+                        pt_bins = linbins(0,1000,500)
                         Nconst_bins = linbins(0,50,50)
                         h = ROOT.TH2D(name, name, 500, pt_bins, 50, Nconst_bins)
                         h.GetXaxis().SetTitle('pT (jet)')
@@ -589,6 +640,15 @@ class PythiaGenENC(process_base.ProcessBase):
             # print('parton 2',leading_parton2.user_index(),'pt',leading_parton2.perp(),'phi',leading_parton2.phi(),'eta',leading_parton2.eta())
             
             self.parton_parents = [leading_parton1, leading_parton2]
+
+            for lp in self.parton_parents:
+                leading_parton_id = lp.id()
+                if (leading_parton_id>0 and leading_parton_id<7):
+                    hname = 'h_JetPt_lp_R{}_qjet'.format(R_label)
+                    getattr(self, hname).Fill(lp.perp())
+                if (leading_parton_id==9 or leading_parton_id==21):
+                    hname = 'h_JetPt_lp_R{}_gjet'.format(R_label)
+                    getattr(self, hname).Fill(lp.perp())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
@@ -950,6 +1010,19 @@ class PythiaGenENC(process_base.ProcessBase):
                         # used matched parton jet to tag the ch and h jet (qurak or gluon jet)
                         j_ch.set_user_index(j_p.user_index())
                         j_h.set_user_index(j_p.user_index())
+
+                        if j_p.user_index() >= 0:
+                            leading_parton_id = abs(self.event[j_p.user_index()].id())
+                            if (leading_parton_id>0 and leading_parton_id<7):
+                                hname = 'h_matched_JetPt_ch_R{}_qjet'.format(R_label)
+                                getattr(self, hname).Fill(j_ch.perp())
+                                hname = 'h_matched_JetPt_h_R{}_qjet'.format(R_label)
+                                getattr(self, hname).Fill(j_h.perp())
+                            if (leading_parton_id==9 or leading_parton_id==21):
+                                hname = 'h_matched_JetPt_ch_R{}_gjet'.format(R_label)
+                                getattr(self, hname).Fill(j_ch.perp())
+                                hname = 'h_matched_JetPt_h_R{}_gjet'.format(R_label)
+                                getattr(self, hname).Fill(j_h.perp())
 
                         if self.do_gluon_jet or self.do_quark_jet:
                             # skip the rest of processing on matched quark or gluon jets if the matched parton jet is not matched to a leading parton
