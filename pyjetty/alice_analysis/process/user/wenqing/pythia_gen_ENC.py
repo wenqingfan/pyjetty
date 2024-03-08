@@ -641,14 +641,14 @@ class PythiaGenENC(process_base.ProcessBase):
             
             self.parton_parents = [leading_parton1, leading_parton2]
 
-            for lp in self.parton_parents:
-                leading_parton_id = lp.id()
+            for index in range(5, 7):
+                leading_parton_id = pythia.event[index].id()
                 if (leading_parton_id>0 and leading_parton_id<7):
                     hname = 'h_JetPt_lp_R{}_qjet'.format(R_label)
-                    getattr(self, hname).Fill(lp.perp())
+                    getattr(self, hname).Fill(pythia.event[index].perp())
                 if (leading_parton_id==9 or leading_parton_id==21):
                     hname = 'h_JetPt_lp_R{}_gjet'.format(R_label)
-                    getattr(self, hname).Fill(lp.perp())
+                    getattr(self, hname).Fill(pythia.event[index].perp())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
