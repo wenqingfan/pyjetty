@@ -653,11 +653,9 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(5, 7):
                 leading_parton_id = pythia.event[index].id()
                 if (leading_parton_id>0 and leading_parton_id<7):
-                    hname = 'hJetPt_leading_quarks'
-                    getattr(self, hname).Fill(pythia.event[index].perp())
+                    self.hJetPt_leading_quarks.Fill(pythia.event[index].perp())
                 if (leading_parton_id==9 or leading_parton_id==21):
-                    hname = 'hJetPt_leading_gluons'
-                    getattr(self, hname).Fill(pythia.event[index].perp())
+                    self.hJetPt_leading_gluons.Fill(pythia.event[index].perp())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
