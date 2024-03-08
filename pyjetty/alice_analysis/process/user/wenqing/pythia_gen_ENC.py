@@ -200,8 +200,6 @@ class PythiaGenENC(process_base.ProcessBase):
         pt_bins = linbins(0,1000,500)
         self.hJetPt_leading_gluons = ROOT.TH1D("hJetPt_leading_gluons", 'Jet pt spectrum of leading gluons', 500, pt_bins)
         self.hJetPt_leading_gluons.SetTitle('pT (jet)')
-
-        pt_bins = linbins(0,1000,500)
         self.hJetPt_leading_quarks = ROOT.TH1D("hJetPt_leading_quarks", 'Jet pt spectrum of leading quarks', 500, pt_bins)
         self.hJetPt_leading_quarks.SetTitle('pT (jet)')
 
@@ -653,9 +651,9 @@ class PythiaGenENC(process_base.ProcessBase):
             for index in range(5, 7):
                 leading_parton_id = pythia.event[index].id()
                 if (leading_parton_id>0 and leading_parton_id<7):
-                    self.hJetPt_leading_quarks.Fill(pythia.event[index].perp())
+                    self.hJetPt_leading_quarks.Fill(pythia.event[index].pT())
                 if (leading_parton_id==9 or leading_parton_id==21):
-                    self.hJetPt_leading_gluons.Fill(pythia.event[index].perp())
+                    self.hJetPt_leading_gluons.Fill(pythia.event[index].pT())
 
             self.parts_pythia_p = pythiafjext.vectorize_select(pythia, [pythiafjext.kFinal], 0, True) # final stable partons
 
