@@ -9,9 +9,9 @@ jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distan
 matched_jet_type: 'p'
 use_leading_parton: False
 ref_jetR: 0.4
-use_ref_for_jet_selection: True
-use_ref_for_pt_scaling: True
-do_gluon_jet: False
+use_ref_for_jet_selection: False
+use_ref_for_pt_scaling: False
+do_gluon_jet: True
 do_quark_jet: False
 
 reject_tracks_fraction: 0.0
