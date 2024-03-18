@@ -131,6 +131,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_quark_jet = False
 
+        if 'do_uds_jet' in config:
+            self.do_uds_jet = config['do_uds_jet']
+        else:
+            self.do_uds_jet = False
+
         if 'do_tagging' in config:
             self.do_tagging = config['do_tagging']
         else:
@@ -1033,7 +1038,7 @@ class PythiaGenENC(process_base.ProcessBase):
                                 hname = 'h_matched_JetPt_p_R{}_gjet'.format(R_label)
                                 getattr(self, hname).Fill(j_p.perp())
 
-                        if self.do_gluon_jet or self.do_quark_jet:
+                        if self.do_gluon_jet or self.do_quark_jet or self.do_uds_jet:
                             # skip the rest of processing on matched quark or gluon jets if the matched parton jet is not matched to a leading parton
                             if j_p.user_index() < 0:
                                 continue
@@ -1044,6 +1049,9 @@ class PythiaGenENC(process_base.ProcessBase):
                                     continue
                                 # if only want to process quark jets but this jet is a gluon jet, skip
                                 if self.do_quark_jet and (leading_parton_id==9 or leading_parton_id==21):
+                                    continue
+                                # if only want to process uds jets but this jet is not, skip
+                                if self.do_uds_jet and (leading_parton_id==9 or leading_parton_id==21 or leading_parton_id>3):
                                     continue
                         
                         # fill histograms (using ch jet as reference) 
