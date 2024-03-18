@@ -13,6 +13,7 @@ use_ref_for_jet_selection: False
 use_ref_for_pt_scaling: False
 do_gluon_jet: False
 do_quark_jet: False
+do_uds_jet: True
 
 reject_tracks_fraction: 0.0
 eta_max: 0.9
