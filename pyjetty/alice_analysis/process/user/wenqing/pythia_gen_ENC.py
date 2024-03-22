@@ -371,6 +371,30 @@ class PythiaGenENC(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h) 
 
+                    name = 'h_ENC2_JetPt2040_{}_R{}_trk10'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_ENC2_JetPt4060_{}_R{}_trk10'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_ENC2_JetPt6080_{}_R{}_trk10'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h) 
+
                     name = 'h_JetPt2040_{}_R{}'.format(jet_level, R_label)
                     print('Initialize histogram',name)
                     h = ROOT.TH1D(name, name, 2, -0.5, 1.5)
@@ -895,6 +919,14 @@ class PythiaGenENC(process_base.ProcessBase):
                     getattr(self, 'h_ENC2_JetPt4060_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
                 if jet.perp()>60 and jet.perp()<80:
                     getattr(self, 'h_ENC2_JetPt6080_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+
+            for index in range(cb1.correlator(2).rs().size()):
+                if jet.perp()>20 and jet.perp()<40:
+                    getattr(self, 'h_ENC2_JetPt2040_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
+                if jet.perp()>40 and jet.perp()<60:
+                    getattr(self, 'h_ENC2_JetPt4060_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
+                if jet.perp()>60 and jet.perp()<80:
+                    getattr(self, 'h_ENC2_JetPt6080_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
 
     #---------------------------------------------------------------
     # Form EEC using jet constituents for matched jets
