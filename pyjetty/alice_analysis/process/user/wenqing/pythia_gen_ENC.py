@@ -151,6 +151,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.do_theory_check = False
 
+        if 'do_sanity_check' in config:
+            self.do_sanity_check = config['do_sanity_check']
+        else:
+            self.do_sanity_check = False
+
         if 'rm_trk_min_pt' in config:
             self.rm_trk_min_pt = config['rm_trk_min_pt']
         else:
@@ -339,7 +344,50 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('pT (jet)')
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)                
+                getattr(self, hist_list_name).append(h)   
+
+                if self.do_sanity_check:
+                    name = 'h_ENC2_JetPt2040_{}_R{}_trk00'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_ENC2_JetPt4060_{}_R{}_trk00'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_ENC2_JetPt6080_{}_R{}_trk00'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH1D(name, name, 50, RL_bins)
+                    h.GetXaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h) 
+
+                    name = 'h_JetPt2040_{}_R{}'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    h = ROOT.TH1D(name, name, 2, -0.5, 1.5)
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_JetPt4060_{}_R{}'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    h = ROOT.TH1D(name, name, 2, -0.5, 1.5)
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)  
+
+                    name = 'h_JetPt6080_{}_R{}'.format(jet_level, R_label)
+                    print('Initialize histogram',name)
+                    h = ROOT.TH1D(name, name, 2, -0.5, 1.5)
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)             
 
                 # NB: Only do the cone check for one reference radius and charged jets for now
                 if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
@@ -830,6 +878,23 @@ class PythiaGenENC(process_base.ProcessBase):
                         getattr(self, 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb_reshuffle0.correlator(ipoint).rs()[index], cb_reshuffle0.correlator(ipoint).weights()[index])
                 for index in range(cb_reshuffle1.correlator(ipoint).rs().size()):
                         getattr(self, 'h_reshuffle_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb_reshuffle1.correlator(ipoint).rs()[index], cb_reshuffle1.correlator(ipoint).weights()[index])
+
+        # sanity check
+        if self.do_sanity_check:
+            if jet.perp()>20 and jet.perp()<40:
+                getattr(self, 'h_JetPt2040_{}_R{}'.format(level, R_label)).Fill(0)
+            if jet.perp()>40 and jet.perp()<60:
+                getattr(self, 'h_JetPt4060_{}_R{}'.format(level, R_label)).Fill(0)
+            if jet.perp()>60 and jet.perp()<80:
+                getattr(self, 'h_JetPt6080_{}_R{}'.format(level, R_label)).Fill(0)
+            
+            for index in range(cb0.correlator(2).rs().size()):
+                if jet.perp()>20 and jet.perp()<40:
+                    getattr(self, 'h_ENC2_JetPt2040_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+                if jet.perp()>40 and jet.perp()<60:
+                    getattr(self, 'h_ENC2_JetPt4060_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+                if jet.perp()>60 and jet.perp()<80:
+                    getattr(self, 'h_ENC2_JetPt6080_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
 
     #---------------------------------------------------------------
     # Form EEC using jet constituents for matched jets
