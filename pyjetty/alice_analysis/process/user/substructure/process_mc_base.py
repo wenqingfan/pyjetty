@@ -1053,14 +1053,14 @@ class ProcessMCBase(process_base.ProcessBase):
 
             # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
             parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, jet_det, perpcone_R)
-            # parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+            parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, 0)
               
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
             for i, part in enumerate(fj_particles_det_cones):
               if part.user_index()>0:
-                print('original user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'is',part.user_index())
+                print('original user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index())
 
             parts_in_cone1 = fj.vectorPJ()
             for part in constituents:
