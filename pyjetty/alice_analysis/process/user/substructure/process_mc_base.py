@@ -661,6 +661,14 @@ class ProcessMCBase(process_base.ProcessBase):
 
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
 
+            for part in fj_particles_combined_beforeCS:
+              if part.user_index() == -1:
+                print('combined particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
+            for jet in jets_combined_reselected_beforeCS:
+              for part in jet.constituents():
+                if part.user_index() == -1:
+                  print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
+
             if self.do_jetcone or self.do_perpcone:
             # NB: either jetcone or perpcone (not both)
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
@@ -723,10 +731,6 @@ class ProcessMCBase(process_base.ProcessBase):
     
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
-
-      for part in jet_det.constituents():
-        if part.user_index() == -1:
-          print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
       
       # Check additional acceptance criteria
       # skip event if not satisfied -- since first jet in event is highest pt
