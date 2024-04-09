@@ -524,7 +524,7 @@ class ProcessMCBase(process_base.ProcessBase):
           print('total number of background parts',len(fj_particles_combined_beforeCS))
           for part in fj_particles_combined_beforeCS:
             print('embedded particles',part.pt(),part.eta(),part.phi(),part.user_index())
-          for p in fj_particles_det:
+          for part in fj_particles_det:
             print('det particles',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
