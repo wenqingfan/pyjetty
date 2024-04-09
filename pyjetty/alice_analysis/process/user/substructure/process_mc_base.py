@@ -723,6 +723,10 @@ class ProcessMCBase(process_base.ProcessBase):
     
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
+
+      for part in jet_det.constituents():
+        if part.user_index() == -1:
+          print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
       
       # Check additional acceptance criteria
       # skip event if not satisfied -- since first jet in event is highest pt
@@ -941,13 +945,6 @@ class ProcessMCBase(process_base.ProcessBase):
     else:
       suffix = ''
     
-    for part in jet_det.constituents():
-      if part.user_index() == -1:
-        print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
-    for part in fj_particles_det_cones:
-      if part.user_index() == -1:
-        print('det particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
-
     # Get matched truth jet
     if jet_det.has_user_info():
       jet_truth = jet_det.python_info().match
