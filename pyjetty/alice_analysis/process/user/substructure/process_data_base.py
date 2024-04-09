@@ -548,7 +548,7 @@ class ProcessDataBase(process_base.ProcessBase):
         
         # NB: a deep copy created for the parts in perp cone (rotation operation does not affect the oringinal parts)        
         parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
-        for part in parts_in_perpcone1:
+        for part in parts:
           part.reset_PtYPhiM(0,0,0,0)
         # for part in parts_in_perpcone1:
         #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
