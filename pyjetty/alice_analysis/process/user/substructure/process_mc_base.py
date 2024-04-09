@@ -1060,10 +1060,6 @@ class ProcessMCBase(process_base.ProcessBase):
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
-            for i, part in enumerate(fj_particles_det_cones):
-              if part.user_index()>0:
-                print('original user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index())
-
             parts_in_cone1 = fj.vectorPJ()
             for part in constituents:
               part.set_user_index(1)
@@ -1074,20 +1070,20 @@ class ProcessMCBase(process_base.ProcessBase):
               part.set_user_index(-1)
               parts_in_cone1.append(part)
 
-            # # check if the index is updated in parts_in_cone1
-            # for i, part in enumerate(parts_in_cone1):
-            #   if part.user_index()==-1:
-            #     print('New user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be -1:',part.user_index())
+            # check if the index is updated in parts_in_cone1
+            for i, part in enumerate(parts_in_cone1):
+              if part.user_index()==-1:
+                print('New user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be -1:',part.user_index())
 
-            # # check if the index is unmodified in the oringal consitituents
-            # for i, part in enumerate(constituents):
-            #   if part.user_index()==1:
-            #     print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
+            # check if the index is unmodified in the oringal consitituents
+            for i, part in enumerate(constituents):
+              if part.user_index()==1:
+                print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
 
-            # # check if the index is unmodified in the oringal particles (before jet clustering)
-            # for i, part in enumerate(fj_particles_det_cones):
-            #   if part.user_index()==1:
-            #     print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
+            # check if the index is unmodified in the oringal particles (before jet clustering)
+            for i, part in enumerate(fj_particles_det_cones):
+              if part.user_index()==1:
+                print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
             
             parts_in_cone2 = fj.vectorPJ()
             for part in constituents:
