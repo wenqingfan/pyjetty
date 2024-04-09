@@ -521,6 +521,9 @@ class ProcessMCBase(process_base.ProcessBase):
         # Main case: Get Pb-Pb event and embed it into the det-level particle list
         else:
           fj_particles_combined_beforeCS = self.process_io_emb.load_event()
+          for part in fj_particles_combined_beforeCS:
+            if part.user_index() < 0:
+              print('embedded particles (<0 user index)',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
           # The pp-det tracks are each stored with a unique user_index >= 0
