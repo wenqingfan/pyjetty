@@ -521,6 +521,11 @@ class ProcessMCBase(process_base.ProcessBase):
         # Main case: Get Pb-Pb event and embed it into the det-level particle list
         else:
           fj_particles_combined_beforeCS = self.process_io_emb.load_event()
+          print('total number of background parts',len(fj_particles_combined_beforeCS))
+          for part in fj_particles_combined_beforeCS:
+            print('embedded particles',part.pt(),part.eta(),part.phi(),part.user_index())
+          for p in fj_particles_det:
+            print('det particles',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
           # The pp-det tracks are each stored with a unique user_index >= 0
@@ -660,14 +665,6 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_selected_beforeCS = jet_selector_det(jets_combined_beforeCS)
 
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
-
-            for part in fj_particles_combined_beforeCS:
-              if part.user_index() == -1:
-                print('combined particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
-            for jet in jets_combined_reselected_beforeCS:
-              for part in jet.constituents():
-                if part.user_index() == -1:
-                  print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
 
             if self.do_jetcone or self.do_perpcone:
             # NB: either jetcone or perpcone (not both)
