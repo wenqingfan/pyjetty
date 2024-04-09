@@ -1077,12 +1077,12 @@ class ProcessMCBase(process_base.ProcessBase):
 
             # check if the index is unmodified in the oringal consitituents
             for i, part in enumerate(constituents):
-              if part.user_index()==1:
+              if part.user_index()>0:
                 print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
 
             # check if the index is unmodified in the oringal particles (before jet clustering)
             for i, part in enumerate(fj_particles_det_cones):
-              if part.user_index()==1:
+              if part.user_index()>0:
                 print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
             
             parts_in_cone2 = fj.vectorPJ()
