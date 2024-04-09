@@ -921,10 +921,10 @@ class ProcessMCBase(process_base.ProcessBase):
   def copy_parts(self, parts):
     parts_copied = fj.vectorPJ()
     for part in parts:
-      user_index_new = part.user_index()
-      part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
-      part_new.set_user_index(user_index_new)
-      parts_copied.push_back(part_new)
+      # user_index_new = part.user_index()
+      # part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
+      # part_new.set_user_index(user_index_new)
+      parts_copied.push_back(part)
     
     return parts_copied
 
