@@ -909,8 +909,10 @@ class ProcessMCBase(process_base.ProcessBase):
       y_new = part.rapidity()
       phi_new = part.phi() + rotate_phi
       m_new = part.m()
+      user_index_new = part.user_index()
       # print('before',part.phi())
       part.reset_PtYPhiM(pt_new, y_new, phi_new, m_new)
+      part.set_user_index(user_index_new)
       # print('after',part.phi())
       parts_rotated.push_back(part)
     
