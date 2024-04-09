@@ -1063,9 +1063,9 @@ class ProcessMCBase(process_base.ProcessBase):
             print('****************************')
 
             # check if the index is unmodified in the oringal consitituents
-            for i, part in enumerate(constituents):
+            for i, part in enumerate(parts_in_jet):
               if part.user_index()<0:
-                print('Original user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
+                print('Original user index for copied constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
 
             # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
             parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
