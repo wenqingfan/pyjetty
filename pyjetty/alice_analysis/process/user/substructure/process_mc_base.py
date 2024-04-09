@@ -522,8 +522,8 @@ class ProcessMCBase(process_base.ProcessBase):
         else:
           fj_particles_combined_beforeCS = self.process_io_emb.load_event()
           for part in fj_particles_combined_beforeCS:
-            if part.user_index() < 0:
-              print('embedded particles (<0 user index)',part.pt(),part.eta(),part.phi(),part.user_index())
+            if part.user_index() == -1:
+              print('embedded particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
           # The pp-det tracks are each stored with a unique user_index >= 0
