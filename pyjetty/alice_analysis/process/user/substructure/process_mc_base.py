@@ -521,18 +521,12 @@ class ProcessMCBase(process_base.ProcessBase):
         # Main case: Get Pb-Pb event and embed it into the det-level particle list
         else:
           fj_particles_combined_beforeCS = self.process_io_emb.load_event()
-          for part in fj_particles_combined_beforeCS:
-            if part.user_index() == -1:
-              print('embedded particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
           # The pp-det tracks are each stored with a unique user_index >= 0
           #   (same index in fj_particles_combined and fj_particles_det -- which will be used in prong-matching)
           # The Pb-Pb tracks are each stored with a unique user_index < 0
           [fj_particles_combined_beforeCS.push_back(p) for p in fj_particles_det]
-          for part in fj_particles_combined_beforeCS:
-            if part.user_index() == -1:
-              print('combined particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
          
         # Perform constituent subtraction for each R_max
         fj_particles_combined = [self.constituent_subtractor[i].process_event(fj_particles_combined_beforeCS) for i, R_max in enumerate(self.max_distance)]
@@ -947,6 +941,13 @@ class ProcessMCBase(process_base.ProcessBase):
     else:
       suffix = ''
     
+    for part in jet_det:
+      if part.user_index() == -1:
+        print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
+    for part in fj_particles_det_cones:
+      if part.user_index() == -1:
+        print('det particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
+
     # Get matched truth jet
     if jet_det.has_user_info():
       jet_truth = jet_det.python_info().match
