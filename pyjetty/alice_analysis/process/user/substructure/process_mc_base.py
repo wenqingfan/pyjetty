@@ -1052,7 +1052,7 @@ class ProcessMCBase(process_base.ProcessBase):
             print('****************************')
 
             # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
-            parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
+            parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, jet_det, perpcone_R)
             parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
               
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
