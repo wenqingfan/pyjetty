@@ -131,6 +131,13 @@ class ProcessMCBase(process_base.ProcessBase):
       self.jetcone_R_list = config['jetcone_R_list']
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
+    
+    # right now donot allow perpcone and jetcone to be enabled as the same time
+    if ('do_perpcone' in config) and (self.do_jetcone==False):
+      self.do_perpcone = config['do_perpcone']
+    else:
+      self.do_perpcone = False
+
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
     else:
@@ -654,7 +661,8 @@ class ProcessMCBase(process_base.ProcessBase):
 
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
 
-            if self.do_jetcone:
+            if self.do_jetcone or self.do_perpcone:
+            # NB: either jetcone or perpcone (not both)
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
@@ -665,7 +673,8 @@ class ProcessMCBase(process_base.ProcessBase):
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
           else:
-            if self.do_jetcone:
+            if self.do_jetcone or self.do_perpcone:
+            # NB: either jetcone or perpcone (not both)
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
@@ -892,6 +901,29 @@ class ProcessMCBase(process_base.ProcessBase):
     
     return cone_parts
 
+  def rotate_parts(self, parts, rotate_phi):
+    # rotate parts in azimuthal direction
+    parts_rotated = fj.vectorPJ()
+    for part in parts:
+      pt_new = part.pt()
+      y_new = part.rapidity()
+      phi_new = part.phi() + rotate_phi
+      m_new = part.m()
+      # print('before',part.phi())
+      part.reset_PtYPhiM(pt_new, y_new, phi_new, m_new)
+      # print('after',part.phi())
+      parts_rotated.push_back(part)
+    
+    return parts_rotated
+
+  def copy_parts(self, parts):
+    parts_copied = fj.vectorPJ()
+    for part in parts:
+      part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
+      parts_copied.push_back(part_new)
+    
+    return parts_copied
+
   #---------------------------------------------------------------
   # Loop through jets and call user function to fill matched
   # histos if both det and truth jets are unique match.
@@ -1003,6 +1035,83 @@ class ProcessMCBase(process_base.ProcessBase):
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                  holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=jetcone_R)
+
+          # If check perpendicular cone, pass the list of perp cone particles (NB: re-label particle origins according to whether they are from perp or jet instead of pythia or PbPb. Need to make sure this part does not interfere with the ss, sb, bb classification in standard embedding procedures)
+          # NO perpcone for the jetcone definition yet, just for the AK jets
+          if self.do_perpcone:
+
+            perp_jet1 = fj.PseudoJet()
+            perp_jet1.reset_PtYPhiM(jet_det.pt(), jet_det.rapidity(), jet_det.phi() + np.pi/2, jet_det.m())
+            perp_jet2 = fj.PseudoJet()
+            perp_jet2.reset_PtYPhiM(jet_det.pt(), jet_det.rapidity(), jet_det.phi() - np.pi/2, jet_det.m())
+
+            # The current implementation only does perpcone for the standard AK jets. No bigger cones
+            perpcone_R = jetR
+            constituents = jet_det.constituents()
+
+            print('****************************')
+
+            # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
+            parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
+            parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+              
+            parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
+            parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
+
+            parts_in_cone1 = fj.vectorPJ()
+            for i, part in enumerate(constituents):
+              part.set_user_index(1)
+              parts_in_cone1.append(part)
+            for part in parts_in_perpcone1:
+              if part.user_index()!=-1:
+                print('change user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index(),'to -1')
+              part.set_user_index(-1)
+              parts_in_cone1.append(part)
+
+            # check if the index is updated in parts_in_cone1
+            for i, part in enumerate(parts_in_cone1):
+              if part.user_index()==-1:
+                print('New user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be -1:',part.user_index())
+
+            # check if the index is unmodified in the oringal consitituents
+            for i, part in enumerate(constituents):
+              if part.user_index()==1:
+                print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
+
+            # check if the index is unmodified in the oringal particles (before jet clustering)
+            for i, part in enumerate(fj_particles_det_cones):
+              if part.user_index()==1:
+                print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be 1:',part.user_index())
+            
+            parts_in_cone2 = fj.vectorPJ()
+            for part in constituents:
+              part.set_user_index(1)
+              parts_in_cone2.append(part)
+            for part in parts_in_perpcone2:
+              part.set_user_index(-1)
+              parts_in_cone2.append(part)
+              
+            cone_parts_in_det_jet = parts_in_cone1
+            cone_parts_in_truth_jet = None
+
+            # Call user function to fill histos
+            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                 jet_truth_groomed_lund, jet_pp_det, jetR,
+                                 obs_setting, grooming_setting, obs_label,
+                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=0) # jetR used later so cone_R jet set to 0
+
+            cone_parts_in_det_jet = parts_in_cone2
+            cone_parts_in_truth_jet = None
+
+            # Call user function to fill histos
+            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                 jet_truth_groomed_lund, jet_pp_det, jetR,
+                                 obs_setting, grooming_setting, obs_label,
+                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=0) # jetR used later so cone_R jet set to 0
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
