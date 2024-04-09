@@ -545,10 +545,11 @@ class ProcessDataBase(process_base.ProcessBase):
         for i, part in enumerate(parts):
           if part.delta_R(perp_jet1)<perpcone_R:
             print('priginal parts before reset (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
-            parts[i].reset_PtYPhiM(1,0,0,0)
         
         # NB: a deep copy created for the parts in perp cone (rotation operation does not affect the oringinal parts)        
         parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
+        for i, part in enumerate(parts_in_perpcone1):
+          parts_in_perpcone1[i].reset_PtYPhiM(1,0,0,0)
         # for part in parts_in_perpcone1:
         #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
         parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
