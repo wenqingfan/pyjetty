@@ -530,6 +530,9 @@ class ProcessMCBase(process_base.ProcessBase):
           #   (same index in fj_particles_combined and fj_particles_det -- which will be used in prong-matching)
           # The Pb-Pb tracks are each stored with a unique user_index < 0
           [fj_particles_combined_beforeCS.push_back(p) for p in fj_particles_det]
+          for part in fj_particles_combined_beforeCS:
+            if part.user_index() == -1:
+              print('combined particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
          
         # Perform constituent subtraction for each R_max
         fj_particles_combined = [self.constituent_subtractor[i].process_event(fj_particles_combined_beforeCS) for i, R_max in enumerate(self.max_distance)]
