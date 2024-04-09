@@ -1058,6 +1058,10 @@ class ProcessMCBase(process_base.ProcessBase):
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
+            for i, part in enumerate(fj_particles_det_cones):
+              if part.user_index()>0:
+                print('original user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'is',part.user_index())
+
             parts_in_cone1 = fj.vectorPJ()
             for part in constituents:
               part.set_user_index(1)
