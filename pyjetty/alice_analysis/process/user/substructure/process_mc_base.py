@@ -919,6 +919,7 @@ class ProcessMCBase(process_base.ProcessBase):
     return parts_rotated
 
   def copy_parts(self, parts):
+    # don't need to re-init every part for a deep copy
     parts_copied = fj.vectorPJ()
     for part in parts:
       # user_index_new = part.user_index()
@@ -1052,6 +1053,7 @@ class ProcessMCBase(process_base.ProcessBase):
             # The current implementation only does perpcone for the standard AK jets. No bigger cones
             perpcone_R = jetR
             constituents = jet_det.constituents()
+            parts_in_jet = self.copy_parts(constituents)
 
             print('****************************')
 
@@ -1061,8 +1063,7 @@ class ProcessMCBase(process_base.ProcessBase):
               
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
-
-            parts_in_jet = self.copy_parts(constituents)
+            
             parts_in_cone1 = fj.vectorPJ()
             for i, part in enumerate(parts_in_jet):
               if part.user_index()<0:
@@ -1082,7 +1083,8 @@ class ProcessMCBase(process_base.ProcessBase):
 
             # check if the index is unmodified in the oringal consitituents
             for i, part in enumerate(constituents):
-              print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
+              if part.user_index()<0:
+                print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
 
             # # check if the index is unmodified in the oringal particles (before jet clustering)
             # for i, part in enumerate(fj_particles_det_cones):
@@ -1090,7 +1092,7 @@ class ProcessMCBase(process_base.ProcessBase):
             #     print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be >0:',part.user_index())
             
             parts_in_cone2 = fj.vectorPJ()
-            for part in constituents:
+            for part in parts_in_jet:
               part.set_user_index(1)
               parts_in_cone2.append(part)
             for part in parts_in_perpcone2:
