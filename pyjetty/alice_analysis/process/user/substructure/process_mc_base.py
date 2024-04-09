@@ -921,7 +921,9 @@ class ProcessMCBase(process_base.ProcessBase):
   def copy_parts(self, parts):
     parts_copied = fj.vectorPJ()
     for part in parts:
+      user_index_new = part.user_index()
       part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
+      part_new.user_index(user_index_new)
       parts_copied.push_back(part_new)
     
     return parts_copied
@@ -1060,8 +1062,9 @@ class ProcessMCBase(process_base.ProcessBase):
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
+            parts_in_jet = self.copy_parts(constituents)
             parts_in_cone1 = fj.vectorPJ()
-            for i, part in enumerate(constituents):
+            for i, part in enumerate(parts_in_jet):
               if part.user_index()<0:
                 print('change user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index(),'to 1')
               part.set_user_index(1)
