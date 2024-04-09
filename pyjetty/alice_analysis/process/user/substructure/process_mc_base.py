@@ -1058,55 +1058,34 @@ class ProcessMCBase(process_base.ProcessBase):
             # The current implementation only does perpcone for the standard AK jets. No bigger cones
             perpcone_R = jetR
             constituents = jet_det.constituents()
-            parts_in_jet = self.copy_parts(constituents)
+            parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
-            print('****************************')
-
-            # check if the index is unmodified in the oringal consitituents
-            for i, part in enumerate(parts_in_jet):
-              if part.user_index()<0:
-                print('Original user index for copied constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
-
-            # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
+            # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
             parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
             parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
               
             parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
             parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
             
+            # use 999 and -999 to distinguish from prevous used labeling numbers
             parts_in_cone1 = fj.vectorPJ()
-            for i, part in enumerate(parts_in_jet):
-              if part.user_index()<0:
-                print('change user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index(),'to 1')
-              part.set_user_index(1)
+            # fill parts from jet
+            for part in parts_in_jet:
+              part.set_user_index(999)
               parts_in_cone1.append(part)
-            for i, part in enumerate(parts_in_perpcone1):
-              # if part.user_index()>0:
-              #   print('change user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index(),'to -1')
-              part.set_user_index(-99)
+            # fill parts from perp cone 1
+            for part in parts_in_perpcone1:
+              part.set_user_index(-999)
               parts_in_cone1.append(part)
-
-            # # check if the index is updated in parts_in_cone1
-            # for i, part in enumerate(parts_in_cone1):
-            #   if part.user_index()==-1:
-            #     print('New user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be -1:',part.user_index())
-
-            # check if the index is unmodified in the oringal consitituents
-            for i, part in enumerate(constituents):
-              if part.user_index()<0:
-                print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
-
-            # # check if the index is unmodified in the oringal particles (before jet clustering)
-            # for i, part in enumerate(fj_particles_det_cones):
-            #   if part.user_index()>0:
-            #     print('Previous user index for original particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be >0:',part.user_index())
             
             parts_in_cone2 = fj.vectorPJ()
+            # fill parts from jet
             for part in parts_in_jet:
-              part.set_user_index(1)
+              part.set_user_index(999)
               parts_in_cone2.append(part)
+            # fill parts from perp cone 2
             for part in parts_in_perpcone2:
-              part.set_user_index(-99)
+              part.set_user_index(-999)
               parts_in_cone2.append(part)
               
             cone_parts_in_det_jet = parts_in_cone1
