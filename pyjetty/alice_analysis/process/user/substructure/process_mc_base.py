@@ -1060,7 +1060,7 @@ class ProcessMCBase(process_base.ProcessBase):
             # check if the index is unmodified in the oringal consitituents
             for i, part in enumerate(constituents):
               if part.user_index()<0:
-                print('Previous user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
+                print('Original user index for constituents (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'should be <0:',part.user_index())
 
             # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index and assembling the perp cone parts
             parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
@@ -1078,7 +1078,7 @@ class ProcessMCBase(process_base.ProcessBase):
             for i, part in enumerate(parts_in_perpcone1):
               # if part.user_index()>0:
               #   print('change user index for particle (i, pt, eta, phi)',i,part.pt(),part.eta(),part.phi(),'from',part.user_index(),'to -1')
-              part.set_user_index(-1)
+              part.set_user_index(-99)
               parts_in_cone1.append(part)
 
             # # check if the index is updated in parts_in_cone1
@@ -1101,7 +1101,7 @@ class ProcessMCBase(process_base.ProcessBase):
               part.set_user_index(1)
               parts_in_cone2.append(part)
             for part in parts_in_perpcone2:
-              part.set_user_index(-1)
+              part.set_user_index(-99)
               parts_in_cone2.append(part)
               
             cone_parts_in_det_jet = parts_in_cone1
