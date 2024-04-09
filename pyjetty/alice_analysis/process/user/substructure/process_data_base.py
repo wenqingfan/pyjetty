@@ -556,6 +556,9 @@ class ProcessDataBase(process_base.ProcessBase):
         # for part in parts_in_perpcone1:
         #   print('after rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
 
+        for part in parts_in_perpcone1:
+          print('perpcone parts after reset (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+
         for i, part in enumerate(parts):
           if part.delta_R(perp_jet1)<perpcone_R:
             print('priginal parts after reset (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
