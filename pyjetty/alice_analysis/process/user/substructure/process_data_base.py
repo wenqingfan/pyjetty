@@ -541,14 +541,24 @@ class ProcessDataBase(process_base.ProcessBase):
         # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
         if perpcone_R != jetR:
           constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
+
+        for i, part in enumerate(parts):
+          if part.delta_R(perp_jet1)<perpcone_R:
+            print('priginal parts before reset (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
         
         # NB: a deep copy created for the parts in perp cone (rotation operation does not affect the oringinal parts)        
         parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
+        for part in parts_in_perpcone1:
+          part.reset_PtYPhiM(0,0,0,0)
         # for part in parts_in_perpcone1:
         #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
         parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
         # for part in parts_in_perpcone1:
         #   print('after rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+
+        for i, part in enumerate(parts):
+          if part.delta_R(perp_jet1)<perpcone_R:
+            print('priginal parts after reset (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
         
         parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R)
         parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
