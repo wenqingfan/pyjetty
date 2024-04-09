@@ -670,9 +670,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           if self.do_rho_subtraction or self.do_constituent_subtraction:
             pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
             pair_type_label = self.pair_type_labels[pair_type]
-
-            if 'perpcone' in hname:
-              print('pair type is',pair_type_label)
           
           if 'ENC' in observable:
             if self.ENC_fastsim and (not 'Truth' in hname):
