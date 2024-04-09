@@ -542,8 +542,9 @@ class ProcessDataBase(process_base.ProcessBase):
         if perpcone_R != jetR:
           constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
         
-        for part in parts:
-          print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+        for i, part in enumerate(parts):
+          if part.delta_R(perp_jet1)<perpcone_R:
+            print('before rotation (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
         
         parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
         # for part in parts_in_perpcone1:
@@ -555,8 +556,9 @@ class ProcessDataBase(process_base.ProcessBase):
         parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R)
         parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
-        for part in parts:
-          print('after rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+        for i, part in enumerate(parts):
+          if part.delta_R(perp_jet1)<perpcone_R:
+            print('after rotation (index, pt, eta, phi)',i,part.pt(),part.eta(),part.phi())
 
         parts_in_cone1 = fj.vectorPJ()
         for part in constituents:
