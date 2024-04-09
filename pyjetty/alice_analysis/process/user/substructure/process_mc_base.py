@@ -521,11 +521,6 @@ class ProcessMCBase(process_base.ProcessBase):
         # Main case: Get Pb-Pb event and embed it into the det-level particle list
         else:
           fj_particles_combined_beforeCS = self.process_io_emb.load_event()
-          print('total number of background parts',len(fj_particles_combined_beforeCS))
-          for part in fj_particles_combined_beforeCS:
-            print('embedded particles',part.pt(),part.eta(),part.phi(),part.user_index())
-          for part in fj_particles_det:
-            print('det particles',part.pt(),part.eta(),part.phi(),part.user_index())
               
           # Form the combined det-level event
           # The pp-det tracks are each stored with a unique user_index >= 0
@@ -923,14 +918,19 @@ class ProcessMCBase(process_base.ProcessBase):
     
     return parts_rotated
 
-  def copy_parts(self, parts):
+  def copy_parts(self, parts, remove_ghosts = True):
     # don't need to re-init every part for a deep copy
+    # the last arguement enable/disable the removal of ghost particles from jet area calculation (default set to true)
     parts_copied = fj.vectorPJ()
     for part in parts:
       # user_index_new = part.user_index()
       # part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
       # part_new.set_user_index(user_index_new)
-      parts_copied.push_back(part)
+      if remove_ghosts:
+        if part.pt() > 0.01:
+          parts_copied.push_back(part)
+      else:
+        parts_copied.push_back(part)
     
     return parts_copied
 
