@@ -941,7 +941,7 @@ class ProcessMCBase(process_base.ProcessBase):
     else:
       suffix = ''
     
-    for part in jet_det:
+    for part in jet_det.constituents():
       if part.user_index() == -1:
         print('constituents particles (user index==-1)',part.pt(),part.eta(),part.phi(),part.user_index())
     for part in fj_particles_det_cones:
