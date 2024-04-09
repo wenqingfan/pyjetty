@@ -215,6 +215,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                     h.GetXaxis().SetTitle('p_{T,ch jet}')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
+
+                if self.do_perpcone:
+                  # Matched det histograms (only det-level for perpcone)
+                  name = 'h_perpcone_matched_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
                 
                 if self.thermal_model:
                   for R_max in self.max_distance:
@@ -717,12 +727,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         # fill RL vs matched truth jet pT for det jets (only fill these extra histograms for ENC or pair distributions)
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
           hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
-          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets. However this also means that two identical histograms will be filled fot jet_pt observable
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets
 
         # Fill correlation between matched det and truth jets
         if 'jet_pt' in observable:
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())
+
+        # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
+        if self.do_perpcone and ('ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable):
+          hname = 'h_perpcone_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
 
       else: # fill for cone parts around jet
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
