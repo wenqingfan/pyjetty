@@ -218,7 +218,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
                 if self.do_perpcone:
                   # Matched det histograms (only det-level for perpcone)
-                  name = 'h_perpcone_matched_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                  name = 'h_perpcone{}_matched_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -312,7 +312,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               
               if self.do_perpcone:
                   # Matched det histograms (only det-level for perpcone)
-                  name = 'h_perpcone_matched_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+                  name = 'h_perpcone{}_matched_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -726,8 +726,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       jet_pt_det = jet_det.perp()
 
     for observable in self.observable_list:
-      
-      if cone_R == 0: # fill for jet constituents
+      # NB: important to make sure that one histogram is only filled by one type of jets
+      # type 1 -- fill for jet constituents
+      if (cone_R == 0) and (cone_parts_in_det_jet == None):
         hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
         self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det)
 
@@ -744,12 +745,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())
 
+      # type 2 -- fill for perp cone
+      if (cone_R == 0) and (cone_parts_in_det_jet != None): 
         # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
         if self.do_perpcone and ('ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable):
-          hname = 'h_perpcone_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
+          hname = 'h_perpcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
 
-      else: # fill for cone parts around jet
+      # type 3 -- fill for cone parts around jet
+      if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
           hname = 'h_jetcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
