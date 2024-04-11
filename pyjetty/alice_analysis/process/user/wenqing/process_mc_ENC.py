@@ -226,15 +226,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                   h.GetYaxis().SetTitle('R_{L}')
                   setattr(self, name, h)
                 
-                if self.thermal_model:
-                  for R_max in self.max_distance:
-                    name = 'h_{}{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, ipoint, pair_type_label, jetR, obs_label, R_max)
-                    pt_bins = linbins(0,200,200)
-                    RL_bins = logbins(1E-4,1,50)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('p_{T,ch jet}')
-                    h.GetYaxis().SetTitle('R_{L}')
-                    setattr(self, name, h)
+                # NB: comment out for now
+                # if self.thermal_model:
+                #   for R_max in self.max_distance:
+                #     name = 'h_{}{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, ipoint, pair_type_label, jetR, obs_label, R_max)
+                #     pt_bins = linbins(0,200,200)
+                #     RL_bins = logbins(1E-4,1,50)
+                #     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                #     h.GetXaxis().SetTitle('p_{T,ch jet}')
+                #     h.GetYaxis().SetTitle('R_{L}')
+                #     setattr(self, name, h)
 
             if 'EEC_noweight' in observable or 'EEC_weight2' in observable:
               name = 'h_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
@@ -320,15 +321,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                   h.GetYaxis().SetTitle('R_{L}')
                   setattr(self, name, h)
 
-              if self.thermal_model:
-                for R_max in self.max_distance:
-                  name = 'h_{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, pair_type_label, jetR, obs_label, R_max)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+              # NB: comment out for now
+              # if self.thermal_model:
+              #   for R_max in self.max_distance:
+              #     name = 'h_{}{}_JetPt_R{}_{}_Rmax{}'.format(observable, pair_type_label, jetR, obs_label, R_max)
+              #     pt_bins = linbins(0,200,200)
+              #     RL_bins = logbins(1E-4,1,50)
+              #     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              #     h.GetXaxis().SetTitle('p_{T,ch jet}')
+              #     h.GetYaxis().SetTitle('R_{L}')
+              #     setattr(self, name, h)
         
         
         if 'jet_pt' in observable:
