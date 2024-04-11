@@ -1089,7 +1089,6 @@ class ProcessMCBase(process_base.ProcessBase):
               parts_in_cone2.append(part)
               
             cone_parts_in_det_jet = parts_in_cone1
-            cone_parts_in_truth_jet = None
 
             # Call user function to fill histos
             self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
@@ -1097,10 +1096,9 @@ class ProcessMCBase(process_base.ProcessBase):
                                  obs_setting, grooming_setting, obs_label,
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=0) # jetR used later so cone_R jet set to 0
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=0) # jetR used later so cone_R jet set to 0
 
             cone_parts_in_det_jet = parts_in_cone2
-            cone_parts_in_truth_jet = None
 
             # Call user function to fill histos
             self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
@@ -1108,7 +1106,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                  obs_setting, grooming_setting, obs_label,
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=0) # jetR used later so cone_R jet set to 0
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=0) # jetR used later so cone_R jet set to 0
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
