@@ -849,17 +849,18 @@ class ProcessMCBase(process_base.ProcessBase):
     # print('fill det hist')
     
     # Fill groomed histograms
-    if self.thermal_model:
-      hname = 'h_{{}}_JetPt_R{}_{{}}_Rmax{}'.format(jetR, R_max)
-      self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
-
-    if self.is_pp:
+    if self.is_pp: # pp
       hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
       self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
-
-    if self.do_rho_subtraction:
-      hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
-      self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
+    else: # non-pp
+      if self.do_rho_subtraction: # rho subtraction
+        hname = 'h_{{}}_JetPt_R{}_{{}}'.format(jetR)
+        self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
+      else: # CS subtraction
+        if self.thermal_model:
+          hname = 'h_{{}}_JetPt_R{}_{{}}_Rmax{}'.format(jetR, R_max)
+          self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
+        # NB: check if also want to have these histograms for non-termal model when using CS subtraction
   
   #---------------------------------------------------------------
   # This function is called once for each jet
