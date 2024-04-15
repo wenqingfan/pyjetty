@@ -217,12 +217,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                     setattr(self, name, h)
 
                 if self.do_perpcone:
-                  # Matched det histograms (only det-level for perpcone)
+                  # Matched det histograms
                   name = 'h_perpcone{}_matched_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
                   h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
+
+                  # Matched det histograms (with matched truth jet pT filled to the other axis)
+                  name = 'h_perpcone{}_matched_extra_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
                   h.GetYaxis().SetTitle('R_{L}')
                   setattr(self, name, h)
                 
@@ -312,12 +321,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                   setattr(self, name, h)
               
               if self.do_perpcone:
-                  # Matched det histograms (only det-level for perpcone)
+                  # Matched det histograms
                   name = 'h_perpcone{}_matched_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
                   h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
+
+                  # Matched det histograms (with matched truth jet pT filled to the other axis)
+                  name = 'h_perpcone{}_matched_extra_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
                   h.GetYaxis().SetTitle('R_{L}')
                   setattr(self, name, h)
 
@@ -753,6 +771,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_perpcone and ('ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable):
           hname = 'h_perpcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
+
+          hname = 'h_perpcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet) 
 
       # type 3 -- fill for cone parts around jet
       if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
