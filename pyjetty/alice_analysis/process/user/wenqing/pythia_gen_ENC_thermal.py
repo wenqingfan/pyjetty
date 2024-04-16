@@ -303,7 +303,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             #-------------------------------------------------------------
             # loop over jets and fill EEC histograms with jet constituents
             for jet_pp in jets_pp:
-                self.fill_jet_histograms(jet_pp, jetR, R_label)
+                self.fill_jet_histograms(jet_pp, R_label)
 
             #-------------------------------------------------------------
             # loop over matched jets and fill EEC histograms with jet constituents
@@ -313,8 +313,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 if imatched_jet_combined > -1:
                     nmatched_pp += 1
                     jet_combined = jets_p[imatched_jet_combined]
-                    self.fill_matched_jets(jet_combined, jet, R_label)
-                    self.fill_matched_perpcone(jet_combined, jet, R_label)
+                    self.fill_matched_jets(jet_combined, jet_pp, R_label)
+                    self.fill_matched_perpcone(jet_combined, jet_pp, jet_R, R_label)
 
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp(), jet_pp.perp())
@@ -328,7 +328,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill jet constituents for unmatched jets
     #---------------------------------------------------------------
-    def fill_jet_histograms(self, jet, jetR):
+    def fill_jet_histograms(self, jet, R_label):
 
         constituents = fj.sorted_by_pt(cone_parts)
 
@@ -349,15 +349,15 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
                 pair_type_label = self.pair_type_labels[pair_type]
               
-                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint) + pair_type_label, jetR, obs_label)
+                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint) + pair_type_label, R_label, obs_label)
                 getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_jets(self, jet_combined, jet_pp, jetR):
+    def fill_matched_jets(self, jet_combined, jet_pp, R_label):
 
-        hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(jetR)
+        hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
         fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = None)
 
         # hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
@@ -366,7 +366,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_perpcone(self, jet_combined, jet_pp, jetR):
+    def fill_matched_perpcone(self, jet_combined, jet_pp, jetR, R_label):
 
         perp_jet1 = fj.PseudoJet()
         perp_jet1.reset_PtYPhiM(jet_combined.pt(), jet_combined.rapidity(), jet_combined.phi() + np.pi/2, jet_combined.m())
@@ -406,7 +406,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
           part.set_user_index(-999)
           parts_in_cone2.append(part)
           
-        hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(jetR)
+        hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
         fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = parts_in_cone1)
         fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = parts_in_cone2)
 
