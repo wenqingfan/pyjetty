@@ -193,7 +193,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             
             # set up our jet definition and a jet selector
             # NB: area calculation enabled
-            jet_def = fj.JetDefinition(fj.antikt_algorithm, jetR, fj.AreaDefinition(fj.active_area_explicit_ghosts))
+            jet_def = fj.JetDefinition(fj.antikt_algorithm, jetR)
             setattr(self, "jet_def_R%s" % jetR_str, jet_def)
             print(jet_def)
 
@@ -264,9 +264,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             jet_def = getattr(self, "jet_def_R%s" % jetR_str)
             track_selector_ch = getattr(self, "track_selector_ch")
 
-            jets_pp = fj.sorted_by_pt(jet_selector(jet_def(track_selector_ch(self.parts_pythia_ch))))
+            cs_pp = fj.ClusterSequence(track_selector_ch(self.parts_pythia_ch), jet_def)
+            jets_pp = fj.sorted_by_pt( jet_selector(cs_pp.inclusive_jets()) )
 
-            jets_combined = fj.sorted_by_pt(jet_selector(jet_def(track_selector_ch(self.fj_particles_combined_beforeCS))))
+            cs_combined = fj.ClusterSequence(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
+            jets_combined = fj.sorted_by_pt( jet_selector(cs_combined.inclusive_jets()) )
 
             #-------------------------------------------------------------
             # match pp (pythia) jets to combined jets
