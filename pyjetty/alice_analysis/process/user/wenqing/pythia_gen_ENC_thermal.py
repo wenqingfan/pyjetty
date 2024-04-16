@@ -72,6 +72,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         # particle level - ALICE tracking restriction
         self.max_eta_hadron = 0.9
 
+        if 'rm_trk_min_pt' in config:
+            self.rm_trk_min_pt = config['rm_trk_min_pt']
+        else:
+            self.rm_trk_min_pt = False
+
         # ENC settings
         self.dphi_cut = -9999
         self.deta_cut = -9999
