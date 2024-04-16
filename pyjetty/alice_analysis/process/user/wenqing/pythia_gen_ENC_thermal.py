@@ -330,7 +330,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     def fill_jet_histograms(self, jet, R_label):
 
-        constituents = fj.sorted_by_pt(cone_parts)
+        constituents = fj.sorted_by_pt(jet.constituents())
 
         c_select = fj.vectorPJ()
         trk_thrd = 1.0
