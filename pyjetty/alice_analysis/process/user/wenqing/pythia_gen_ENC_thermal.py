@@ -360,7 +360,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     def fill_matched_jets(self, jet_combined, jet_pp, R_label):
 
         hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
-        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = None)
+        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
 
         # hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
         # hname.Fill(jet_combined.area(), jet_pp)
@@ -409,13 +409,13 @@ class PythiaGenENCThermal(process_base.ProcessBase):
           parts_in_cone2.append(part)
           
         hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
-        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = parts_in_cone1)
-        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = parts_in_cone2)
+        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
+        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
 
     #---------------------------------------------------------------
     # Fill matched ENC histograms
     #---------------------------------------------------------------
-    def fill_matched_ENC_histograms(self, hname, jet_pp, jet_combined, cone_parts = None):
+    def fill_matched_ENC_histograms(self, hname, jet_pp, jet_combined, cone_parts):
         
         if cone_parts == None:
             constituents = fj.sorted_by_pt(jet_combined.constituents())
