@@ -148,27 +148,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
             for ipoint in range(2, self.npoint+1):
+
                 name = 'h_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint), R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,200,200)
-                RL_bins = logbins(1E-4,1,50)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                name = 'h_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint), R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,200,200)
-                RL_bins = logbins(1E-4,1,50)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint), R_label)
                 print('Initialize histogram',name)
                 pt_bins = linbins(0,200,200)
                 RL_bins = logbins(1E-4,1,50)
@@ -187,6 +168,28 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 h.GetYaxis().SetTitle('Area')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
+                
+                for pair_type_label in self.pair_type_labels:
+
+                    name = 'h_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
+
+                    name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
             name = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
             pt_bins = linbins(0,1000,500)
