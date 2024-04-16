@@ -241,6 +241,10 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             # Add pythia particles to the list
             [self.fj_particles_combined_beforeCS.push_back(p) for p in self.parts_pythia_ch]
 
+            if self.debug_level > 0:
+                for p in self.fj_particles_combined_beforeCS:
+                    print('particle info user_index',p.user_index(),'pt',p.perp(),'phi',p.phi(),'eta',p.eta(),)
+
             # Some "accepted" events don't survive hadronization step -- keep track here
             self.hNevents.Fill(0)
 
@@ -468,7 +472,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     return parts_rotated
 
     #---------------------------------------------------------------
-    # Create a copy o flist of particles
+    # Create a copy of list of particles
     #---------------------------------------------------------------
     def copy_parts(self, parts, remove_ghosts = True):
     # don't need to re-init every part for a deep copy
@@ -487,22 +491,23 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     # Detemine pair type (ss, sb, bb)
     #---------------------------------------------------------------
     def check_pair_type(self, corr_builder, ipoint, constituents, index):
-    part1 = int(corr_builder.correlator(ipoint).indices1()[index])
-    part2 = int(corr_builder.correlator(ipoint).indices2()[index])
-    type1 = constituents[part1].user_index()
-    type2 = constituents[part2].user_index()
 
-    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
-    if type1*type2 >= 0:
-      if type1 < 0 or type2 < 0:
-        # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 0 # means bkg-bkg
-      else:
-        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 2 # means sig-sig
-    else:
-      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-      return 1 # means sig-bkg
+        part1 = int(corr_builder.correlator(ipoint).indices1()[index])
+        part2 = int(corr_builder.correlator(ipoint).indices2()[index])
+        type1 = constituents[part1].user_index()
+        type2 = constituents[part2].user_index()
+
+        # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+        if type1*type2 >= 0:
+          if type1 < 0 or type2 < 0:
+            # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+            return 0 # means bkg-bkg
+          else:
+            # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+            return 2 # means sig-sig
+        else:
+          # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+          return 1 # means sig-bkg
 
     #---------------------------------------------------------------
     # Initiate scaling of all histograms and print final simulation info
