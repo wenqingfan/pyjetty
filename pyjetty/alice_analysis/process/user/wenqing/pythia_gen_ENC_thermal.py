@@ -137,6 +137,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         self.hNevents = ROOT.TH1I("hNevents", 'Number accepted events (unscaled)', 2, -0.5, 1.5)
 
+        self.pair_type_labels = ['_bb','_sb','_ss']
+
         for jetR in self.jetR_list:
 
             # Store a list of all the histograms just so that we can rescale them later
