@@ -352,7 +352,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         for ipoint in range(2, self.npoint+1):
             for index in range(new_corr.correlator(ipoint).rs().size()):              
                 hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
-                getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
+                getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
@@ -437,7 +437,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
                 pair_type_label = self.pair_type_labels[pair_type]
               
-                getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pp.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
+                getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pp.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
     
     #---------------------------------------------------------------
     # Return pt-fraction of tracks in jet_pp that are contained in jet_combined
