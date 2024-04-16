@@ -350,11 +350,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         new_corr = ecorrel.CorrelatorBuilder(c_select, jet.perp(), self.npoint, self.npower, dphi_cut, deta_cut)
 
         for ipoint in range(2, self.npoint+1):
-            for index in range(new_corr.correlator(ipoint).rs().size()):
-                pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
-                pair_type_label = self.pair_type_labels[pair_type]
-              
-                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint) + pair_type_label, R_label, obs_label)
+            for index in range(new_corr.correlator(ipoint).rs().size()):              
+                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
                 getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]*weights_pair[index])
 
     #---------------------------------------------------------------
