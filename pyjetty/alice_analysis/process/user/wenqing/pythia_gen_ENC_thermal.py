@@ -409,8 +409,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
           parts_in_cone2.append(part)
           
         hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
-        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
-        fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
 
     #---------------------------------------------------------------
     # Fill matched ENC histograms
