@@ -469,7 +469,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
           # print('after',part.phi())
           parts_rotated.push_back(part)
 
-    return parts_rotated
+        return parts_rotated
 
     #---------------------------------------------------------------
     # Create a copy of list of particles
