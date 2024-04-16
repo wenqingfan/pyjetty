@@ -272,7 +272,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             cs_pp = fj.ClusterSequence(track_selector_ch(self.parts_pythia_ch), jet_def)
             jets_pp = fj.sorted_by_pt( jet_selector(cs_pp.inclusive_jets()) )
 
-            cs_combined = fj.ClusterSequence(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
+            cs_combined = fj.ClusterSequence(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def)
             jets_combined = fj.sorted_by_pt( jet_selector(cs_combined.inclusive_jets()) )
 
             #-------------------------------------------------------------
@@ -355,8 +355,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(jetR)
         fill_matched_ENC_histograms(hname, jet_pp, jet_combined, cone_parts = None)
 
-        hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
-        hname.Fill(jet_combined.area(), jet_pp)
+        # hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
+        # hname.Fill(jet_combined.area(), jet_pp)
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
