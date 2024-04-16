@@ -3,6 +3,8 @@ jetR: [0.2]
 
 debug_level: 1
 
+rm_trk_min_pt: True
+
 thermal_model:
   beta: 0.425
   N_avg: 2500
