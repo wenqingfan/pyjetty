@@ -77,6 +77,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         else:
             self.rm_trk_min_pt = False
 
+        if 'mc_fraction_threshold' in config:
+            self.mc_fraction_threshold = config['mc_fraction_threshold']
+        else:
+            self.mc_fraction_threshold = 0.5 # default to 0.5
+
         # ENC settings
         self.dphi_cut = -9999
         self.deta_cut = -9999
