@@ -1,0 +1,9 @@
+# processing parameters
+jetR: [0.2]
+
+debug_level: 0
+
+thermal_model:
+  beta: 0.425
+  N_avg: 2500
+  sigma_N: 500
