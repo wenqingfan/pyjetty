@@ -256,7 +256,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             # Add pythia particles to the list
             [self.fj_particles_combined_beforeCS.push_back(p) for p in self.parts_pythia_ch]
 
-            if self.debug_level > 0:
+            if self.debug_level > 1:
                 for p in self.fj_particles_combined_beforeCS:
                     print('particle info user_index',p.user_index(),'pt',p.perp(),'phi',p.phi(),'eta',p.eta(),)
 
