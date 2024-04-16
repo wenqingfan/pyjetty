@@ -319,7 +319,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     nmatched_pp += 1
                     jet_combined = jets_combined[imatched_jet_combined]
                     self.fill_matched_jets(jet_combined, jet_pp, R_label)
-                    self.fill_matched_perpcone(jet_combined, jet_pp, jet_R, R_label)
+                    self.fill_matched_perpcone(jet_combined, jet_pp, jetR, R_label)
 
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp(), jet_pp.perp())
