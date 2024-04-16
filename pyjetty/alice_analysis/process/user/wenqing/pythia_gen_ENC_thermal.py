@@ -293,7 +293,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 if len(matched_jet_combined)==1: # accept if there is one match only (NB: but may be used multiple times)
                     jets_combined_matched_to_pp.append(matched_jet_combined[0]) # save matched combined jet index
                     print('matched pp jet R',jetR,'pt',jet_pp.perp(),'phi',jet_pp.phi(),'eta',jet_pp.eta())
-                    print('matched combined jet index',matched_jet_combined[0],'pt',jets_combined[matched_jets_combined[0]].perp(),'phi',jets_combined[matched_jets_combined[0]].phi(),'eta',jets_combined[matched_jets_combined[0]].eta())
+                    print('matched combined jet index',matched_jet_combined[0],'pt',jets_combined[matched_jet_combined[0]].perp(),'phi',jets_combined[matched_jet_combined[0]].phi(),'eta',jets_combined[matched_jet_combined[0]].eta())
                     
                 else:
                     jets_combined_matched_to_pp.append(-1) 
