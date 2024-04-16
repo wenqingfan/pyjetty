@@ -380,11 +380,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         constituents = jet_combined.constituents()
         parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
-        # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
-        parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
+        # NB: a deep copy of the combined particle list are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
+        parts_in_perpcone1 = self.find_parts_around_jet(self.fj_particles_combined_beforeCS, perp_jet1, perpcone_R)
         parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
           
-        parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
+        parts_in_perpcone2 = self.find_parts_around_jet(self.fj_particles_combined_beforeCS, perp_jet2, perpcone_R)
         parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
         
         # use 999 and -999 to distinguish from prevous used labeling numbers
