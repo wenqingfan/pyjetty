@@ -1,0 +1,23 @@
+# processing parameters
+jetR: [0.2]
+
+debug_level: 0
+
+rm_trk_min_pt: True
+
+jet_matching_distance: 0.6
+mc_fraction_threshold: 0.5
+
+thermal_model:
+  beta: 0.425
+  N_avg: 500
+  sigma_N: 100
+
+constituent_subtractor:
+  max_distance: 0.1
+  main_R_max: 0.1
+  alpha: 0
+  max_eta: 0.9
+  bge_rho_grid_size: 1.0
+  max_pt_correct: 100
+  ghost_area: 0.01
