@@ -363,13 +363,13 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             for jet_pp in jets_pp:
                 hname = 'h_JetPt_ch_pp_R{}'.format(R_label)
                 getattr(self, hname).Fill(jet_pp.perp())
-                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
+                hname = 'h_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
                 self.fill_jet_histograms(hname, jet_pp)
 
             for jet_combined in jets_combined:
                 hname = 'h_JetPt_ch_combined_R{}'.format(R_label)
                 getattr(self, hname).Fill(jet_combined.perp())
-                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
+                hname = 'h_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
                 self.fill_jet_histograms(hname, jet_combined)
 
             #-------------------------------------------------------------
@@ -413,7 +413,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         for ipoint in range(2, self.npoint+1):
             for index in range(new_corr.correlator(ipoint).rs().size()):              
-                getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                getattr(self,hname.format(ipoint, obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
