@@ -27,6 +27,7 @@ import ecorrel
 
 from pyjetty.alice_analysis.process.base import process_base
 from pyjetty.alice_analysis.process.base import thermal_generator
+from pyjetty.mputils.csubtractor import CEventSubtractor
 
 # Prevent ROOT from stealing focus when plotting
 ROOT.gROOT.SetBatch(True)
@@ -154,7 +155,17 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 pt_bins = linbins(0,200,200)
                 RL_bins = logbins(1E-4,1,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
+                h.GetXaxis().SetTitle('p_{T, pp jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint), R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T, comb jet}')
                 h.GetYaxis().SetTitle('R_{L}')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
@@ -164,7 +175,17 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 pt_bins = linbins(0,200,200)
                 area_bins = linbins(0,1,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
-                h.GetXaxis().SetTitle('pT (jet)')
+                h.GetXaxis().SetTitle('p_{T, pp jet}')
+                h.GetYaxis().SetTitle('Area')
+                setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
+
+                name = 'h_matched_area_JetPt_ch_combined_R{}'.format(str(ipoint), R_label)
+                print('Initialize histogram',name)
+                pt_bins = linbins(0,200,200)
+                area_bins = linbins(0,1,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
+                h.GetXaxis().SetTitle('p_{T, comb jet}')
                 h.GetYaxis().SetTitle('Area')
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
@@ -176,7 +197,17 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetXaxis().SetTitle('p_{T, pp jet}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
+
+                    name = 'h_matched_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T, comb jet}')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
@@ -186,7 +217,17 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
                     h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('pT (jet)')
+                    h.GetXaxis().SetTitle('p_{T, pp jet}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
+
+                    name = 'h_perpcone_matched_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                    print('Initialize histogram',name)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T, comb jet}')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
@@ -196,6 +237,18 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
             h.GetXaxis().SetTitle('p_{T, comb jet}')
             h.GetYaxis().SetTitle('p_{T, pp jet}')
+            setattr(self, name, h)
+
+            name = 'h_JetPt_ch_pp_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            h = ROOT.TH1D(name, name, 500, pt_bins)
+            h.GetYaxis().SetTitle('p_{T, pp jet}')
+            setattr(self, name, h)
+
+            name = 'h_JetPt_ch_combined_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            h = ROOT.TH1D(name, name, 500, pt_bins)
+            h.GetYaxis().SetTitle('p_{T, comb jet}')
             setattr(self, name, h)
 
     #---------------------------------------------------------------
@@ -279,11 +332,14 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             jet_def = getattr(self, "jet_def_R%s" % jetR_str)
             track_selector_ch = getattr(self, "track_selector_ch")
 
-            cs_pp = fj.ClusterSequence(track_selector_ch(self.parts_pythia_ch), jet_def)
+            cs_pp = fj.ClusterSequence(track_selector_ch(self.parts_pythia_ch), jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
             jets_pp = fj.sorted_by_pt( jet_selector(cs_pp.inclusive_jets()) )
 
-            cs_combined = fj.ClusterSequence(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def)
+            cs_combined = fj.ClusterSequence(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
             jets_combined = fj.sorted_by_pt( jet_selector(cs_combined.inclusive_jets()) )
+
+            self.constituent_subtractor = CEventSubtractor(max_distance=self.R_max, alpha=self.alpha, max_eta=self.max_eta, bge_rho_grid_size=self.bge_rho_grid_size, max_pt_correct=self.max_pt_correct, ghost_area=self.ghost_area, distance_type=fjcontrib.ConstituentSubtractor.deltaR) 
+            self.rho = self.constituent_subtractor.bge_rho.rho() 
 
             #-------------------------------------------------------------
             # match pp (pythia) jets to combined jets
@@ -292,14 +348,14 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 matched_jet_combined = []
                 for index_jet_combined, jet_combined in enumerate(jets_combined):
                     mc_fraction = self.mc_fraction(jet_pp, jet_combined)
-                    if mc_fraction > self.mc_fraction_threshold:
+                    if (mc_fraction > self.mc_fraction_threshold) and self.is_geo_matched(jet_pp, jet_combined, jetR):
                         matched_jet_combined.append(index_jet_combined)
                     
                 if len(matched_jet_combined)==1: # accept if there is one match only (NB: but may be used multiple times)
                     jets_combined_matched_to_pp.append(matched_jet_combined[0]) # save matched combined jet index
-                    print('matched pp jet R',jetR,'pt',jet_pp.perp(),'phi',jet_pp.phi(),'eta',jet_pp.eta())
-                    print('matched combined jet index',matched_jet_combined[0],'pt',jets_combined[matched_jet_combined[0]].perp(),'phi',jets_combined[matched_jet_combined[0]].phi(),'eta',jets_combined[matched_jet_combined[0]].eta())
-                    
+                    if self.debug_level > 0:
+                        print('matched pp jet R',jetR,'pt',jet_pp.perp(),'phi',jet_pp.phi(),'eta',jet_pp.eta())
+                        print('matched combined jet index',matched_jet_combined[0],'pt',jets_combined[matched_jet_combined[0]].perp(),'phi',jets_combined[matched_jet_combined[0]].phi(),'eta',jets_combined[matched_jet_combined[0]].eta())     
                 else:
                     jets_combined_matched_to_pp.append(-1) 
 
@@ -308,7 +364,16 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             #-------------------------------------------------------------
             # loop over jets and fill EEC histograms with jet constituents
             for jet_pp in jets_pp:
-                self.fill_jet_histograms(jet_pp, R_label)
+                hname = 'h_JetPt_ch_pp_R{}'.format(R_label)
+                hname.Fill(jet_pp.perp())
+                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
+                self.fill_jet_histograms(hname, jet_pp)
+
+            for jet_combined in jets_combined:
+                hname = 'h_JetPt_ch_combined_R{}'.format(R_label)
+                hname.Fill(jet_combined.perp())
+                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
+                self.fill_jet_histograms(hname, jet_combined)
 
             #-------------------------------------------------------------
             # loop over matched jets and fill EEC histograms with jet constituents
@@ -322,7 +387,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     self.fill_matched_perpcone(jet_combined, jet_pp, jetR, R_label)
 
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
-                    getattr(self, hname).Fill(jet_combined.perp(), jet_pp.perp())
+                    getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area(), jet_pp.perp())
 
             if self.debug_level > 0:
                 if len(jets_pp)>0:
@@ -333,7 +398,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill jet constituents for unmatched jets
     #---------------------------------------------------------------
-    def fill_jet_histograms(self, jet, R_label):
+    def fill_jet_histograms(self, hname, jet):
 
         constituents = fj.sorted_by_pt(jet.constituents())
 
@@ -351,7 +416,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         for ipoint in range(2, self.npoint+1):
             for index in range(new_corr.correlator(ipoint).rs().size()):              
-                hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
                 getattr(self,hname).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
@@ -359,7 +423,12 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     def fill_matched_jets(self, jet_combined, jet_pp, R_label):
 
+        # fill EEC for matched comb jet using pp jet for jet pT
         hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
+
+        # fill EEC for matched comb jet using comb jet (after rho subtraction) for jet pT
+        hname = 'h_matched_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
 
         # hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
@@ -408,7 +477,13 @@ class PythiaGenENCThermal(process_base.ProcessBase):
           part.set_user_index(-999)
           parts_in_cone2.append(part)
           
+        # fill EEC for matched comb jet using pp jet for jet pT
         hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
+
+        # fill EEC for matched comb jet using comb jet (rho subtracted) for jet pT
+        hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
 
@@ -430,15 +505,32 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             break
           c_select.append(c) # NB: use the break statement since constituents are already sorted
 
-        new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pp.perp(), self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
+        if 'combined' in hname:
+            jet_pt = jet_combined.perp()-self.rho*jet_combined.area()
+        else:
+            jet_pt = jet_pp.perp()
+
+        new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
 
         for ipoint in range(2, self.npoint+1):
             for index in range(new_corr.correlator(ipoint).rs().size()):
                 pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
                 pair_type_label = self.pair_type_labels[pair_type]
               
-                getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pp.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
     
+    #---------------------------------------------------------------
+    # Compare two jets and store matching candidates in user_info
+    #---------------------------------------------------------------
+    def is_geo_matched(self, jet1, jet2, jetR):
+        deltaR = jet1.delta_R(jet2)
+      
+        # Add a matching candidate to the list if it is within the geometrical cut
+        if deltaR < self.jet_matching_distance * jetR:
+            return True
+        else:
+            return False
+
     #---------------------------------------------------------------
     # Return pt-fraction of tracks in jet_pp that are contained in jet_combined
     #---------------------------------------------------------------
