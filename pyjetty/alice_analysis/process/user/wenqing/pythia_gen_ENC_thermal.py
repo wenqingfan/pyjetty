@@ -428,7 +428,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         hname = 'h_matched_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
 
-        hname = 'h_matched_area_JetPt_ch_R{}'.format(jetR)
+        hname = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
         hname.Fill(jet_combined.area(), jet_pp)
 
     #---------------------------------------------------------------
