@@ -175,7 +175,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
 
-                name = 'h_matched_area_JetPt_ch_R{}'.format(str(ipoint), R_label)
+                name = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
                 print('Initialize histogram',name)
                 pt_bins = linbins(0,200,200)
                 area_bins = linbins(0,1,100)
