@@ -78,6 +78,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         else:
             self.rm_trk_min_pt = False
 
+        if 'jet_matching_distance' in config:
+            self.jet_matching_distance = config['jet_matching_distance']
+        else:
+            self.jet_matching_distance = 0.6 # default to 0.6
+
         if 'mc_fraction_threshold' in config:
             self.mc_fraction_threshold = config['mc_fraction_threshold']
         else:
