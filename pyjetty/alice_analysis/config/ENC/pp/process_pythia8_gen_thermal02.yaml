@@ -5,6 +5,7 @@ debug_level: 1
 
 rm_trk_min_pt: True
 
+jet_matching_distance: 0.6
 mc_fraction_threshold: 0.5
 
 thermal_model:
