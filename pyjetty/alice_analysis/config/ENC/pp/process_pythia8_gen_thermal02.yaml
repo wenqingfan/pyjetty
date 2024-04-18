@@ -1,7 +1,7 @@
 # processing parameters
 jetR: [0.2]
 
-debug_level: 1
+debug_level: 0
 
 rm_trk_min_pt: True
 
