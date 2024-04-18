@@ -303,6 +303,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 for p in self.fj_particles_combined_beforeCS:
                     print('particle info user_index',p.user_index(),'pt',p.perp(),'phi',p.phi(),'eta',p.eta(),)
 
+            self.constituent_subtractor = CEventSubtractor(max_distance=self.max_distance, alpha=self.alpha, max_eta=self.max_eta, bge_rho_grid_size=self.bge_rho_grid_size, max_pt_correct=self.max_pt_correct, ghost_area=self.ghost_area, distance_type=fjcontrib.ConstituentSubtractor.deltaR)
+            self.constituent_subtractor.process_event(self.fj_particles_combined_beforeCS)
+
+            self.rho = self.constituent_subtractor.bge_rho.rho() 
+
             # Some "accepted" events don't survive hadronization step -- keep track here
             self.hNevents.Fill(0)
 
@@ -327,9 +332,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
             cs_combined = fj.ClusterSequenceArea(track_selector_ch(self.fj_particles_combined_beforeCS), jet_def, fj.AreaDefinition(fj.active_area_explicit_ghosts))
             jets_combined = fj.sorted_by_pt( jet_selector(cs_combined.inclusive_jets()) )
-
-            self.constituent_subtractor = CEventSubtractor(max_distance=self.max_distance, alpha=self.alpha, max_eta=self.max_eta, bge_rho_grid_size=self.bge_rho_grid_size, max_pt_correct=self.max_pt_correct, ghost_area=self.ghost_area, distance_type=fjcontrib.ConstituentSubtractor.deltaR) 
-            self.rho = self.constituent_subtractor.bge_rho.rho() 
 
             #-------------------------------------------------------------
             # match pp (pythia) jets to combined jets
