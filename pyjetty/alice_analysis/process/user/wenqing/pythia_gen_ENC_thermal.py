@@ -431,7 +431,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         hname = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
         if self.debug_level > 0:
             print('area',jet_combined.area(),'rho',self.rho,'matche pp jet pt',jet_pp.perp())
-        getattr(self, hname).Fill(jet_combined.area(), jet_pp.perp())
+        getattr(self, hname).Fill(jet_pp.perp(), jet_combined.area())
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
