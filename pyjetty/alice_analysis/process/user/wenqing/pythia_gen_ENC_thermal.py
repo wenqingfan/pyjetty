@@ -362,13 +362,13 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             # loop over jets and fill EEC histograms with jet constituents
             for jet_pp in jets_pp:
                 hname = 'h_JetPt_ch_pp_R{}'.format(R_label)
-                hname.Fill(jet_pp.perp())
+                getattr(self, hname).Fill(jet_pp.perp())
                 hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
                 self.fill_jet_histograms(hname, jet_pp)
 
             for jet_combined in jets_combined:
                 hname = 'h_JetPt_ch_combined_R{}'.format(R_label)
-                hname.Fill(jet_combined.perp())
+                getattr(self, hname).Fill(jet_combined.perp())
                 hname = 'h_ENC{}_JetPt_ch_R{}_{}'.format(ipoint, R_label, obs_label)
                 self.fill_jet_histograms(hname, jet_combined)
 
