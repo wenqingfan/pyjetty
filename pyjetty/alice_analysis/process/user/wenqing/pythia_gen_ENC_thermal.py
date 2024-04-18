@@ -153,6 +153,43 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
             R_label = str(jetR).replace('.', '') + 'Scaled'
 
+            name = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
+            print('Initialize histogram',name)
+            pt_bins = linbins(0,200,200)
+            area_bins = linbins(0,1,100)
+            h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
+            h.GetXaxis().SetTitle('p_{T, pp jet}')
+            h.GetYaxis().SetTitle('Area')
+            setattr(self, name, h)
+            getattr(self, hist_list_name).append(h)
+
+            name = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
+            h.GetXaxis().SetTitle('p_{T, comb jet}')
+            h.GetYaxis().SetTitle('p_{T, pp jet}')
+            setattr(self, name, h)
+
+            name = 'h_matched_JetPt_ch_JES_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            JES_bins = linbins(-1,1,200)
+            h = ROOT.TH2D(name, name, 500, pt_bins, 200, JES_bins)     
+            h.GetXaxis().SetTitle('p_{T, pp jet}')
+            h.GetYaxis().SetTitle('(p_{T, comb jet}-p_{T, pp jet})/p_{T, pp jet}')
+            setattr(self, name, h)
+
+            name = 'h_JetPt_ch_pp_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            h = ROOT.TH1D(name, name, 500, pt_bins)
+            h.GetYaxis().SetTitle('p_{T, pp jet}')
+            setattr(self, name, h)
+
+            name = 'h_JetPt_ch_combined_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            h = ROOT.TH1D(name, name, 500, pt_bins)
+            h.GetYaxis().SetTitle('p_{T, comb jet}')
+            setattr(self, name, h)
+
             for ipoint in range(2, self.npoint+1):
 
                 name = 'h_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint), R_label)
@@ -175,16 +212,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 setattr(self, name, h)
                 getattr(self, hist_list_name).append(h)
 
-                name = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,200,200)
-                area_bins = linbins(0,1,100)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
-                h.GetXaxis().SetTitle('p_{T, pp jet}')
-                h.GetYaxis().SetTitle('Area')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-                
                 for pair_type_label in self.pair_type_labels:
 
                     name = 'h_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
@@ -226,25 +253,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
-
-            name = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
-            pt_bins = linbins(0,1000,500)
-            h = ROOT.TH2D(name, name, 500, pt_bins, 500, pt_bins)
-            h.GetXaxis().SetTitle('p_{T, comb jet}')
-            h.GetYaxis().SetTitle('p_{T, pp jet}')
-            setattr(self, name, h)
-
-            name = 'h_JetPt_ch_pp_R{}'.format(R_label)
-            pt_bins = linbins(0,1000,500)
-            h = ROOT.TH1D(name, name, 500, pt_bins)
-            h.GetYaxis().SetTitle('p_{T, pp jet}')
-            setattr(self, name, h)
-
-            name = 'h_JetPt_ch_combined_R{}'.format(R_label)
-            pt_bins = linbins(0,1000,500)
-            h = ROOT.TH1D(name, name, 500, pt_bins)
-            h.GetYaxis().SetTitle('p_{T, comb jet}')
-            setattr(self, name, h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
@@ -385,6 +393,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area(), jet_pp.perp())
+                    hname = 'h_matched_JetPt_ch_JES_R{}'.format(R_label)
+                    getattr(self, hname).Fill(jet_pp.perp(), (jet_combined.perp()-self.rho*jet_combined.area()-jet_pp.perp())/jet_pp.perp())
 
             if self.debug_level > 0:
                 if len(jets_pp)>0:
