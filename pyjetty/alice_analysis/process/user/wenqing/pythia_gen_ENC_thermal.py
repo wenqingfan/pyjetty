@@ -197,7 +197,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             for ipoint in range(2, self.npoint+1):
 
                 for thrd in self.thrd_list:
-                    name = 'h_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint), R_label, thrd*10)
+                    thrd_label = 'trk{:.0f}'.format(thrd*10)
+                    name = 'h_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint), R_label, thrd_label)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -207,7 +208,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
-                    name = 'h_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint), R_label, thrd*10)
+                    name = 'h_ENC{}_JetPt_ch_combined_R{}_{}'.format(str(ipoint), R_label, thrd_label)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -219,7 +220,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                     for pair_type_label in self.pair_type_labels:
 
-                        name = 'h_matched_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        name = 'h_matched_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -229,7 +230,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_matched_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        name = 'h_matched_ENC{}_JetPt_ch_combined_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -239,7 +240,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -249,7 +250,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
-                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_combined_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
                         RL_bins = logbins(1E-4,1,50)
@@ -416,7 +417,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         for thrd in self.thrd_list:
             c_select = fj.vectorPJ()
-            obs_label = 'trk{}'.format(thrd*10)
+            thrd_label = 'trk{:.0f}'.format(thrd*10)
             for c in constituents:
               if c.pt() < thrd:
                 break
@@ -428,7 +429,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
             for ipoint in range(2, self.npoint+1):
                 for index in range(new_corr.correlator(ipoint).rs().size()):              
-                    getattr(self,hname.format(ipoint, obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                    getattr(self,hname.format(ipoint, thrd_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
@@ -513,7 +514,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         for thrd in self.thrd_list:
             c_select = fj.vectorPJ()
-            obs_label = 'trk{}'.format(thrd*10)
+            thrd_label = 'trk{:.0f}'.format(thrd*10)
             for c in constituents:
               if c.pt() < thrd:
                 break
@@ -531,7 +532,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
                     pair_type_label = self.pair_type_labels[pair_type]
                   
-                    getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                    getattr(self, hname.format(str(ipoint) + pair_type_label,thrd_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
     
     #---------------------------------------------------------------
     # Compare two jets and store matching candidates in user_info
