@@ -552,7 +552,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             if 'combined' in hname:
                 jet_pt_weight = jet_combined.perp()-self.rho*jet_combined.area()
                 jet_pt_select = jet_combined.perp()-self.rho*jet_combined.area()
-            else if 'mix' in hname:
+            elif 'mix' in hname:
                 jet_pt_weight = jet_combined.perp()-self.rho*jet_combined.area()
                 jet_pt_select = jet_pp.perp()
             else:
