@@ -240,6 +240,16 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
+                        name = 'h_matched_ENC{}_JetPt_ch_mix_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, pp jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
                         name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
                         print('Initialize histogram',name)
                         pt_bins = linbins(0,200,200)
@@ -256,6 +266,16 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         RL_bins = logbins(1E-4,1,50)
                         h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
                         h.GetXaxis().SetTitle('p_{T, comb jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_mix_R{}_{}'.format(str(ipoint)+pair_type_label, R_label, thrd_label)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, pp jet}')
                         h.GetYaxis().SetTitle('R_{L}')
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
@@ -444,6 +464,10 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         hname = 'h_matched_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
 
+        # fill EEC for matched comb jet pp jet for jet pT selection and comb jet for energy weight
+        hname = 'h_matched_ENC{{}}_JetPt_ch_mix_R{}_{{}}'.format(R_label)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, None)
+
         hname = 'h_matched_area_JetPt_ch_R{}'.format(R_label)
         if self.debug_level > 0:
             print('area',jet_combined.area(),'rho',self.rho,'matche pp jet pt',jet_pp.perp())
@@ -502,6 +526,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
         self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
 
+        # fill EEC for matched comb jet pp jet for jet pT selection and comb jet for energy weight
+        hname = 'h_perpcone_matched_ENC{{}}_JetPt_ch_mix_R{}_{{}}'.format(R_label)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
+        self.fill_matched_ENC_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
+
     #---------------------------------------------------------------
     # Fill matched ENC histograms
     #---------------------------------------------------------------
@@ -521,18 +550,23 @@ class PythiaGenENCThermal(process_base.ProcessBase):
               c_select.append(c) # NB: use the break statement since constituents are already sorted
 
             if 'combined' in hname:
-                jet_pt = jet_combined.perp()-self.rho*jet_combined.area()
+                jet_pt_weight = jet_combined.perp()-self.rho*jet_combined.area()
+                jet_pt_select = jet_combined.perp()-self.rho*jet_combined.area()
+            else if 'mix' in hname:
+                jet_pt_weight = jet_combined.perp()-self.rho*jet_combined.area()
+                jet_pt_select = jet_pp.perp()
             else:
-                jet_pt = jet_pp.perp()
+                jet_pt_weight = jet_pp.perp()
+                jet_pt_select = jet_pp.perp()
 
-            new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
+            new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt_weight, self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
 
             for ipoint in range(2, self.npoint+1):
                 for index in range(new_corr.correlator(ipoint).rs().size()):
                     pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
                     pair_type_label = self.pair_type_labels[pair_type]
                   
-                    getattr(self, hname.format(str(ipoint) + pair_type_label,thrd_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                    getattr(self, hname.format(str(ipoint) + pair_type_label,thrd_label)).Fill(jet_pt_select, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
     
     #---------------------------------------------------------------
     # Compare two jets and store matching candidates in user_info
