@@ -5,6 +5,8 @@ debug_level: 0
 
 rm_trk_min_pt: True
 
+thrd: [0.5, 1.0, 2.0]
+
 jet_matching_distance: 0.6
 mc_fraction_threshold: 0.5
 
