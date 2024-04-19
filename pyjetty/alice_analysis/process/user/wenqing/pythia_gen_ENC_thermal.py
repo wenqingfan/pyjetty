@@ -89,6 +89,10 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             self.mc_fraction_threshold = 0.5 # default to 0.5
 
         # ENC settings
+        if 'thrd' in config:
+            self.thrd_list = config['thrd']
+        else:
+            self.thrd_list = [1.0]
         self.dphi_cut = -9999
         self.deta_cut = -9999
         self.npoint = 2
@@ -192,29 +196,8 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
             for ipoint in range(2, self.npoint+1):
 
-                name = 'h_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint), R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,200,200)
-                RL_bins = logbins(1E-4,1,50)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('p_{T, pp jet}')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                name = 'h_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint), R_label)
-                print('Initialize histogram',name)
-                pt_bins = linbins(0,200,200)
-                RL_bins = logbins(1E-4,1,50)
-                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                h.GetXaxis().SetTitle('p_{T, comb jet}')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
-                getattr(self, hist_list_name).append(h)
-
-                for pair_type_label in self.pair_type_labels:
-
-                    name = 'h_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                for thrd in self.thrd_list:
+                    name = 'h_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint), R_label, thrd*10)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -224,7 +207,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
-                    name = 'h_matched_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
+                    name = 'h_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint), R_label, thrd*10)
                     print('Initialize histogram',name)
                     pt_bins = linbins(0,200,200)
                     RL_bins = logbins(1E-4,1,50)
@@ -234,25 +217,47 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
-                    name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
-                    print('Initialize histogram',name)
-                    pt_bins = linbins(0,200,200)
-                    RL_bins = logbins(1E-4,1,50)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('p_{T, pp jet}')
-                    h.GetYaxis().SetTitle('R_{L}')
-                    setattr(self, name, h)
-                    getattr(self, hist_list_name).append(h)
+                    for pair_type_label in self.pair_type_labels:
 
-                    name = 'h_perpcone_matched_ENC{}_JetPt_ch_combined_R{}_trk10'.format(str(ipoint)+pair_type_label, R_label)
-                    print('Initialize histogram',name)
-                    pt_bins = linbins(0,200,200)
-                    RL_bins = logbins(1E-4,1,50)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                    h.GetXaxis().SetTitle('p_{T, comb jet}')
-                    h.GetYaxis().SetTitle('R_{L}')
-                    setattr(self, name, h)
-                    getattr(self, hist_list_name).append(h)
+                        name = 'h_matched_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, pp jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_matched_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, comb jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, pp jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_perpcone_matched_ENC{}_JetPt_ch_combined_R{}_trk{}'.format(str(ipoint)+pair_type_label, R_label, thrd*10)
+                        print('Initialize histogram',name)
+                        pt_bins = linbins(0,200,200)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('p_{T, comb jet}')
+                        h.GetYaxis().SetTitle('R_{L}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
 
     #---------------------------------------------------------------
     # Initiate jet defs, selectors, and sd (if required)
@@ -409,21 +414,21 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         constituents = fj.sorted_by_pt(jet.constituents())
 
-        c_select = fj.vectorPJ()
-        trk_thrd = 1.0
-        obs_label = 'trk10'
-        for c in constituents:
-          if c.pt() < trk_thrd:
-            break
-          c_select.append(c) # NB: use the break statement since constituents are already sorted
+        for thrd in self.thrd_list:
+            c_select = fj.vectorPJ()
+            obs_label = 'trk{}'.format(thrd*10)
+            for c in constituents:
+              if c.pt() < thrd:
+                break
+              c_select.append(c) # NB: use the break statement since constituents are already sorted
 
-        dphi_cut = -9999
-        deta_cut = -9999
-        new_corr = ecorrel.CorrelatorBuilder(c_select, jet.perp(), self.npoint, self.npower, dphi_cut, deta_cut)
+            dphi_cut = -9999
+            deta_cut = -9999
+            new_corr = ecorrel.CorrelatorBuilder(c_select, jet.perp(), self.npoint, self.npower, dphi_cut, deta_cut)
 
-        for ipoint in range(2, self.npoint+1):
-            for index in range(new_corr.correlator(ipoint).rs().size()):              
-                getattr(self,hname.format(ipoint, obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+            for ipoint in range(2, self.npoint+1):
+                for index in range(new_corr.correlator(ipoint).rs().size()):              
+                    getattr(self,hname.format(ipoint, obs_label)).Fill(jet.perp(), new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
@@ -506,27 +511,27 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         else:
             constituents = fj.sorted_by_pt(cone_parts)
 
-        c_select = fj.vectorPJ()
-        trk_thrd = 1.0
-        obs_label = 'trk10'
-        for c in constituents:
-          if c.pt() < trk_thrd:
-            break
-          c_select.append(c) # NB: use the break statement since constituents are already sorted
+        for thrd in self.thrd_list:
+            c_select = fj.vectorPJ()
+            obs_label = 'trk{}'.format(thrd*10)
+            for c in constituents:
+              if c.pt() < thrd:
+                break
+              c_select.append(c) # NB: use the break statement since constituents are already sorted
 
-        if 'combined' in hname:
-            jet_pt = jet_combined.perp()-self.rho*jet_combined.area()
-        else:
-            jet_pt = jet_pp.perp()
+            if 'combined' in hname:
+                jet_pt = jet_combined.perp()-self.rho*jet_combined.area()
+            else:
+                jet_pt = jet_pp.perp()
 
-        new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
+            new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, self.npoint, self.npower, self.dphi_cut, self.deta_cut) # NB: using the pp jet as reference for energy weight
 
-        for ipoint in range(2, self.npoint+1):
-            for index in range(new_corr.correlator(ipoint).rs().size()):
-                pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
-                pair_type_label = self.pair_type_labels[pair_type]
-              
-                getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+            for ipoint in range(2, self.npoint+1):
+                for index in range(new_corr.correlator(ipoint).rs().size()):
+                    pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
+                    pair_type_label = self.pair_type_labels[pair_type]
+                  
+                    getattr(self, hname.format(str(ipoint) + pair_type_label,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
     
     #---------------------------------------------------------------
     # Compare two jets and store matching candidates in user_info
