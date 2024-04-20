@@ -194,6 +194,14 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             h.GetYaxis().SetTitle('p_{T, comb jet}')
             setattr(self, name, h)
 
+            name = 'h_JetPt_ch_mc_fraction_R{}'.format(R_label)
+            pt_bins = linbins(0,1000,500)
+            mc_fraction_bins = linbins(0,1,100)
+            h = ROOT.TH2D(name, name, 500, pt_bins, 100, mc_fraction_bins)     
+            h.GetXaxis().SetTitle('p_{T, pp jet}')
+            h.GetYaxis().SetTitle('mc fraction')
+            setattr(self, name, h)
+
             for ipoint in range(2, self.npoint+1):
 
                 for thrd in self.thrd_list:
@@ -379,7 +387,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 matched_jet_combined = []
                 for index_jet_combined, jet_combined in enumerate(jets_combined):
                     mc_fraction = self.mc_fraction(jet_pp, jet_combined)
-                    if (mc_fraction > self.mc_fraction_threshold) and self.is_geo_matched(jet_pp, jet_combined, jetR):
+                    mc_fraction_list.append(mc_fraction)
+                    distance_list.append(distance)
+                    if mc_fraction > self.mc_fraction_threshold:
                         matched_jet_combined.append(index_jet_combined)
                     
                 if len(matched_jet_combined)==1: # accept if there is one match only (NB: but may be used multiple times)
@@ -402,7 +412,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
             for jet_combined in jets_combined:
                 hname = 'h_JetPt_ch_combined_R{}'.format(R_label)
-                getattr(self, hname).Fill(jet_combined.perp())
+                getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area())
                 hname = 'h_ENC{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
                 self.fill_jet_histograms(hname, jet_combined)
 
