@@ -387,8 +387,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 matched_jet_combined = []
                 for index_jet_combined, jet_combined in enumerate(jets_combined):
                     mc_fraction = self.mc_fraction(jet_pp, jet_combined)
-                    mc_fraction_list.append(mc_fraction)
-                    distance_list.append(distance)
                     if mc_fraction > self.mc_fraction_threshold:
                         matched_jet_combined.append(index_jet_combined)
                     
