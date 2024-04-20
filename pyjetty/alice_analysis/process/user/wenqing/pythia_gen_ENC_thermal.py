@@ -387,7 +387,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 matched_jet_combined = []
                 for index_jet_combined, jet_combined in enumerate(jets_combined):
                     mc_fraction = self.mc_fraction(jet_pp, jet_combined)
-                    if mc_fraction > self.mc_fraction_threshold:
+                    if (mc_fraction > self.mc_fraction_threshold) and (self.is_geo_matched(jet_combined, jet_pp, jetR)):
                         matched_jet_combined.append(index_jet_combined)
                     
                 if len(matched_jet_combined)==1: # accept if there is one match only (NB: but may be used multiple times)
