@@ -437,6 +437,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           setattr(self, name, h)
 
           # Matched truth histograms
+          # FIX ME: just a place holder, this histogram is not filled not because area() is not available for truth jet
           name = 'h_matched_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
           area_bins = linbins(0,1,100)
@@ -444,7 +445,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
-
 
         # # Diagnostic
         # if 'jet_diag' in observable:
@@ -768,7 +768,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     if 'jet_pt' in observable:
       getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
 
-    if self.do_rho_subtraction and 'area' in observable:
+    if self.do_rho_subtraction and 'area' in observable and (not 'Truth' in hname):
       getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, jet.area())
 
   #---------------------------------------------------------------
