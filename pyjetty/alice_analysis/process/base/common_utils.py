@@ -61,6 +61,8 @@ class CommonUtils(common_base.CommonBase):
       return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
     elif observable == 'jet_pt':
       return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
+    elif observable == 'area':
+      return [obs_config_dict[name]['trk_thrd'] for name in obs_subconfig_list]
 
     # Else observable not implemented
     return [None for _ in obs_subconfig_list]
