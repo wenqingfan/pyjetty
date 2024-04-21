@@ -300,6 +300,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
 
+              # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+              name = 'h_matched_extra2_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
               # Matched truth histograms
               name = 'h_matched_{}{}_JetPt_Truth_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
               pt_bins = linbins(0,200,200)
@@ -350,6 +359,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
                   # Matched det histograms (with matched truth jet pT filled to the other axis)
                   name = 'h_perpcone{}_matched_extra_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
+
+                  # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+                  name = 'h_perpcone{}_matched_extra2_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
