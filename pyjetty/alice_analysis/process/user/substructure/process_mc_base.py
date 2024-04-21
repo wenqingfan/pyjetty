@@ -1058,6 +1058,8 @@ class ProcessMCBase(process_base.ProcessBase):
 
             # The current implementation only does perpcone for the standard AK jets. No bigger cones
             perpcone_R = jetR
+            if self.do_rho_subtraction:
+              perpcone_R = math.sqrt(jet_det.area()/np.pi)
             constituents = jet_det.constituents()
             parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
