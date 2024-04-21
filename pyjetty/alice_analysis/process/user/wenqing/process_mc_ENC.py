@@ -178,6 +178,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('R_{L}')
                 setattr(self, name, h)
 
+                # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+                name = 'h_matched_extra2_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+
                 # Matched truth histograms
                 name = 'h_matched_{}{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
@@ -228,6 +237,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
                   # Matched det histograms (with matched truth jet pT filled to the other axis)
                   name = 'h_perpcone{}_matched_extra_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,200)
+                  RL_bins = logbins(1E-4,1,50)
+                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                  h.GetYaxis().SetTitle('R_{L}')
+                  setattr(self, name, h)
+
+                  # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+                  name = 'h_perpcone{}_matched_extra2_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
                   pt_bins = linbins(0,200,200)
                   RL_bins = logbins(1E-4,1,50)
                   h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -388,6 +406,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('p_{T,ch jet}^{truth}')
+          setattr(self, name, h)
+
+        if 'area' in observable:
+          # Matched det histograms
+          name = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          area_bins = linbins(0,1,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
         # # Diagnostic
@@ -712,6 +740,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     if 'jet_pt' in observable:
       getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
 
+    if self.do_rho_subtraction and 'area' in observable:
+      getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, jet.area())
+
   #---------------------------------------------------------------
   # This function is called per jet subconfigration 
   # Fill matched jet histograms
@@ -760,6 +791,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets
 
+          hname = 'h_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt()) # NB: use the truth jet pt for both tje jet pt selection and energy weight calculation
+
         # Fill correlation between matched det and truth jets
         if 'jet_pt' in observable:
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
@@ -774,6 +808,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           hname = 'h_perpcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet) 
+
+          hname = 'h_perpcone{}_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt(), cone_parts_in_det_jet) 
 
       # type 3 -- fill for cone parts around jet
       if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
