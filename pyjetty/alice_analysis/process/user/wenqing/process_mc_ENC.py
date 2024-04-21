@@ -436,6 +436,16 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
+          # Matched truth histograms
+          name = 'h_matched_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          area_bins = linbins(0,1,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+          h.GetYaxis().SetTitle('Area')
+          setattr(self, name, h)
+
+
         # # Diagnostic
         # if 'jet_diag' in observable:
         #   name = 'h_{}_JetEta_R{}_{}'.format(observable, jetR, obs_label)
