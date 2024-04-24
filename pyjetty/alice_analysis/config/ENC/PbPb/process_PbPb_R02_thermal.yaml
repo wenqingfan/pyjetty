@@ -10,7 +10,7 @@
 # The process step is intended to loop over all observables simultaneously
 # The analysis step is intended to run for a single observable block
 
-process_observables: ['jet_ENC_RL', 'jet_pt', 'jet_EEC_weight2_RL']
+process_observables: ['jet_ENC_RL', 'jet_pt', 'jet_EEC_weight2_RL', 'area']
 jetR: [0.2]
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
 mc_fraction_threshold: 0.5
@@ -262,3 +262,46 @@ jet_pt:
     obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
     obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
 
+# Observable block
+area:
+
+  common_settings:
+    xtitle: '#it{d_{pair}}'
+    ytitle: '#frac{1}{#it{#sigma}_{jet}} #frac{d#it{#sigma}}{d#it{d_{pair}}}'
+    pt_bins_reported: [40, 80, 120]
+    max_reg_param: 10
+    plot_overlay_list:
+      - ['config1', 'config2', 'config3']
+      
+  # RM binnings from processing:
+  #   pt-truth: 10 GeV
+  #   pt-det: 5 GeV
+  #   RL-truth: 0.01
+  #   RL-det: 0.01
+  
+  config1:
+    trk_thrd: 1.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config2:
+    trk_thrd: 2.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
+  config3:
+    trk_thrd: 0.5
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
