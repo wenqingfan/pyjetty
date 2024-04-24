@@ -464,6 +464,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_h_vs_p_R{}'.format(R_label)
                 pt_bins = linbins(0,1000,500)
@@ -471,6 +472,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,h jet}')
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_ch_vs_h_R{}'.format(R_label)
                 pt_bins = linbins(0,1000,500)
@@ -478,6 +480,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,h jet}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_p_over_ch_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,10,500)
@@ -486,6 +489,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,p}/p_{T,ch jet}')
                 h.GetYaxis().SetTitle('p_{T,ch jet}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_p_over_h_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,10,500)
@@ -494,6 +498,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,p}/p_{T,h jet}')
                 h.GetYaxis().SetTitle('p_{T,h jet}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_ch_over_p_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,2,100)
@@ -502,6 +507,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,ch jet}/p_{T,p}') # this ratio should be mostly within [0,1]
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 name = 'h_matched_JetPt_h_over_p_ratio_R{}'.format(R_label)
                 ratio_bins = linbins(0,2,100)
@@ -510,6 +516,7 @@ class PythiaGenENC(process_base.ProcessBase):
                 h.GetXaxis().SetTitle('p_{T,h jet}/p_{T,p}')  # this ratio should be mostly within [0,1]
                 h.GetYaxis().SetTitle('p_{T,p}')
                 setattr(self, name, h)
+                getattr(self, hist_list_name).append(h)
 
                 # Charged jets pT for gluons and quarks
                 name = 'h_matched_JetPt_ch_R{}_gjet'.format(R_label)
@@ -569,6 +576,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     h.GetXaxis().SetTitle('p_{T,p jet}')
                     h.GetYaxis().SetTitle('p_{T,p}')
                     setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
                     name = 'h_matched_JetPt_p_over_p_ratio_R{}'.format(R_label)
                     ratio_bins = linbins(0,10,500)
@@ -577,6 +585,7 @@ class PythiaGenENC(process_base.ProcessBase):
                     h.GetXaxis().SetTitle('p_{T,p}/p_{T,p jet}')  # this ratio should be mostly within [0,1]
                     h.GetYaxis().SetTitle('p_{T,p jet}')
                     setattr(self, name, h)
+                    getattr(self, hist_list_name).append(h)
 
                 for jet_level in ['p', 'h', 'ch']:
                     tag_levels = ['']
