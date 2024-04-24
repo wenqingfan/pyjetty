@@ -173,6 +173,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             h.GetXaxis().SetTitle('p_{T, comb jet}')
             h.GetYaxis().SetTitle('p_{T, pp jet}')
             setattr(self, name, h)
+            getattr(self, hist_list_name).append(h)
 
             name = 'h_matched_JetPt_ch_JES_R{}'.format(R_label)
             pt_bins = linbins(0,1000,500)
@@ -181,26 +182,21 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             h.GetXaxis().SetTitle('p_{T, pp jet}')
             h.GetYaxis().SetTitle('(p_{T, comb jet}-p_{T, pp jet})/p_{T, pp jet}')
             setattr(self, name, h)
+            getattr(self, hist_list_name).append(h)
 
             name = 'h_JetPt_ch_pp_R{}'.format(R_label)
             pt_bins = linbins(0,1000,500)
             h = ROOT.TH1D(name, name, 500, pt_bins)
             h.GetYaxis().SetTitle('p_{T, pp jet}')
             setattr(self, name, h)
+            getattr(self, hist_list_name).append(h)
 
             name = 'h_JetPt_ch_combined_R{}'.format(R_label)
             pt_bins = linbins(0,1000,500)
             h = ROOT.TH1D(name, name, 500, pt_bins)
             h.GetYaxis().SetTitle('p_{T, comb jet}')
             setattr(self, name, h)
-
-            name = 'h_JetPt_ch_mc_fraction_R{}'.format(R_label)
-            pt_bins = linbins(0,1000,500)
-            mc_fraction_bins = linbins(0,1,100)
-            h = ROOT.TH2D(name, name, 500, pt_bins, 100, mc_fraction_bins)     
-            h.GetXaxis().SetTitle('p_{T, pp jet}')
-            h.GetYaxis().SetTitle('mc fraction')
-            setattr(self, name, h)
+            getattr(self, hist_list_name).append(h)
 
             for ipoint in range(2, self.npoint+1):
 
