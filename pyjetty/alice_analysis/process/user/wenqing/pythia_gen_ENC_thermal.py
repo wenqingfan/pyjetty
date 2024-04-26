@@ -488,7 +488,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         perp_jet2.reset_PtYPhiM(jet_combined.pt(), jet_combined.rapidity(), jet_combined.phi() - np.pi/2, jet_combined.m())
 
         # The current implementation only does perpcone for the standard AK jets. No bigger cones
-        perpcone_R = jetR # FIX ME: still checking if using the jet R for perp cone R is the best choice or not
+        perpcone_R = math.sqrt(jet_det.area()/np.pi) # FIX ME: still checking if using the jet R for perp cone R is the best choice or not
         constituents = jet_combined.constituents()
         parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
