@@ -448,6 +448,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if 'rho_local' in observable:
           hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          print('initialize rho local hists:',hname)
           pt_bins = linbins(0,200,200)
           rho_bins = linbins(0,500,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
