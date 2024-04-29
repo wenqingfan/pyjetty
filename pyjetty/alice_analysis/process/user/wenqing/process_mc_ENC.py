@@ -446,6 +446,40 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
+        if 'rho_local' in observable:
+          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          rho_bins = linbins(0,500,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('local rho')
+          setattr(self, name, h)
+
+          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          rho_bins = linbins(0,500,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+          h.GetYaxis().SetTitle('local rho')
+          setattr(self, name, h)
+
+          if self.do_perpcone:
+            hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+            pt_bins = linbins(0,200,200)
+            rho_bins = linbins(0,500,100)
+            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+            h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+            h.GetYaxis().SetTitle('local rho')
+            setattr(self, name, h)
+
+            hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+            pt_bins = linbins(0,200,200)
+            rho_bins = linbins(0,500,100)
+            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+            h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+            h.GetYaxis().SetTitle('local rho')
+            setattr(self, name, h)
+
         # # Diagnostic
         # if 'jet_diag' in observable:
         #   name = 'h_{}_JetEta_R{}_{}'.format(observable, jetR, obs_label)
@@ -584,16 +618,18 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     type2 = constituents[part2].user_index()
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
-    if type1*type2 >= 0:
-      if type1 < 0 or type2 < 0:
-        # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 0 # means bkg-bkg
-      else:
-        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 2 # means sig-sig
-    else:
+    if type1 < 0 and type2 < 0:
+      # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
+      return 0 # means bkg-bkg
+    if type1 < 0 and type2 >= 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
+    if type1 >= 0 and type2 < 0:
+      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      return 1 # means sig-bkg
+    if type1 >= 0 and type2 >= 0:
+      # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
+      return 2 # means sig-sig
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -705,8 +741,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   #---------------------------------------------------------------
   def fill_matched_observable_histograms(self, hname, observable, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, jet_pt_matched, cone_parts = None):
     
-    constituents = fj.sorted_by_pt(jet.constituents())
-    if cone_parts!=None:
+    if cone_parts == None:
+      constituents = fj.sorted_by_pt(jet.constituents())
+    else:
       constituents = fj.sorted_by_pt(cone_parts)
 
     # if cone_parts!=None and 'Truth' in hname:
@@ -827,6 +864,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())
 
+        if 'rho_local' in observable:
+          pt_sum = 0.
+          for c in jet_det.constituents():
+            if c.user_index() < 0:
+              pt_sum += c.pt()
+          rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
+          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_det.perp(), rho_local)
+          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+
       # type 2 -- fill for perp cone
       if (cone_R == 0) and (cone_parts_in_det_jet != None): 
         # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
@@ -839,6 +887,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           hname = 'h_perpcone{}_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt(), cone_parts_in_det_jet) 
+
+        if self.do_perpcone and 'rho_local' in observable:
+          pt_sum = 0.
+          for c in cone_parts_in_det_jet:
+            if c.user_index() < 0:
+              pt_sum += c.pt()
+          rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
+          hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_det.perp(), rho_local)
+          hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 3 -- fill for cone parts around jet
       if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
