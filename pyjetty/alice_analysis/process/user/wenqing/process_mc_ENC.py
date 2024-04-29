@@ -428,10 +428,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          rho_bins = linbins(0,100,100)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-          h.GetYaxis().SetTitle('local rho')
+          pt_bins = linbins(0,100,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
           setattr(self, name, h)
 
         if 'area' in observable:
@@ -888,14 +886,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())
 
-        if self.do_rho_subtraction and 'rho_local' in observable:
-          pt_sum = 0.
-          for c in jet_det.constituents():
-            if c.user_index() < 0:
-              pt_sum += c.pt()
-          rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
           hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, rho_local)
+          getattr(self, hname).Fill(jet_pt_det, 0)
+
+        # if self.do_rho_subtraction and 'rho_local' in observable:
+        #   pt_sum = 0.
+        #   for c in jet_det.constituents():
+        #     if c.user_index() < 0:
+        #       pt_sum += c.pt()
+        #   rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
+        #   hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
+        #   getattr(self, hname).Fill(jet_pt_det, 0)
           # hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           # getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
