@@ -446,17 +446,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
-          hname = 'h_matched_rho_local_JetPt_R{}_{}'.format(jetR, obs_label)
+          hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          rho_bins = linbins(0,500,100)
+          rho_bins = linbins(0,100,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('local rho')
           setattr(self, name, h)
 
-          hname = 'h_matched_rho_local_JetPt_Truth_R{}_{}'.format(jetR, obs_label)
+          hname = 'h_matched_what_JetPt_Truth_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          rho_bins = linbins(0,500,100)
+          rho_bins = linbins(0,100,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('local rho')
@@ -886,7 +886,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
-          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           # hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           # getattr(self, hname).Fill(jet_truth.perp(), rho_local)
