@@ -1072,20 +1072,20 @@ class ProcessMCBase(process_base.ProcessBase):
             
             # use 999 and -999 to distinguish from prevous used labeling numbers
             parts_in_cone1 = fj.vectorPJ()
-            # # fill parts from jet
-            # for part in parts_in_jet:
-            #   part.set_user_index(999)
-            #   parts_in_cone1.append(part)
+            # fill parts from jet
+            for part in parts_in_jet:
+              part.set_user_index(999)
+              parts_in_cone1.append(part)
             # fill parts from perp cone 1
             for part in parts_in_perpcone1:
               part.set_user_index(-999)
               parts_in_cone1.append(part)
             
             parts_in_cone2 = fj.vectorPJ()
-            # # fill parts from jet
-            # for part in parts_in_jet:
-            #   part.set_user_index(999)
-            #   parts_in_cone2.append(part)
+            # fill parts from jet
+            for part in parts_in_jet:
+              part.set_user_index(999)
+              parts_in_cone2.append(part)
             # fill parts from perp cone 2
             for part in parts_in_perpcone2:
               part.set_user_index(-999)
