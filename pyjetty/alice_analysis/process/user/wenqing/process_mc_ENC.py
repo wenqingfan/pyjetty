@@ -428,7 +428,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          pt_bins = linbins(0,100,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
           setattr(self, name, h)
 
