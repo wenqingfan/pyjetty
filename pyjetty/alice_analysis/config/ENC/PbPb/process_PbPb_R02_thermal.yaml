@@ -23,7 +23,7 @@ ENC_fastsim: False # only set to True when fast_simulation is set to True
 ENC_pair_cut: False
 
 do_rho_subtraction: True
-do_perpcone: False
+do_perpcone: True
 do_jetcone: False
 
 thermal_model:
