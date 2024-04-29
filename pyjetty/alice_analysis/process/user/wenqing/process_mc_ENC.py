@@ -426,6 +426,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('p_{T,ch jet}^{truth}')
           setattr(self, name, h)
 
+          hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          rho_bins = linbins(0,100,100)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('local rho')
+          setattr(self, name, h)
+
         if 'area' in observable:
           # Matched det histograms
           name = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
@@ -446,21 +454,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
-          hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          rho_bins = linbins(0,100,100)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-          h.GetYaxis().SetTitle('local rho')
-          setattr(self, name, h)
+          # hname = 'h_matched_what_JetPt_R{}_{}'.format(jetR, obs_label)
+          # pt_bins = linbins(0,200,200)
+          # rho_bins = linbins(0,100,100)
+          # h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+          # h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          # h.GetYaxis().SetTitle('local rho')
+          # setattr(self, name, h)
 
-          hname = 'h_matched_what_JetPt_Truth_R{}_{}'.format(jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          rho_bins = linbins(0,100,100)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-          h.GetYaxis().SetTitle('local rho')
-          setattr(self, name, h)
+          # hname = 'h_matched_what_JetPt_Truth_R{}_{}'.format(jetR, obs_label)
+          # pt_bins = linbins(0,200,200)
+          # rho_bins = linbins(0,100,100)
+          # h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+          # h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          # h.GetYaxis().SetTitle('local rho')
+          # setattr(self, name, h)
 
         # if 'rho_local' in observable:
         #   hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
