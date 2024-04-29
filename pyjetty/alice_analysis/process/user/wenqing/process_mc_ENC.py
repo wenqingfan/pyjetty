@@ -446,7 +446,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
-          hname = 'h_matched_rho_local_JetPt_R{}_{}'.format(, jetR, obs_label)
+          hname = 'h_matched_rho_local_JetPt_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
           rho_bins = linbins(0,500,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -454,7 +454,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('local rho')
           setattr(self, name, h)
 
-          hname = 'h_matched_rho_local_JetPt_Truth_R{}_{}'.format(, jetR, obs_label)
+          hname = 'h_matched_rho_local_JetPt_Truth_R{}_{}'.format(jetR, obs_label)
           pt_bins = linbins(0,200,200)
           rho_bins = linbins(0,500,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
