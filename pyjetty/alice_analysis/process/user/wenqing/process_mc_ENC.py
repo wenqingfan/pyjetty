@@ -871,7 +871,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
           hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_det.perp(), rho_local)
+          getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
@@ -895,7 +895,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
           hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_det.perp(), rho_local)
+          getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
