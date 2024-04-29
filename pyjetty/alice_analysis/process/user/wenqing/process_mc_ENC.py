@@ -448,7 +448,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if 'rho_local' in observable:
           hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          print('initialize rho local hists:',hname)
           pt_bins = linbins(0,200,200)
           rho_bins = linbins(0,500,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -871,10 +870,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
-          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, rho_local)
-          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          # hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          # getattr(self, hname).Fill(jet_pt_det, rho_local)
+          # hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          # getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 2 -- fill for perp cone
       if (cone_R == 0) and (cone_parts_in_det_jet != None): 
@@ -895,10 +894,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # FIX ME: for now use jet.area() for both jet and perpcone
-          hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, rho_local)
-          hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          # hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          # getattr(self, hname).Fill(jet_pt_det, rho_local)
+          # hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          # getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 3 -- fill for cone parts around jet
       if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
