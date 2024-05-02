@@ -88,6 +88,12 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         else:
             self.mc_fraction_threshold = 0.5 # default to 0.5
 
+        # perp cone settings
+        if 'static_perpcone' in config:
+            self.static_perpcone = config['static_perpcone']
+        else:
+            self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
+
         # ENC settings
         if 'thrd' in config:
             self.thrd_list = config['thrd']
@@ -488,7 +494,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         perp_jet2.reset_PtYPhiM(jet_combined.pt(), jet_combined.rapidity(), jet_combined.phi() - np.pi/2, jet_combined.m())
 
         # The current implementation only does perpcone for the standard AK jets. No bigger cones
-        perpcone_R = math.sqrt(jet_combined.area()/np.pi) # FIX ME: still checking if using the jet R for perp cone R is the best choice or not
+        perpcone_R = jetR
+        if self.static_perpcone == False:
+            perpcone_R = math.sqrt(jet_combined.area()/np.pi) # FIX ME: still checking if using the jet R for perp cone R is the best choice or not
         constituents = jet_combined.constituents()
         parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
