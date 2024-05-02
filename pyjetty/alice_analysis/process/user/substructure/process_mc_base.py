@@ -137,6 +137,10 @@ class ProcessMCBase(process_base.ProcessBase):
       self.do_perpcone = config['do_perpcone']
     else:
       self.do_perpcone = False
+    if 'static_perpcone' in config:
+        self.static_perpcone = config['static_perpcone']
+    else:
+        self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
 
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
@@ -1058,7 +1062,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
             # The current implementation only does perpcone for the standard AK jets. No bigger cones
             perpcone_R = jetR
-            if self.do_rho_subtraction:
+            if self.do_rho_subtraction and self.static_perpcone == False:
               perpcone_R = math.sqrt(jet_det.area()/np.pi)
             constituents = jet_det.constituents()
             parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
