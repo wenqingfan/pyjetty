@@ -657,16 +657,18 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         type2 = constituents[part2].user_index()
 
         # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
-        if type1*type2 >= 0:
-          if type1 < 0 or type2 < 0:
-            # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-            return 0 # means bkg-bkg
-          else:
-            # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-            return 2 # means sig-sig
-        else:
+        if type1 < 0 and type2 < 0:
+          # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
+          return 0 # means bkg-bkg
+        if type1 < 0 and type2 >= 0:
           # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
           return 1 # means sig-bkg
+        if type1 >= 0 and type2 < 0:
+          # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+          return 1 # means sig-bkg
+        if type1 >= 0 and type2 >= 0:
+          # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
+          return 2 # means sig-sig
 
     #---------------------------------------------------------------
     # Initiate scaling of all histograms and print final simulation info
