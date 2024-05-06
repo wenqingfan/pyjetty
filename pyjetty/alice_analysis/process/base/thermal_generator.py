@@ -56,6 +56,11 @@ class ThermalGenerator(common_base.CommonBase):
   
     # Decide how many tracks to generate
     N_tracks = int(np.random.normal(self.N_avg, self.sigma_N))
+    itrial = 0
+    while N_track < 0:
+        print('N_track is negative (',N_track,') in trial number',itrial,'... Re-generate N_track')
+        itrial += 1
+        N_tracks = int(np.random.normal(self.N_avg, self.sigma_N))
   
     # Generate tracks, and populate a dataframe
     pt_array = np.random.gamma(self.alpha, self.beta, N_tracks)
