@@ -8,6 +8,8 @@ rm_trk_min_pt: True
 jet_matching_distance: 0.6
 mc_fraction_threshold: 0.5
 
+coneR: [0.2]
+
 thermal_model:
   beta: 0.425
   N_avg: 500

@@ -10,6 +10,8 @@ thrd: [0.5, 1.0, 2.0]
 jet_matching_distance: 100
 mc_fraction_threshold: 0.5
 
+coneR: [0.2]
+
 thermal_model:
   beta: 0.425
   N_avg: 2500
