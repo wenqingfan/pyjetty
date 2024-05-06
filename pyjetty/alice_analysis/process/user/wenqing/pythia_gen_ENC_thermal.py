@@ -235,7 +235,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     setattr(self, name, h)
                     getattr(self, hist_list_name).append(h)
 
-                    for cone_R in self.coneR_list:
+                    for coneR in self.coneR_list:
                         name = 'h_perpcone{}_matched_{}_JetPt_ch_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
                         h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
@@ -769,11 +769,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Select particles around jet axis
     #---------------------------------------------------------------
-    def find_parts_around_jet(self, parts, jet, cone_R):
+    def find_parts_around_jet(self, parts, jet, coneR):
 
         cone_parts = fj.vectorPJ()
         for part in parts:
-          if jet.delta_R(part) <= cone_R:
+          if jet.delta_R(part) <= coneR:
             cone_parts.push_back(part)
         
         return cone_parts
