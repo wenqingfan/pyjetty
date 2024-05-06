@@ -585,7 +585,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         # Bigger cones than AK jet R implemented
         perpcone_R = coneR
-        coneR_label = str(cone).replace('.', '')
+        coneR_label = str(coneR).replace('.', '')
         # NB1: only enable dynamic option when coneR = jetR
         # NB2: similar result using dynamic and static cone
         if self.static_perpcone == False and coneR_label == R_label:
