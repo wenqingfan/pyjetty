@@ -506,10 +506,10 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 if imatched_jet_combined > -1:
                     nmatched_pp += 1
                     jet_combined = jets_combined[imatched_jet_combined]
-                    self.fill_matched_jets(jet_combined, jet_pp, R_label)
+                    self.fill_matched_jets(jet_combined, jet_pp, jetR)
                     for coneR in self.coneR_list:
-                        self.fill_matched_perpcone(jet_combined, jet_pp, coneR, R_label)
-                        self.fill_matched_jetcone(jet_combined, jet_pp, coneR, R_label)
+                        self.fill_matched_perpcone(jet_combined, jet_pp, jetR, coneR)
+                        self.fill_matched_jetcone(jet_combined, jet_pp, jetR, coneR)
 
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area(), jet_pp.perp())
@@ -548,7 +548,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_jets(self, jet_combined, jet_pp, R_label):
+    def fill_matched_jets(self, jet_combined, jet_pp, jetR):
+
+        R_label = str(jetR).replace('.', '') + 'Scaled'
 
         # fill EEC for matched comb jet using pp jet for jet pT
         hname = 'h_matched_ENC{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
@@ -569,16 +571,18 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         # fill EEC for matched comb jet using pp jet for jet pT
         hname = 'h_matched_{{}}_JetPt_ch_R{}_{{}}'.format(R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, None)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, jetR, None)
 
         # fill EEC for matched comb jet using comb jet (after rho subtraction) for jet pT
         hname = 'h_matched_{{}}_JetPt_ch_combined_R{}_{{}}'.format(R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, None)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, jetR, None)
             
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_perpcone(self, jet_combined, jet_pp, coneR, R_label):
+    def fill_matched_perpcone(self, jet_combined, jet_pp, jetR, coneR):
+
+        R_label = str(jetR).replace('.', '') + 'Scaled'
 
         perp_jet1 = fj.PseudoJet()
         perp_jet1.reset_PtYPhiM(jet_combined.pt(), jet_combined.rapidity(), jet_combined.phi() + np.pi/2, jet_combined.m())
@@ -587,10 +591,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         # Bigger cones than AK jet R implemented
         perpcone_R = coneR
-        coneR_label = str(coneR).replace('.', '')
         # NB1: only enable dynamic option when coneR = jetR
         # NB2: similar result using dynamic and static cone
-        if self.static_perpcone == False and coneR_label == R_label:
+        if self.static_perpcone == False and coneR == jetR:
             perpcone_R = math.sqrt(jet_combined.area()/np.pi)
         constituents = jet_combined.constituents()
         parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
@@ -640,18 +643,20 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         # fill rho local for matched comb jet using pp jet for jet pT
         hname = 'h_perpcone{}_matched_{{}}_JetPt_ch_R{}_{{}}'.format(coneR, R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_cone1)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_cone2)
 
         # fill rho local for matched comb jet using comb jet (rho subtracted) for jet pT
         hname = 'h_perpcone{}_matched_{{}}_JetPt_ch_combined_R{}_{{}}'.format(coneR, R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_cone1)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_cone2)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_cone1)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_cone2)
     
     #---------------------------------------------------------------
     # Fill jet cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_jetcone(self, jet_combined, jet_pp, coneR, R_label):
+    def fill_matched_jetcone(self, jet_combined, jet_pp, jetR, coneR):
+
+        R_label = str(jetR).replace('.', '') + 'Scaled'
 
         jetcone_R = coneR
 
@@ -667,11 +672,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
         # fill rho local for matched comb jet using pp jet for jet pT
         hname = 'h_jetcone{}_matched_{{}}_JetPt_ch_R{}_{{}}'.format(coneR, R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_jetcone)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_jetcone)
 
         # fill rho local for matched comb jet using comb jet (rho subtracted) for jet pT
         hname = 'h_jetcone{}_matched_{{}}_JetPt_ch_combined_R{}_{{}}'.format(coneR, R_label)
-        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, parts_in_jetcone)
+        self.fill_matched_rho_local_histograms(hname, jet_pp, jet_combined, coneR, parts_in_jetcone)
 
     #---------------------------------------------------------------
     # Fill matched ENC histograms
@@ -713,7 +718,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill matched rho local histograms
     #---------------------------------------------------------------
-    def fill_matched_rho_local_histograms(self, hname, jet_pp, jet_combined, cone_parts):
+    def fill_matched_rho_local_histograms(self, hname, jet_pp, jet_combined, coneR, cone_parts):
         
         if cone_parts == None:
             constituents = fj.sorted_by_pt(jet_combined.constituents())
@@ -739,7 +744,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                 pt_sum += c.perp()
                 N_sum += 1
 
-            getattr(self, hname.format('rho_local', thrd_label)).Fill(jet_pt_select, pt_sum/jet_combined.area())
+            if 'jetcone' in hname or 'perpcone' in hname:
+                jet_area = np.pi*coneR*coneR
+            else:
+                jet_area = jet_combined.area()
+            getattr(self, hname.format('rho_local', thrd_label)).Fill(jet_pt_select, pt_sum/jet_area)
             getattr(self, hname.format('mult', thrd_label)).Fill(jet_pt_select, N_sum)
     
     #---------------------------------------------------------------
