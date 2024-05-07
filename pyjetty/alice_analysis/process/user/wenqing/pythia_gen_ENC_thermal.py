@@ -214,14 +214,16 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     thrd_label = 'trk{:.0f}'.format(thrd*10)
                     
                     if observable == 'rho_local':
-                        obs_bins = linbins(0,500,100)
+                        obs_nbins = 100
+                        obs_bins = linbins(0,500,obs_nbins)
                     else:
-                        obs_bins = linbins(0,50,50)
+                        obs_nbins = 50
+                        obs_bins = linbins(0,50,obs_nbins)
                     pt_bins = linbins(0,200,200)
 
                     name = 'h_matched_{}_JetPt_ch_R{}_{}'.format(observable, R_label, thrd_label)
                     print('Initialize histogram',name)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                     h.GetXaxis().SetTitle('p_{T, pp jet}')
                     h.GetYaxis().SetTitle(observable)
                     setattr(self, name, h)
@@ -229,7 +231,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                     name = 'h_matched_{}_JetPt_ch_combined_R{}_{}'.format(observable, R_label, thrd_label)
                     print('Initialize histogram',name)
-                    h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                     h.GetXaxis().SetTitle('p_{T, comb jet}')
                     h.GetYaxis().SetTitle(observable)
                     setattr(self, name, h)
@@ -238,7 +240,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     for coneR in self.coneR_list:
                         name = 'h_perpcone{}_matched_{}_JetPt_ch_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                         h.GetXaxis().SetTitle('p_{T, pp jet}')
                         h.GetYaxis().SetTitle(observable)
                         setattr(self, name, h)
@@ -246,7 +248,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                         name = 'h_perpcone{}_matched_{}_JetPt_ch_combined_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                         h.GetXaxis().SetTitle('p_{T, comb jet}')
                         h.GetYaxis().SetTitle(observable)
                         setattr(self, name, h)
@@ -254,7 +256,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                         name = 'h_jetcone{}_matched_{}_JetPt_ch_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                         h.GetXaxis().SetTitle('p_{T, pp jet}')
                         h.GetYaxis().SetTitle(observable)
                         setattr(self, name, h)
@@ -263,7 +265,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                         name = 'h_jetcone{}_matched_{}_JetPt_ch_combined_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
                         obs_bins = linbins(0,500,100)
-                        h = ROOT.TH2D(name, name, 200, pt_bins, 100, obs_bins)
+                        h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                         h.GetXaxis().SetTitle('p_{T, comb jet}')
                         h.GetYaxis().SetTitle(observable)
                         setattr(self, name, h)
