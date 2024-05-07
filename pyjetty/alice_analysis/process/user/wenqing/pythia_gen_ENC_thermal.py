@@ -509,7 +509,11 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     self.fill_matched_jets(jet_combined, jet_pp, jetR)
                     for coneR in self.coneR_list:
                         self.fill_matched_jetcone(jet_combined, jet_pp, jetR, coneR)
-                        self.fill_matched_perpcone(jet_combined, jet_pp, jetR, coneR, False)
+                        if coneR == jetR:
+                            use_constituents = True
+                        else:
+                            use_constituents = False
+                        self.fill_matched_perpcone(jet_combined, jet_pp, jetR, coneR, use_constituents)
                         
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area(), jet_pp.perp())
@@ -751,8 +755,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
             pt_sum = 0
             N_sum = 0
             for c in c_select:
-                pt_sum += c.perp()
-                N_sum += 1
+                if c.user_index() < 0:
+                    pt_sum += c.perp()
+                    N_sum += 1
 
             if 'jetcone' in hname or 'perpcone' in hname:
                 jet_area = np.pi*coneR*coneR
