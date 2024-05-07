@@ -508,9 +508,9 @@ class PythiaGenENCThermal(process_base.ProcessBase):
                     jet_combined = jets_combined[imatched_jet_combined]
                     self.fill_matched_jets(jet_combined, jet_pp, jetR)
                     for coneR in self.coneR_list:
-                        self.fill_matched_perpcone(jet_combined, jet_pp, jetR, coneR)
                         self.fill_matched_jetcone(jet_combined, jet_pp, jetR, coneR)
-
+                        self.fill_matched_perpcone(jet_combined, jet_pp, jetR, coneR, False)
+                        
                     hname = 'h_matched_JetPt_ch_combined_vs_pp_R{}'.format(R_label)
                     getattr(self, hname).Fill(jet_combined.perp()-self.rho*jet_combined.area(), jet_pp.perp())
                     hname = 'h_matched_JetPt_ch_JES_R{}'.format(R_label)
@@ -580,7 +580,7 @@ class PythiaGenENCThermal(process_base.ProcessBase):
     #---------------------------------------------------------------
     # Fill perp cone for matched combined jets
     #---------------------------------------------------------------
-    def fill_matched_perpcone(self, jet_combined, jet_pp, jetR, coneR):
+    def fill_matched_perpcone(self, jet_combined, jet_pp, jetR, coneR, use_constituents):
 
         R_label = str(jetR).replace('.', '') + 'Scaled'
 
@@ -589,14 +589,24 @@ class PythiaGenENCThermal(process_base.ProcessBase):
         perp_jet2 = fj.PseudoJet()
         perp_jet2.reset_PtYPhiM(jet_combined.pt(), jet_combined.rapidity(), jet_combined.phi() - np.pi/2, jet_combined.m())
 
-        # Bigger cones than AK jet R implemented
+        #================================================================
+        #   Bigger cones than AK jet R implemented
+        # if use_constituents is true, use jet constituents for jet particles
+        # else use particles in jet cone for jet particles, and use 
+        # the same cone size for jet cone and perp cone 
+        # NB: don't use constituents when coneR > jetR
+        #================================================================
         perpcone_R = coneR
         # NB1: only enable dynamic option when coneR = jetR
         # NB2: similar result using dynamic and static cone
         if self.static_perpcone == False and coneR == jetR:
             perpcone_R = math.sqrt(jet_combined.area()/np.pi)
-        constituents = jet_combined.constituents()
-        parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+        
+        if use_constituents:
+            constituents = jet_combined.constituents()
+            parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+        else:
+            parts_in_jet = self.find_parts_around_jet(self.fj_particles_combined_beforeCS, jet_combined, perpcone_R)
 
         # NB: a deep copy of the combined particle list are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
         parts_in_perpcone1 = self.find_parts_around_jet(self.fj_particles_combined_beforeCS, perp_jet1, perpcone_R)
