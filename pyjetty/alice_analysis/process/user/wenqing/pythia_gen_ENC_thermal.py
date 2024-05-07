@@ -264,7 +264,6 @@ class PythiaGenENCThermal(process_base.ProcessBase):
 
                         name = 'h_jetcone{}_matched_{}_JetPt_ch_combined_R{}_{}'.format(coneR, observable, R_label, thrd_label)
                         print('Initialize histogram',name)
-                        obs_bins = linbins(0,500,100)
                         h = ROOT.TH2D(name, name, 200, pt_bins, obs_nbins, obs_bins)
                         h.GetXaxis().SetTitle('p_{T, comb jet}')
                         h.GetYaxis().SetTitle(observable)
