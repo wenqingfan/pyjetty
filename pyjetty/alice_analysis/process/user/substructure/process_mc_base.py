@@ -146,6 +146,11 @@ class ProcessMCBase(process_base.ProcessBase):
         self.leading_pt = config['leading_pt']
     else:
         self.leading_pt = -1 # negative means no leading track cut
+
+    if 'remove_outlier' in config:
+        self.remove_outlier = config['remove_outlier']
+    else:
+        self.remove_outlier = False
     
     if self.do_constituent_subtraction:
         self.is_pp = False
@@ -965,10 +970,24 @@ class ProcessMCBase(process_base.ProcessBase):
         # print('debug8--jet det', jet_det_pt, 'size', len(jet_det.constituents()))
         # print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
         
+        if not self.is_pp:
+          pass
         jet_pt_det_ungroomed = jet_det_pt
         jet_pt_truth_ungroomed = jet_truth.pt()
         JES = (jet_pt_det_ungroomed - jet_pt_truth_ungroomed) / jet_pt_truth_ungroomed
         getattr(self, 'hJES_R{}{}'.format(jetR, suffix)).Fill(jet_pt_truth_ungroomed, JES)
+
+        # in embedded PbPb, it can occasionally happen that a jet from PbPb is next to a jet from pythia
+        # in this case, the local background energy will be much larger than the "true" UE background seen in data
+        # in addition, if there is a hard particle labelled as "background" in a jet with large det jet pt and very small true jet pt. If such case happen at a single digit level, one can get very werid outliers in the final EEC distributions
+        # Try jet pt selection to start (can also require the hardest particle inside det jet to be from pythia)
+        # If a jet is considered a outlier, skip this jet
+        if not self.is_pp and self.remove_outlier:
+          if jet_pt_det_ungroomed - jet_pt_truth_ungroomed > 45:
+            return
+          # constituents = fj.sorted_by_pt( jet_det.constituents() )
+          # if constituents[0].user_index() < 0 and constituents[0].perp() > 5:
+          #   return
         
         # If Pb-Pb case, we need to keep jet_det, jet_truth, jet_pp_det
         jet_pp_det = None
