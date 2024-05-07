@@ -23,7 +23,7 @@ ENC_fastsim: False # only set to True when fast_simulation is set to True
 ENC_pair_cut: False
 
 do_rho_subtraction: True
-do_perpcone: True
+do_perpcone: False
 do_jetcone: False
 jetcone_R_list: [0.2]
 
