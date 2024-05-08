@@ -865,8 +865,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, jet_truth.pt())
 
         if self.do_rho_subtraction and 'rho_local' in observable:
+          trk_thrd = obs_setting
+          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
           pt_sum = 0.
-          for c in jet_det.constituents():
+          for c in constituents_sorted:
+            if c.pt() < trk_thrd:
+              break
             if c.user_index() < 0:
               pt_sum += c.pt()
           rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
@@ -889,8 +893,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt(), cone_parts_in_det_jet) 
 
         if self.do_rho_subtraction and self.do_perpcone and 'rho_local' in observable:
+          trk_thrd = obs_setting
+          cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
           pt_sum = 0.
-          for c in cone_parts_in_det_jet:
+          for c in cone_parts_in_det_jet_sorted:
+            if c.pt() < trk_thrd:
+              break
             if c.user_index() < 0:
               pt_sum += c.pt()
           if self.static_perpcone == True:
