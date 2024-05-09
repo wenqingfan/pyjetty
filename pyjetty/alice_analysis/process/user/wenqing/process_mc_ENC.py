@@ -873,11 +873,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               break
             if c.user_index() < 0:
               pt_sum += c.pt()
-          rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
-          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, rho_local)
-          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          if jet_det.area() > 0:
+            rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
+            hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, rho_local)
+            hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          else:
+            print('Very weird jet: area', jet_det.area(), 'pt', jet_det.perp(), 'nconst', len(jet_det.constituents()), 'eta', jet_det.eta(), 'phi', jet_det.phi())
 
       # type 2 -- fill for perp cone
       if (cone_R == 0) and (cone_parts_in_det_jet != None): 
