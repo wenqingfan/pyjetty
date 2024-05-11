@@ -113,6 +113,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   #---------------------------------------------------------------
   def initialize_user_output_objects_R(self, jetR):
 
+    # check the rate of the zero area jets (only filled if rho subtraction enabled)
+    name = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
+    pt_bins = linbins(0,200,200)
+    mult_bins = logbins(0,50,50)
+    h = ROOT.TH2D(name, name, 200, pt_bins, 50, mult_bins)
+    h.GetXaxis().SetTitle('p_{T,ch jet}')
+    h.GetYaxis().SetTitle('N_{const}')
+    setattr(self, name, h)
+
     for observable in self.observable_list:
 
       for trk_thrd in self.obs_settings[observable]:
@@ -838,6 +847,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       # print('Det: pT',jet_det.perp(),'(',jet_pt_det,')','phi',jet_det.phi(),'eta',jet_det.eta())
       # print('Truth: pT',jet_truth.perp(),'phi',jet_truth.phi(),'eta',jet_truth.eta())
       # print('Difference pT (truth-det)',jet_truth.perp()-jet_pt_det_ungroomed)
+      if jet_det.area() == 0:
+        hname = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
+        getattr(self, hname).Fill(len(jet_det.constituents()), jet_pt_det)
+        return # FIX ME: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt_det = jet_det.perp()
 
@@ -873,14 +886,11 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               break
             if c.user_index() < 0:
               pt_sum += c.pt()
-          if jet_det.area() > 0:
-            rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
-            hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Fill(jet_pt_det, rho_local)
-            hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
-          else:
-            print('Very weird jet: area', jet_det.area(), 'pt', jet_det.perp(), 'nconst', len(jet_det.constituents()), 'eta', jet_det.eta(), 'phi', jet_det.phi())
+          rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
+          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det, rho_local)
+          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 2 -- fill for perp cone
       if (cone_R == 0) and (cone_parts_in_det_jet != None): 
