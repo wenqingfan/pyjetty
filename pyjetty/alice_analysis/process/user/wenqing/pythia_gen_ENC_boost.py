@@ -236,46 +236,48 @@ class PythiaGenENCBoost(process_base.ProcessBase):
     def calculate_boost_vec(self, jet_before, new_pt):
         
         print('before boost',jet_before.pt(), jet_before.rapidity(), jet_before.phi(), jet_before.m())
-        rest_vec_before = jet_before._jet_rest
-        jet_after = fj.PseudoJet()
-        jet_after.reset_PtYPhiM(new_pt, jet_before.rapidity(), jet_before.phi(), jet_before.m())
-        rest_vec_after = jet_after._jet_rest
+        TLorentzVector jet_before_vec
+        jet_before_vec.SetPxPyPzE(jet_before.px(), jet_before.py(), jet_before.pz(), jet_before.E())
+        # rest_vec_before = jet_before._jet_rest
+        # jet_after = fj.PseudoJet()
+        # jet_after.reset_PtYPhiM(new_pt, jet_before.rapidity(), jet_before.phi(), jet_before.m())
+        # rest_vec_after = jet_after._jet_rest
 
-        jet_after_check = fj.PseudoJet()
-        jet_after_check.reset_PtYPhiM(jet_before.pt(), jet_before.rapidity(), jet_before.phi(), jet_before.m())
-        jet_after_check.Boost(-rest_vec_before+rest_vec_after)
-        print('after boost',jet_after_check.pt(), jet_after_check.rapidity(), jet_after_check.phi(), jet_after_check.m())
+        # jet_after_check = fj.PseudoJet()
+        # jet_after_check.reset_PtYPhiM(jet_before.pt(), jet_before.rapidity(), jet_before.phi(), jet_before.m())
+        # jet_after_check.Boost(-rest_vec_before+rest_vec_after)
+        # print('after boost',jet_after_check.pt(), jet_after_check.rapidity(), jet_after_check.phi(), jet_after_check.m())
 
-        return -rest_vec_before+rest_vec_after
+        # return -rest_vec_before+rest_vec_after
 
-    #---------------------------------------------------------------
-    # Create a copy of list of particles
-    #---------------------------------------------------------------
-    def copy_parts(self, parts, remove_ghosts = True):
-    # don't need to re-init every part for a deep copy
-    # the last arguement enable/disable the removal of ghost particles from jet area calculation (default set to true)
-        parts_copied = fj.vectorPJ()
-        for part in parts:
-          if remove_ghosts:
-            if part.pt() > 0.01:
-              parts_copied.push_back(part)
-          else:
-            parts_copied.push_back(part)
+    # #---------------------------------------------------------------
+    # # Create a copy of list of particles
+    # #---------------------------------------------------------------
+    # def copy_parts(self, parts, remove_ghosts = True):
+    # # don't need to re-init every part for a deep copy
+    # # the last arguement enable/disable the removal of ghost particles from jet area calculation (default set to true)
+    #     parts_copied = fj.vectorPJ()
+    #     for part in parts:
+    #       if remove_ghosts:
+    #         if part.pt() > 0.01:
+    #           parts_copied.push_back(part)
+    #       else:
+    #         parts_copied.push_back(part)
 
-        return parts_copied
+    #     return parts_copied
 
-    #---------------------------------------------------------------
-    # Lorentz boost the list of particles
-    #---------------------------------------------------------------
-    def boost_parts(parts_before, boost_vec):
-        parts_after = fj.vectorPJ()
-        for part in parts_before:
-            # print('before',part.pt(),part.phi(),part.rapidity())
-            part.Boost(boost_vec)
-            # print('after',part.pt(),part.phi(),part.rapidity())
-            parts_after.push_back(part)
+    # #---------------------------------------------------------------
+    # # Lorentz boost the list of particles
+    # #---------------------------------------------------------------
+    # def boost_parts(parts_before, boost_vec):
+    #     parts_after = fj.vectorPJ()
+    #     for part in parts_before:
+    #         # print('before',part.pt(),part.phi(),part.rapidity())
+    #         part.Boost(boost_vec)
+    #         # print('after',part.pt(),part.phi(),part.rapidity())
+    #         parts_after.push_back(part)
 
-        return parts_after
+    #     return parts_after
 
     #---------------------------------------------------------------
     # Find jets, do matching between levels, and fill histograms & trees
@@ -298,8 +300,8 @@ class PythiaGenENCBoost(process_base.ProcessBase):
                 if jet_pp.perp() > 20 and jet_pp.perp() < 21:
                     ref_pt = 40
                     boost_vec = self.calculate_boost_vec(jet_pp, ref_pt)
-                    parts_in_jet = self.copy_parts(constituents)
-                    self.boost_parts(parts_in_jet, boost_vec)
+                    # parts_in_jet = self.copy_parts(constituents)
+                    # self.boost_parts(parts_in_jet, boost_vec)
 
                 # hname = 'h_JetPt_ch_pp_R{}'.format(R_label)
                 # getattr(self, hname).Fill(jet_pp.perp())
