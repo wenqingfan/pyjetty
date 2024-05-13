@@ -297,7 +297,7 @@ class PythiaGenENCBoost(process_base.ProcessBase):
             for jet_pp in jets_pp:
                 if jet_pp.perp() > 20 and jet_pp.perp() < 21:
                     ref_pt = 40
-                    self.boost_vec = calculate_boost_vec(jet_pp, ref_pt)
+                    boost_vec = self.calculate_boost_vec(jet_pp, ref_pt)
                     parts_in_jet = self.copy_parts(constituents)
                     self.boost_parts(parts_in_jet, boost_vec)
 
