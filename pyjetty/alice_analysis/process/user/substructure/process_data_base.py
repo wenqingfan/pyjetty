@@ -97,6 +97,10 @@ class ProcessDataBase(process_base.ProcessBase):
       self.do_perpcone = config['do_perpcone']
     else:
       self.do_perpcone = False
+    if 'static_perpcone' in config:
+        self.static_perpcone = config['static_perpcone']
+    else:
+        self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
 
     if 'do_jetcone' in config:
       self.do_jetcone = config['do_jetcone']
@@ -481,19 +485,37 @@ class ProcessDataBase(process_base.ProcessBase):
     return cone_parts
 
   def rotate_parts(self, parts, rotate_phi):
-    # rotate parts in azimuthal direction
+    # rotate parts in azimuthal direction (NB: manually update the user index also)
     parts_rotated = fj.vectorPJ()
     for part in parts:
       pt_new = part.pt()
       y_new = part.rapidity()
       phi_new = part.phi() + rotate_phi
       m_new = part.m()
+      user_index_new = part.user_index()
       # print('before',part.phi())
       part.reset_PtYPhiM(pt_new, y_new, phi_new, m_new)
+      part.set_user_index(user_index_new)
       # print('after',part.phi())
       parts_rotated.push_back(part)
     
     return parts_rotated
+
+  def copy_parts(self, parts, remove_ghosts = True):
+    # don't need to re-init every part for a deep copy
+    # the last arguement enable/disable the removal of ghost particles from jet area calculation (default set to true)
+    parts_copied = fj.vectorPJ()
+    for part in parts:
+      # user_index_new = part.user_index()
+      # part_new = fj.PseudoJet(part.px(), part.py(), part.pz(), part.E())
+      # part_new.set_user_index(user_index_new)
+      if remove_ghosts:
+        if part.pt() > 0.01:
+          parts_copied.push_back(part)
+      else:
+        parts_copied.push_back(part)
+    
+    return parts_copied
 
   def analyze_jet_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
     # analyze cones around jet axis. NB: maybe can even use WTA axis
@@ -538,9 +560,16 @@ class ProcessDataBase(process_base.ProcessBase):
       for perpcone_R in perpcone_R_list:
 
         constituents = jet.constituents()
+        parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+
         # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
         if perpcone_R != jetR:
           constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
+          parts_in_jet = constituents
+
+        if perpcone_R == jetR:
+          if self.do_rho_subtraction and self.static_perpcone == False:
+              perpcone_R = math.sqrt(jet.area()/np.pi)
         
         # NB1: a deep copy already created in find_parts_around_jet(). Operations on the deep copy does not affect the oringinal parts     
         # NB2: when iterating using for loop through all the particle list like "for part in parts", operations like part.* will not change the parts. Need to use parts[*].* to change the parts  
@@ -556,18 +585,18 @@ class ProcessDataBase(process_base.ProcessBase):
 
         parts_in_cone1 = fj.vectorPJ()
         for part in constituents:
-          part.set_user_index(1)
+          part.set_user_index(999)
           parts_in_cone1.append(part)
         for part in parts_in_perpcone1:
-          part.set_user_index(-1)
+          part.set_user_index(-999)
           parts_in_cone1.append(part)
 
         parts_in_cone2 = fj.vectorPJ()
         for part in constituents:
-          part.set_user_index(1)
+          part.set_user_index(999)
           parts_in_cone2.append(part)
         for part in parts_in_perpcone2:
-          part.set_user_index(-1)
+          part.set_user_index(-999)
           parts_in_cone2.append(part)
 
         self.analyze_accepted_cone(True, parts_in_cone1, perpcone_R, jet, jetR, suffix, rho_bge)
