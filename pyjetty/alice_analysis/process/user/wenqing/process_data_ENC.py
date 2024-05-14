@@ -141,17 +141,25 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
               if 'jet_pt' in observable:
                 name = 'h_perpcone{}_{}_JetPt_R{}_{}'.format(perpcone_R, 'pt', jetR, trk_thrd)
                 pt_bins = linbins(-200,200,400)
-                h = ROOT.TH1D(name, name, 200, pt_bins)
+                h = ROOT.TH1D(name, name, 400, pt_bins)
                 h.GetXaxis().SetTitle('p_{T,perp cone}')
                 h.GetYaxis().SetTitle('Counts')
                 setattr(self, name, h)
 
                 name = 'h_perpcone{}_Nconst_JetPt_R{}_{}'.format(perpcone_R, jetR, trk_thrd)
-                pt_bins = linbins(-200,200,400)
+                pt_bins = linbins(0,200,200)
                 Nconst_bins = linbins(0,50,50)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 50, Nconst_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}')
                 h.GetYaxis().SetTitle('N_{const}')
+                setattr(self, name, h)
+
+                name = 'h_perpcone{}_rho_local_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, trk_thrd)
+                pt_bins = linbins(0,200,200)
+                rho_bins = linbins(0,500,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
 
               for pair_type_label in self.pair_type_labels:
@@ -234,7 +242,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       return True
     else:
       return False
-  
+
   def check_pair_type(self, corr_builder, ipoint, constituents, index):
     part1 = int(corr_builder.correlator(ipoint).indices1()[index])
     part2 = int(corr_builder.correlator(ipoint).indices2()[index])
@@ -242,16 +250,18 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     type2 = constituents[part2].user_index()
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
-    if type1*type2 >= 0:
-      if type1 < 0 or type2 < 0:
-        # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 0 # means bkg-bkg
-      else:
-        # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
-        return 2 # means sig-sig
-    else:
+    if type1 < 0 and type2 < 0:
+      # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
+      return 0 # means bkg-bkg
+    if type1 < 0 and type2 >= 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
+    if type1 >= 0 and type2 < 0:
+      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      return 1 # means sig-bkg
+    if type1 >= 0 and type2 >= 0:
+      # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
+      return 2 # means sig-sig
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -279,6 +289,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0::
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
     # print('unsubtracted pt',jet.perp(),'subtracted',jet_pt,'# of constituents >',trk_thrd,'is',len(c_select))
@@ -347,6 +359,15 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     # print('cone R',cone_R)
     # print('total cone nconst (with thrd cut):',len(c_select))
     # print('perp cone nconst (with thrd cut):',nconst_perp)
+    pt_sum_perp = 0.
+    for c in c_select_perp:
+      pt_sum_perp += c.pt()
+    if self.static_perpcone == True:
+      rho_local_perp = pt_sum_perp / (np.pi * jetR * jetR)
+    elif jet.has_area():
+      rho_local_perp = pt_sum_perp / jet.area()
+    else:
+      rho_local_perp = -1
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
@@ -358,6 +379,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_perpcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0::
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
 
@@ -367,6 +390,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       if 'jet_pt' in observable:
         getattr(self, hname.format(cone_R, 'pt', jetR, obs_label, suffix)).Fill(cone_pt)
         getattr(self, hname.format(cone_R, 'Nconst', jetR, obs_label, suffix)).Fill(jet_pt, nconst_perp)
+        getattr(self, hname.format(cone_R, 'rho_local', jetR, obs_label, suffix)).Fill(jet_pt, rho_local_perp)
 
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         for ipoint in range(2, 3):
@@ -423,6 +447,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_jetcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0::
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
 
