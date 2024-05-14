@@ -115,7 +115,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
     # check the rate of the zero area jets (only filled if rho subtraction enabled)
     name = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
-    pt_bins = linbins(0,200,200)
+    pt_bins = linbins(0,200,200)r
     mult_bins = logbins(0,50,50)
     h = ROOT.TH2D(name, name, 200, pt_bins, 50, mult_bins)
     h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -848,12 +848,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       # print('Truth: pT',jet_truth.perp(),'phi',jet_truth.phi(),'eta',jet_truth.eta())
       # print('Difference pT (truth-det)',jet_truth.perp()-jet_pt_det_ungroomed)
       if jet_det.area() == 0:
-        hname = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
-        Nconst = len(jet_det.constituents())
-        if Nconst >= 0 and Nconst < 1000:
-          getattr(self, hname).Fill(jet_pt_det, Nconst)
-        else:
-          getattr(self, hname).Fill(jet_pt_det, -1)
+        # hname = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
+        # Nconst = len(jet_det.constituents())
+        # if Nconst >= 0 and Nconst < 1000:
+        #   getattr(self, hname).Fill(jet_pt_det, Nconst)
+        # else:
+        #   getattr(self, hname).Fill(jet_pt_det, -1)
         return # FIX ME: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt_det = jet_det.perp()
