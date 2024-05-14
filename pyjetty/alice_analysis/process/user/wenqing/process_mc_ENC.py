@@ -115,7 +115,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
     # check the rate of the zero area jets (only filled if rho subtraction enabled)
     name = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
-    pt_bins = linbins(0,200,200)r
+    pt_bins = linbins(0,200,200)
     mult_bins = logbins(0,50,50)
     h = ROOT.TH2D(name, name, 200, pt_bins, 50, mult_bins)
     h.GetXaxis().SetTitle('p_{T,ch jet}')
