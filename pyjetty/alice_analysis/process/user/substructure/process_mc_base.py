@@ -1098,8 +1098,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
               # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
               if perpcone_R != jetR:
-                constituents = self.find_parts_around_jet(parts, jet_det, jetcone_R)
-                parts_in_jet = constituents
+                parts_in_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, perpcone_R)
 
               if perpcone_R == jetR:
                 if self.do_rho_subtraction and self.static_perpcone == False:
