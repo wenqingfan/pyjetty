@@ -926,7 +926,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 2 -- fill for perp cone
-      if self.do_perpcone and (cone_R >= 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
+      if (self.do_perpcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
         # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
           hname = 'h_perpcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
@@ -948,7 +948,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               pt_sum += c.pt()
           if (self.static_perpcone) == True or (cone_R != jetR):
-            rho_local = pt_sum / (np.pi * jetR * jetR)
+            rho_local = pt_sum / (np.pi * cone_R * cone_R)
           else:
             rho_local = pt_sum / jet_det.area()
           hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
@@ -957,7 +957,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 3 -- fill for cone parts around jet
-      if self.do_jetcone and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
+      if (self.do_jetcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
           hname = 'h_jetcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
@@ -977,7 +977,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 break
               if c.user_index() < 0:
                 pt_sum += c.pt()
-            rho_local = pt_sum / (np.pi * jetR * jetR)
+            rho_local = pt_sum / (np.pi * cone_R * cone_R)
+            print('local desity for jet cone',cone_R,'with total energy',pt_sum,'and density',rho_local)
             hname = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, rho_local)
             hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
