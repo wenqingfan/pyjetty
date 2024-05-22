@@ -122,6 +122,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     h.GetYaxis().SetTitle('N_{const}')
     setattr(self, name, h)
 
+    if self.do_perpcone:
+      perpcone_R_list = [jetR]
+      # add perp cone check for the jet cone method (if the cone radius is different from jet R)
+      if self.do_jetcone:
+        for jetcone_R in self.jetcone_R_list:
+          if jetcone_R != jetR: # just a safeguard
+            perpcone_R_list.append(jetcone_R)
+
     for observable in self.observable_list:
 
       for trk_thrd in self.obs_settings[observable]:
@@ -235,32 +243,33 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                     setattr(self, name, h)
 
                 if self.do_perpcone:
-                  # Matched det histograms
-                  name = 'h_perpcone{}_matched_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                  for perpcone_R in perpcone_R_list:
+                    # Matched det histograms
+                    name = 'h_perpcone{}_matched_{}{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, ipoint, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
 
-                  # Matched det histograms (with matched truth jet pT filled to the other axis)
-                  name = 'h_perpcone{}_matched_extra_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                    # Matched det histograms (with matched truth jet pT filled to the other axis)
+                    name = 'h_perpcone{}_matched_extra_{}{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, ipoint, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
 
-                  # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
-                  name = 'h_perpcone{}_matched_extra2_{}{}{}_JetPt_R{}_{}'.format(jetR, observable, ipoint, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                    # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+                    name = 'h_perpcone{}_matched_extra2_{}{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, ipoint, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
                 
                 # NB: comment out for now
                 # if self.thermal_model:
@@ -357,32 +366,33 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                   setattr(self, name, h)
               
               if self.do_perpcone:
-                  # Matched det histograms
-                  name = 'h_perpcone{}_matched_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                  for perpcone_R in perpcone_R_list:
+                    # Matched det histograms
+                    name = 'h_perpcone{}_matched_{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
 
-                  # Matched det histograms (with matched truth jet pT filled to the other axis)
-                  name = 'h_perpcone{}_matched_extra_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                    # Matched det histograms (with matched truth jet pT filled to the other axis)
+                    name = 'h_perpcone{}_matched_extra_{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
 
-                  # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
-                  name = 'h_perpcone{}_matched_extra2_{}{}_JetPt_R{}_{}'.format(jetR, observable, pair_type_label, jetR, obs_label)
-                  pt_bins = linbins(0,200,200)
-                  RL_bins = logbins(1E-4,1,50)
-                  h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-                  h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-                  h.GetYaxis().SetTitle('R_{L}')
-                  setattr(self, name, h)
+                    # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
+                    name = 'h_perpcone{}_matched_extra2_{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
 
               # NB: comment out for now
               # if self.thermal_model:
@@ -472,22 +482,41 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('local rho')
           setattr(self, name, h)
 
-          if self.do_perpcone:
-            name = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            rho_bins = linbins(0,500,100)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-            h.GetYaxis().SetTitle('local rho')
-            setattr(self, name, h)
+          if self.do_jetcone:
+            for jetcone_R in self.jetcone_R_list:
+              name = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              rho_bins = linbins(0,500,100)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+              h.GetYaxis().SetTitle('local rho')
+              setattr(self, name, h)
 
-            name = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            rho_bins = linbins(0,500,100)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-            h.GetYaxis().SetTitle('local rho')
-            setattr(self, name, h)
+              name = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              rho_bins = linbins(0,500,100)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('local rho')
+              setattr(self, name, h)
+          
+          if self.do_perpcone:
+            for perpcone_R in perpcone_R_list:
+              name = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              rho_bins = linbins(0,500,100)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+              h.GetYaxis().SetTitle('local rho')
+              setattr(self, name, h)
+
+              name = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              rho_bins = linbins(0,500,100)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('local rho')
+              setattr(self, name, h)
 
         # # Diagnostic
         # if 'jet_diag' in observable:
@@ -897,19 +926,19 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 2 -- fill for perp cone
-      if (cone_R == 0) and (cone_parts_in_det_jet != None): 
+      if self.do_perpcone and (cone_R >= 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
         # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
-        if self.do_perpcone and ('ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable):
-          hname = 'h_perpcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
+        if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+          hname = 'h_perpcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
 
-          hname = 'h_perpcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
+          hname = 'h_perpcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet) 
 
-          hname = 'h_perpcone{}_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR, jetR)
+          hname = 'h_perpcone{}_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt(), cone_parts_in_det_jet) 
 
-        if self.do_rho_subtraction and self.do_perpcone and 'rho_local' in observable:
+        if self.do_rho_subtraction and 'rho_local' in observable:
           trk_thrd = obs_setting
           cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
           pt_sum = 0.
@@ -918,17 +947,17 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               break
             if c.user_index() < 0:
               pt_sum += c.pt()
-          if self.static_perpcone == True:
+          if (self.static_perpcone) == True or (cone_R != jetR):
             rho_local = pt_sum / (np.pi * jetR * jetR)
           else:
             rho_local = pt_sum / jet_det.area()
-          hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, rho_local)
-          hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetR, observable, jetR, obs_label)
+          hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 3 -- fill for cone parts around jet
-      if (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
+      if self.do_jetcone and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
           hname = 'h_jetcone{}_matched_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det, cone_parts_in_det_jet)
@@ -939,7 +968,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_jetcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet)          
 
-
+          if self.do_rho_subtraction and 'rho_local' in observable:
+            trk_thrd = obs_setting
+            cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
+            pt_sum = 0.
+            for c in cone_parts_in_det_jet_sorted:
+              if c.pt() < trk_thrd:
+                break
+              if c.user_index() < 0:
+                pt_sum += c.pt()
+            rho_local = pt_sum / (np.pi * jetR * jetR)
+            hname = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, rho_local)
+            hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+    
     # # Find all subjets
     # trk_thrd = obs_setting
     # cs_subjet_det = fj.ClusterSequence(jet_det.constituents(), self.subjet_def[trk_thrd])
