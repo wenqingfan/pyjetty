@@ -132,8 +132,8 @@ class ProcessMCBase(process_base.ProcessBase):
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
     
-    # right now donot allow perpcone and jetcone to be enabled as the same time
-    if ('do_perpcone' in config) and (self.do_jetcone==False):
+    # Now allow perpcone and jetcone to be enabled as the same time
+    if 'do_perpcone' in config:
       self.do_perpcone = config['do_perpcone']
     else:
       self.do_perpcone = False
@@ -1079,60 +1079,79 @@ class ProcessMCBase(process_base.ProcessBase):
             perp_jet2 = fj.PseudoJet()
             perp_jet2.reset_PtYPhiM(jet_det.pt(), jet_det.rapidity(), jet_det.phi() - np.pi/2, jet_det.m())
 
-            # The current implementation only does perpcone for the standard AK jets. No bigger cones
-            perpcone_R = jetR
-            if self.do_rho_subtraction and self.static_perpcone == False:
-              perpcone_R = math.sqrt(jet_det.area()/np.pi)
-            constituents = jet_det.constituents()
-            parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+            # Now implementated the perpcone for both jet constituents and jet cones with radius larger than the jet radius used in the AK clustering algorithm
+            # example 1: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.2]), do_perpcone = True
+            # -- fill and save perpcone hists for the jet constituents
+            # example 2: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.4]), do_perpcone = True
+            # -- fill and save perpcone hists for the jet constituents and jet cone with size 0.4
+            perpcone_R_list = [jetR]
+            if self.do_jetcone:
+              # add perp cone check for the jet cone method (if the cone radius is different from jet R)
+              for jetcone_R in self.jetcone_R_list:
+                if jetcone_R!=jetR: # just a safeguard
+                  perpcone_R_list.append(jetcone_R)
 
-            # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
-            parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
-            parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+            for perpcone_R in perpcone_R_list:
+
+              constituents = jet.constituents()
+              parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+
+              # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
+              if perpcone_R != jetR:
+                constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
+                parts_in_jet = constituents
+
+              if perpcone_R == jetR:
+                if self.do_rho_subtraction and self.static_perpcone == False:
+                    perpcone_R = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
+
+              # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
+              parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
+              parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+                
+              parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
+              parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
               
-            parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
-            parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
-            
-            # use 999 and -999 to distinguish from prevous used labeling numbers
-            parts_in_cone1 = fj.vectorPJ()
-            # fill parts from jet
-            for part in parts_in_jet:
-              part.set_user_index(999)
-              parts_in_cone1.append(part)
-            # fill parts from perp cone 1
-            for part in parts_in_perpcone1:
-              part.set_user_index(-999)
-              parts_in_cone1.append(part)
-            
-            parts_in_cone2 = fj.vectorPJ()
-            # fill parts from jet
-            for part in parts_in_jet:
-              part.set_user_index(999)
-              parts_in_cone2.append(part)
-            # fill parts from perp cone 2
-            for part in parts_in_perpcone2:
-              part.set_user_index(-999)
-              parts_in_cone2.append(part)
+              # use 999 and -999 to distinguish from prevous used labeling numbers
+              parts_in_cone1 = fj.vectorPJ()
+              # fill parts from jet
+              for part in parts_in_jet:
+                part.set_user_index(999)
+                parts_in_cone1.append(part)
+              # fill parts from perp cone 1
+              for part in parts_in_perpcone1:
+                part.set_user_index(-999)
+                parts_in_cone1.append(part)
               
-            cone_parts_in_det_jet = parts_in_cone1
+              parts_in_cone2 = fj.vectorPJ()
+              # fill parts from jet
+              for part in parts_in_jet:
+                part.set_user_index(999)
+                parts_in_cone2.append(part)
+              # fill parts from perp cone 2
+              for part in parts_in_perpcone2:
+                part.set_user_index(-999)
+                parts_in_cone2.append(part)
+                
+              cone_parts_in_det_jet = parts_in_cone1
 
-            # Call user function to fill histos
-            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
-                                 jet_truth_groomed_lund, jet_pp_det, jetR,
-                                 obs_setting, grooming_setting, obs_label,
-                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
-                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=0) # jetR used later so cone_R jet set to 0
+              # Call user function to fill histos
+              self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                   jet_truth_groomed_lund, jet_pp_det, jetR,
+                                   obs_setting, grooming_setting, obs_label,
+                                   jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                   R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
 
-            cone_parts_in_det_jet = parts_in_cone2
+              cone_parts_in_det_jet = parts_in_cone2
 
-            # Call user function to fill histos
-            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
-                                 jet_truth_groomed_lund, jet_pp_det, jetR,
-                                 obs_setting, grooming_setting, obs_label,
-                                 jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
-                                 R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=0) # jetR used later so cone_R jet set to 0
+              # Call user function to fill histos
+              self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                   jet_truth_groomed_lund, jet_pp_det, jetR,
+                                   obs_setting, grooming_setting, obs_label,
+                                   jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                   R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
