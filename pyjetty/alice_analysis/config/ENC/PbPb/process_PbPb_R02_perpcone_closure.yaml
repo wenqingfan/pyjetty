@@ -25,7 +25,8 @@ remove_outlier: False
 
 do_rho_subtraction: True
 do_perpcone: True
-do_jetcone: False
+do_jetcone: True
+jetcone_R_list: [0.4]
 
 constituent_subtractor:
   max_distance: [0.1]
