@@ -1088,22 +1088,22 @@ class ProcessMCBase(process_base.ProcessBase):
             if self.do_jetcone:
               # add perp cone check for the jet cone method (if the cone radius is different from jet R)
               for jetcone_R in self.jetcone_R_list:
-                if jetcone_R!=jetR: # just a safeguard
+                if jetcone_R != jetR: # just a safeguard
                   perpcone_R_list.append(jetcone_R)
 
             for perpcone_R in perpcone_R_list:
 
-              constituents = jet.constituents()
+              constituents = jet_det.constituents()
               parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
 
               # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
               if perpcone_R != jetR:
-                constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
+                constituents = self.find_parts_around_jet(parts, jet_det, jetcone_R)
                 parts_in_jet = constituents
 
               if perpcone_R == jetR:
                 if self.do_rho_subtraction and self.static_perpcone == False:
-                    perpcone_R = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
+                    perpcone_R = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
 
               # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
               parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
