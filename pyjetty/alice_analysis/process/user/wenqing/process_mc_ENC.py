@@ -968,21 +968,20 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_jetcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet)          
 
-          if self.do_rho_subtraction and 'rho_local' in observable:
-            trk_thrd = obs_setting
-            cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
-            pt_sum = 0.
-            for c in cone_parts_in_det_jet_sorted:
-              if c.pt() < trk_thrd:
-                break
-              if c.user_index() < 0:
-                pt_sum += c.pt()
-            rho_local = pt_sum / (np.pi * cone_R * cone_R)
-            print('local desity for jet cone',cone_R,'with total energy',pt_sum,'and density',rho_local)
-            hname = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
-            getattr(self, hname).Fill(jet_pt_det, rho_local)
-            hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
-            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+        if self.do_rho_subtraction and 'rho_local' in observable:
+          trk_thrd = obs_setting
+          cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
+          pt_sum = 0.
+          for c in cone_parts_in_det_jet_sorted:
+            if c.pt() < trk_thrd:
+              break
+            if c.user_index() < 0:
+              pt_sum += c.pt()
+          rho_local = pt_sum / (np.pi * cone_R * cone_R)
+          hname = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det, rho_local)
+          hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), rho_local)
     
     # # Find all subjets
     # trk_thrd = obs_setting
