@@ -891,19 +891,23 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       # NB: important to make sure that one histogram is only filled by one type of jets
       # type 1 -- fill for jet constituents
       if (cone_R == 0) and (cone_parts_in_det_jet == None):
-        hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
-        self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det)
+        # if analyze jet cones and only analyze jet cones, then only fill jet pt histograms for standard jets (just to speed things up)
+        if self.do_jetcone and self.do_only_jetcone and !('jet_pt' in observable):
+          pass
+        else:
+          hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_pt_det)
 
-        hname = 'h_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
-        self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt())
+          hname = 'h_matched_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_truth, jet_truth_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt())
 
-        # fill RL vs matched truth jet pT for det jets (only fill these extra histograms for ENC or pair distributions)
-        if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-          hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
-          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets
+          # fill RL vs matched truth jet pT for det jets (only fill these extra histograms for ENC or pair distributions)
+          if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+            hname = 'h_matched_extra_{{}}_JetPt_R{}_{{}}'.format(jetR)
+            self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt()) # NB: use the truth jet pt so the reco jets histograms are comparable to matched truth jets
 
-          hname = 'h_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR)
-          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt()) # NB: use the truth jet pt for both tje jet pt selection and energy weight calculation
+            hname = 'h_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR)
+            self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt()) # NB: use the truth jet pt for both tje jet pt selection and energy weight calculation
 
         # Fill correlation between matched det and truth jets
         if 'jet_pt' in observable:
