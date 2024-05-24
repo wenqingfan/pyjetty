@@ -131,6 +131,11 @@ class ProcessMCBase(process_base.ProcessBase):
       self.jetcone_R_list = config['jetcone_R_list']
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
+    # for speed reason, if this is enabled, then only contruct EECs for jetcone and related perpcone (skip the EECs for the standard jet constituents)
+    if 'do_only_jetcone' in config:
+      self.do_only_jetcone = config['do_only_jetcone']
+    else:
+      self.do_only_jetcone = False
     
     # Now allow perpcone and jetcone to be enabled as the same time
     if 'do_perpcone' in config:
@@ -670,29 +675,30 @@ class ProcessMCBase(process_base.ProcessBase):
 
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
 
-            if self.do_jetcone or self.do_perpcone:
-            # NB: either jetcone or perpcone (not both)
-              self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
-                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
-                            fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth)
-            else:
+            # if not analyzing any cones, then just need to pass jets to analyze_jets function
+            if !self.do_jetcone and !self.do_perpcone:
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho)
-          else:
-            if self.do_jetcone or self.do_perpcone:
-            # NB: either jetcone or perpcone (not both)
-              self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+            # if either perpcone or jetcone enabled, then pass all paticles to analyze_jets function in addition to jets
+            else:
+              self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
-                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
-            else:
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth)
+          else:
+            # if not analyzing any cones, then just need to pass jets to analyze_jets function
+            if !self.do_jetcone and !self.do_perpcone:
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0)
+            else:
+              self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+                            jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
+                            fj_particles_det_holes = fj_particles_det_holes,
+                            fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = 0, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
 
   #---------------------------------------------------------------
   # Jet selection cuts.
@@ -970,8 +976,6 @@ class ProcessMCBase(process_base.ProcessBase):
         # print('debug8--jet det', jet_det_pt, 'size', len(jet_det.constituents()))
         # print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
         
-        if not self.is_pp:
-          pass
         jet_pt_det_ungroomed = jet_det_pt
         jet_pt_truth_ungroomed = jet_truth.pt()
         JES = (jet_pt_det_ungroomed - jet_pt_truth_ungroomed) / jet_pt_truth_ungroomed
@@ -1084,12 +1088,17 @@ class ProcessMCBase(process_base.ProcessBase):
             # -- fill and save perpcone hists for the jet constituents
             # example 2: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.4]), do_perpcone = True
             # -- fill and save perpcone hists for the jet constituents and jet cone with size 0.4
-            perpcone_R_list = [jetR]
+            # a special case: if analyze jet cones and only analyze jet cones, then skip the EEC histograms for perpcones of jetR if jetR is not in the jetcone_R_list (just to speed things up)
+            perpcone_R_list = []
             if self.do_jetcone:
-              # add perp cone check for the jet cone method (if the cone radius is different from jet R)
-              for jetcone_R in self.jetcone_R_list:
-                if jetcone_R != jetR: # just a safeguard
+              if self.do_only_jetcone:
+                for jetcone_R in self.jetcone_R_list:
                   perpcone_R_list.append(jetcone_R)
+              else:
+                perpcone_R_list.append(jetR)
+                for jetcone_R in self.jetcone_R_list:
+                  if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+                    perpcone_R_list.append(jetcone_R)
 
             for perpcone_R in perpcone_R_list:
 
