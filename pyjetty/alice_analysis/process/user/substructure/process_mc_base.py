@@ -676,7 +676,7 @@ class ProcessMCBase(process_base.ProcessBase):
             jets_combined_reselected_beforeCS = self.reselect_jets(jets_combined_selected_beforeCS, jetR, rho_bge = rho)
 
             # if not analyzing any cones, then just need to pass jets to analyze_jets function
-            if !self.do_jetcone and !self.do_perpcone:
+            if not (self.do_jetcone or self.do_perpcone):
               self.analyze_jets(jets_combined_reselected_beforeCS, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
@@ -689,7 +689,7 @@ class ProcessMCBase(process_base.ProcessBase):
                             fj_particles_truth_holes = fj_particles_truth_holes, rho_bge = rho, fj_particles_det_cones = fj_particles_combined_beforeCS, fj_particles_truth_cones = fj_particles_truth)
           else:
             # if not analyzing any cones, then just need to pass jets to analyze_jets function
-            if !self.do_jetcone and !self.do_perpcone:
+            if not (self.do_jetcone or self.do_perpcone):
               self.analyze_jets(jets_combined_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                             jets_det_pp_selected = jets_det_pp_selected, R_max = R_max,
                             fj_particles_det_holes = fj_particles_det_holes,
