@@ -122,13 +122,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
     h.GetYaxis().SetTitle('N_{const}')
     setattr(self, name, h)
 
-    if self.do_perpcone:
-      perpcone_R_list = [jetR]
-      # add perp cone check for the jet cone method (if the cone radius is different from jet R)
-      if self.do_jetcone:
+    perpcone_R_list = []
+    if self.do_jetcone:
+      if self.do_only_jetcone:
         for jetcone_R in self.jetcone_R_list:
-          if jetcone_R != jetR: # just a safeguard
-            perpcone_R_list.append(jetcone_R)
+          perpcone_R_list.append(jetcone_R)
+      else:
+        perpcone_R_list.append(jetR)
+        for jetcone_R in self.jetcone_R_list:
+          if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
 
     for observable in self.observable_list:
 
