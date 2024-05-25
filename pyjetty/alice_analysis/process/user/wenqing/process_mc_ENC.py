@@ -131,6 +131,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         perpcone_R_list.append(jetR)
         for jetcone_R in self.jetcone_R_list:
           if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+            perpcone_R_list.append(jetcone_R)
 
     for observable in self.observable_list:
 
