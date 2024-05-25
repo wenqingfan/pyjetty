@@ -895,7 +895,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
       # type 1 -- fill for jet constituents
       if (cone_R == 0) and (cone_parts_in_det_jet == None):
         # if analyze jet cones and only analyze jet cones, then only fill jet pt histograms for standard jets (just to speed things up)
-        if self.do_jetcone and self.do_only_jetcone and !('jet_pt' in observable):
+        if self.do_jetcone and self.do_only_jetcone and not ('jet_pt' in observable):
           pass
         else:
           hname = 'h_matched_{{}}_JetPt_R{}_{{}}'.format(jetR)
