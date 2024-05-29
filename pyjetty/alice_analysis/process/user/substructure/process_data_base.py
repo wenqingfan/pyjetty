@@ -110,6 +110,10 @@ class ProcessDataBase(process_base.ProcessBase):
       self.jetcone_R_list = config['jetcone_R_list']
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
+    if 'do_only_jetcone' in config:
+      self.do_only_jetcone = config['do_only_jetcone']
+    else:
+      self.do_only_jetcone = False
 
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
@@ -337,29 +341,28 @@ class ProcessDataBase(process_base.ProcessBase):
           #       print('leading part pt',constituents[0].perp(),'eta',constituents[0].eta(),'phi',constituents[0].phi())
           
           if self.do_rho_subtraction:
-            self.analyze_jets(jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
-            if self.do_perpcone:
-              self.analyze_perp_cones(fj_particles, jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
-            if self.do_jetcone:
-              self.analyze_jet_cones(fj_particles, jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
+            if not (self.do_jetcone or self.do_perpcone):
+              self.analyze_jets(jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho)
+            else:
+              self.analyze_jets(jets_selected_unsub, jetR, R_max = R_max, rho_bge = rho, parts = fj_particles)
           else:
-            self.analyze_jets(jets_selected, jetR, R_max = R_max)
-            if self.do_perpcone:
-              self.analyze_perp_cones(fj_particles, jets_selected, jetR, R_max = R_max)
-            if self.do_jetcone:
-              self.analyze_jet_cones(fj_particles, jets_selected, jetR, R_max = R_max)
+            if not (self.do_jetcone or self.do_perpcone):
+              self.analyze_jets(jets_selected, jetR, R_max = R_max)
+            else:
+              self.analyze_jets(jets_selected, jetR, R_max = R_max, rho_bge = 0, parts = fj_particles) # NB: feed all particles for cone around the CS subtracted jet. An alternate way is to use CS subtracted particles
 
   #---------------------------------------------------------------
   # Jet selection cuts.
   #---------------------------------------------------------------
-  def reselect_jets(self, jets_selected, jetR, rho_bge = 0, is_perp = False):
+  def reselect_jets(self, jets_selected, jetR, rho_bge = 0):
     # re-apply jet pt > 5GeV cut after rho subtraction and leading track pt cut if there is any
+    # no special treatment on jets when looking at perpcones (used to check perpcones for jets without leading pt cut)
     jets_reselected = fj.vectorPJ()
     for jet in jets_selected:
       is_jet_selected = True
       
       # leading track selection
-      if self.leading_pt > 0 and is_perp == False:
+      if self.leading_pt > 0:
         constituents = fj.sorted_by_pt(jet.constituents())
         if constituents[0].perp() < self.leading_pt:
           is_jet_selected = False
@@ -378,7 +381,7 @@ class ProcessDataBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   # Analyze jets of a given event.
   #---------------------------------------------------------------
-  def analyze_jets(self, jets_selected, jetR, R_max = None, rho_bge = 0):
+  def analyze_jets(self, jets_selected, jetR, R_max = None, rho_bge = 0, parts = None):
   
     # Prepare suffix for the CS background subtraction config
     if R_max and (not self.do_rho_subtraction):
@@ -429,12 +432,12 @@ class ProcessDataBase(process_base.ProcessBase):
       # Set suffix for filling histograms
       suffix = '{}'.format(R_max_label)
 
-      result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge) for jet in jets_reselected]
+      result = [self.analyze_accepted_jet(jet, jetR, suffix, rho_bge, parts) for jet in jets_reselected]
 
   #---------------------------------------------------------------
   # Fill histograms
   #---------------------------------------------------------------
-  def analyze_accepted_jet(self, jet, jetR, suffix, rho_bge = 0):
+  def analyze_accepted_jet(self, jet, jetR, suffix, rho_bge = 0, parts = None):
     
     # Check additional acceptance criteria
     if not self.utils.is_det_jet_accepted(jet):
@@ -474,6 +477,76 @@ class ProcessDataBase(process_base.ProcessBase):
       # Call user function to fill histograms
       self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix)
+
+      # Fill histograms for jetcone
+      if self.do_jetcone:
+        for jetcone_R in self.jetcone_R_list:
+          parts_in_cone = self.find_parts_around_jet(parts, jet, jetcone_R)
+          self.fill_jet_cone_histograms(parts_in_cone, jetcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+
+      # Fill histograms for perpcone
+      if self.do_perpcone:
+        
+        # construct perpcone size list
+        perpcone_R_list = []
+        if self.do_jetcone:
+          if self.do_only_jetcone:
+            for jetcone_R in self.jetcone_R_list:
+              perpcone_R_list.append(jetcone_R)
+          else:
+            perpcone_R_list.append(jetR)
+            for jetcone_R in self.jetcone_R_list:
+              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+                perpcone_R_list.append(jetcone_R)
+
+        # construct perp cones and fill histograms
+        for perpcone_R in perpcone_R_list:
+
+          if perpcone_R == jetR:
+            if self.do_rho_subtraction and self.static_perpcone == False:
+                perpcone_R = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
+
+          parts_in_cone1 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, +1)
+          self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+
+          parts_in_cone2 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, -1)
+          self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+
+  def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
+
+    # print('jet pt',jet.perp()-rho_bge*jet.area(),'phi',jet.phi(),'eta',jet.eta(),'area',jet.area())
+
+    perp_jet = fj.PseudoJet()
+    perp_jet.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + rotation_sign*np.pi/2, jet.m())
+
+    constituents = jet.constituents()
+    parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+
+    # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
+    if perpcone_R != jetR:
+      parts_in_jet = self.find_parts_around_jet(parts, jet, perpcone_R)
+
+    # NB1: a deep copy already created in find_parts_around_jet(). Operations on the deep copy does not affect the oringinal parts     
+    # NB2: when iterating using for loop through all the particle list like "for part in parts", operations like part.* will not change the parts. Need to use parts[*].* to change the parts  
+    parts_in_perpcone = self.find_parts_around_jet(parts, perp_jet, perpcone_R)
+    # for part in parts_in_perpcone:
+    #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+    parts_in_perpcone = self.rotate_parts(parts_in_perpcone, -rotation_sign*np.pi/2)
+    # for part in parts_in_perpcone:
+    #   print('after rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
+
+    parts_in_cone = fj.vectorPJ()
+    for part in parts_in_jet:
+      part.set_user_index(999)
+      parts_in_cone.append(part)
+    for part in parts_in_perpcone1:
+      part.set_user_index(-999)
+      parts_in_cone.append(part)
+
+    return parts_in_cone
 
   def find_parts_around_jet(self, parts, jet, cone_R):
     # select particles around jet axis
@@ -516,129 +589,6 @@ class ProcessDataBase(process_base.ProcessBase):
         parts_copied.push_back(part)
     
     return parts_copied
-
-  def analyze_jet_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
-    # analyze cones around jet axis. NB: maybe can even use WTA axis
-    if R_max and (not self.do_rho_subtraction):
-      suffix = '_Rmax{}'.format(R_max)
-    else:
-      suffix = ''
-
-    jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge)
-
-    for jet in jets_reselected:
-      # NB: set cone R to be >= jet R
-      for jetcone_R in self.jetcone_R_list:
-        parts_in_cone = self.find_parts_around_jet(parts, jet, jetcone_R)
-        self.analyze_accepted_cone(False, parts_in_cone, jetcone_R, jet, jetR, suffix, rho_bge)
-
-  def analyze_perp_cones(self, parts, jets_selected, jetR, R_max = None, rho_bge = 0):
-    # analyze cones perpendicular to jet in the azimuthal plane
-    if R_max and (not self.do_rho_subtraction):
-      suffix = '_Rmax{}'.format(R_max)
-    else:
-      suffix = ''
-
-    jets_reselected = self.reselect_jets(jets_selected, jetR, rho_bge = rho_bge, is_perp = True) # NB: last arguement set to True to enable cuts for perp cone (e.g. no leading pt cut)
-
-    perpcone_R_list = [jetR] # FIX ME: not sure it's better to just use jet R or calculate from area, For now just use jet R so it's more consistent with the jet cone method
-    # if self.do_rho_subtraction and rho_bge > 0:
-    #   perpcone_R_list = [math.sqrt(jet.area()/np.pi)] # NB: jet area is available only when rho subtraction flag is on
-    if self.do_jetcone:
-      # add perp cone check for the jet cone method (if the cone radius is different from jet R)
-      for jetcone_R in self.jetcone_R_list:
-        if jetcone_R!=jetR: # just a safeguard
-          perpcone_R_list.append(jetcone_R)
-
-    for jet in jets_reselected:
-      # print('jet pt',jet.perp()-rho_bge*jet.area(),'phi',jet.phi(),'eta',jet.eta(),'area',jet.area())
-      perp_jet1 = fj.PseudoJet()
-      perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + np.pi/2, jet.m())
-      perp_jet2 = fj.PseudoJet()
-      perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
-
-      for perpcone_R in perpcone_R_list:
-
-        constituents = jet.constituents()
-        parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
-
-        # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
-        if perpcone_R != jetR:
-          constituents = self.find_parts_around_jet(parts, jet, jetcone_R)
-          parts_in_jet = constituents
-
-        if perpcone_R == jetR:
-          if self.do_rho_subtraction and self.static_perpcone == False:
-              perpcone_R = math.sqrt(jet.area()/np.pi)
-        
-        # NB1: a deep copy already created in find_parts_around_jet(). Operations on the deep copy does not affect the oringinal parts     
-        # NB2: when iterating using for loop through all the particle list like "for part in parts", operations like part.* will not change the parts. Need to use parts[*].* to change the parts  
-        parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R)
-        # for part in parts_in_perpcone1:
-        #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
-        parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
-        # for part in parts_in_perpcone1:
-        #   print('after rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
-        
-        parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R)
-        parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
-
-        parts_in_cone1 = fj.vectorPJ()
-        for part in constituents:
-          part.set_user_index(999)
-          parts_in_cone1.append(part)
-        for part in parts_in_perpcone1:
-          part.set_user_index(-999)
-          parts_in_cone1.append(part)
-
-        parts_in_cone2 = fj.vectorPJ()
-        for part in constituents:
-          part.set_user_index(999)
-          parts_in_cone2.append(part)
-        for part in parts_in_perpcone2:
-          part.set_user_index(-999)
-          parts_in_cone2.append(part)
-
-        self.analyze_accepted_cone(True, parts_in_cone1, perpcone_R, jet, jetR, suffix, rho_bge)
-        self.analyze_accepted_cone(True, parts_in_cone2, perpcone_R, jet, jetR, suffix, rho_bge)
-
-  def analyze_accepted_cone(self, is_perp, cone_parts, cone_R, jet, jetR, suffix, rho_bge = 0):
-    
-    # Check additional acceptance criteria
-    if not self.utils.is_det_jet_accepted(jet):
-      return
-          
-    # Fill base histograms
-    if self.do_rho_subtraction and rho_bge > 0:
-      jet_pt_ungroomed = jet.pt() - rho_bge*jet.area()
-    else:
-      jet_pt_ungroomed = jet.pt()
-    
-    # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
-    # Note that the subconfigurations are defined by the first observable, if multiple are defined
-    observable = self.observable_list[0]
-    for i in range(len(self.obs_settings[observable])):
-    
-      obs_setting = self.obs_settings[observable][i]
-      grooming_setting = self.obs_grooming_settings[observable][i]
-      obs_label = self.utils.obs_label(obs_setting, grooming_setting)
-    
-      # Groom jet, if applicable
-      if grooming_setting:
-        gshop = fjcontrib.GroomerShop(jet, jetR, self.reclustering_algorithm)
-        jet_groomed_lund = self.utils.groom(gshop, grooming_setting, jetR)
-        if not jet_groomed_lund:
-          continue
-      else:
-        jet_groomed_lund = None
-
-      # Call user function to fill histograms
-      if is_perp:
-        self.fill_perp_cone_histograms(cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
-      else:
-        self.fill_jet_cone_histograms(cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
   #---------------------------------------------------------------
   # This function is called once
