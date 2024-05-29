@@ -542,7 +542,7 @@ class ProcessDataBase(process_base.ProcessBase):
     for part in parts_in_jet:
       part.set_user_index(999)
       parts_in_cone.append(part)
-    for part in parts_in_perpcone1:
+    for part in parts_in_perpcone:
       part.set_user_index(-999)
       parts_in_cone.append(part)
 
