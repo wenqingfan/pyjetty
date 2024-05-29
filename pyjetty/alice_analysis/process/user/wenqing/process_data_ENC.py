@@ -293,7 +293,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
-      if jet.area() == 0::
+      if jet.area() == 0:
         return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
@@ -387,7 +387,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_perpcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
-      if jet.area() == 0::
+      if jet.area() == 0:
         return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
@@ -455,7 +455,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     hname = 'h_jetcone{}_{}_JetPt_R{}_{}{}'
     if self.do_rho_subtraction:
       jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
-      if jet.area() == 0::
+      if jet.area() == 0:
         return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
