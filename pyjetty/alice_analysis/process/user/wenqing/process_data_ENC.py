@@ -158,7 +158,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
                 h.GetYaxis().SetTitle('N_{const}')
                 setattr(self, name, h)
 
-                name = 'h_perpcone{}_rho_local_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, trk_thrd)
+                name = 'h_perpcone{}_rho_local_JetPt_R{}_{}'.format(perpcone_R, jetR, trk_thrd)
                 pt_bins = linbins(0,200,200)
                 rho_bins = linbins(0,500,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
