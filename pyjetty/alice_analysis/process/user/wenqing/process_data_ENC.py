@@ -370,12 +370,16 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     pt_sum_perp = 0.
     for c in c_select_perp:
       pt_sum_perp += c.pt()
-    if self.static_perpcone == True:
-      rho_local_perp = pt_sum_perp / (np.pi * jetR * jetR)
-    elif jet.has_area():
-      rho_local_perp = pt_sum_perp / jet.area()
+
+    if cone_R != jetR:
+      rho_local_perp = pt_sum_perp / (np.pi * cone_R * cone_R)
     else:
-      rho_local_perp = -1
+      if self.static_perpcone == True:
+        rho_local_perp = pt_sum_perp / (np.pi * jetR * jetR)
+      elif jet.has_area():
+        rho_local_perp = pt_sum_perp / jet.area()
+      else:
+        rho_local_perp = -1
 
     if self.ENC_pair_cut:
       dphi_cut = -9999 # means no dphi cut
