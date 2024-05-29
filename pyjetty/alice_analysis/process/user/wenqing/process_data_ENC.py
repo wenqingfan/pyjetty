@@ -64,6 +64,17 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
   def initialize_user_output_objects(self):
 
     for jetR in self.jetR_list:
+      perpcone_R_list = []
+      if self.do_jetcone:
+        if self.do_only_jetcone:
+          for jetcone_R in self.jetcone_R_list:
+            perpcone_R_list.append(jetcone_R)
+        else:
+          perpcone_R_list.append(jetR)
+          for jetcone_R in self.jetcone_R_list:
+            if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+              perpcone_R_list.append(jetcone_R)
+
       for observable in self.observable_list:
         for trk_thrd in self.obs_settings[observable]:
 
@@ -129,13 +140,6 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
             self.pair_type_labels = ['_bb','_sb','_ss']
           
           if self.do_perpcone:
-            
-            perpcone_R_list = [jetR]
-            # add perp cone check for the jet cone method (if the cone radius is different from jet R)
-            if self.do_jetcone:
-              for jetcone_R in self.jetcone_R_list:
-                if jetcone_R!=jetR: # just a safeguard
-                  perpcone_R_list.append(jetcone_R)
             
             for perpcone_R in perpcone_R_list:
               if 'jet_pt' in observable:
@@ -296,27 +300,31 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     # print('unsubtracted pt',jet.perp(),'subtracted',jet_pt,'# of constituents >',trk_thrd,'is',len(c_select))
     new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
     for observable in self.observable_list:
-      if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
-        for ipoint in range(2, 3):
-          for index in range(new_corr.correlator(ipoint).rs().size()):
+      # if analyze jet cones and only analyze jet cones, then only fill jet pt histograms for standard jets (just to speed things up)
+      if self.do_jetcone and self.do_only_jetcone and not ('jet_pt' in observable):
+        pass
+      else:
+        if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
+          for ipoint in range(2, 3):
+            for index in range(new_corr.correlator(ipoint).rs().size()):
 
-            # processing only like-sign pairs when self.ENC_pair_like is on
-            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
-              continue
+              # processing only like-sign pairs when self.ENC_pair_like is on
+              if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
+                continue
 
-            # processing only unlike-sign pairs when self.ENC_pair_unlike is on
-            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
-              continue
+              # processing only unlike-sign pairs when self.ENC_pair_unlike is on
+              if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
+                continue
 
-            if 'ENC' in observable:
-              getattr(self, hname.format(observable + str(ipoint), jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(observable + str(ipoint) + 'Pt', jetR, obs_label, suffix)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
+              if 'ENC' in observable:
+                getattr(self, hname.format(observable + str(ipoint), jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                getattr(self, hname.format(observable + str(ipoint) + 'Pt', jetR, obs_label, suffix)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index]) # NB: fill pt*RL
 
-            if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              if ipoint==2 and 'EEC_noweight' in observable:
+                getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
-            if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              if ipoint==2 and 'EEC_weight2' in observable:
+                getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
       if 'jet_pt' in observable:
         getattr(self, hname.format(observable, jetR, obs_label, suffix)).Fill(jet_pt) 
