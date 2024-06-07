@@ -74,6 +74,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           for jetcone_R in self.jetcone_R_list:
             if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
               perpcone_R_list.append(jetcone_R)
+      else:
+        perpcone_R_list.append(jetR)
 
       for observable in self.observable_list:
         for trk_thrd in self.obs_settings[observable]:
