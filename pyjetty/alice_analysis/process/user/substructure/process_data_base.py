@@ -499,6 +499,8 @@ class ProcessDataBase(process_base.ProcessBase):
             for jetcone_R in self.jetcone_R_list:
               if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
                 perpcone_R_list.append(jetcone_R)
+        else:
+          perpcone_R_list.append(jetR)
 
         # construct perp cones and fill histograms
         for perpcone_R in perpcone_R_list:
