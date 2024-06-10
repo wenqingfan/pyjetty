@@ -209,6 +209,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('R_{L}')
                 setattr(self, name, h)
 
+                # Matched det histograms (with matched truth jet pT used for energy weight calculation)
+                name = 'h_matched_extra3_{}{}{}_JetPt_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+
                 # Matched truth histograms
                 name = 'h_matched_{}{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
@@ -275,6 +284,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                     h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
+
+                    # Matched det histograms (with matched truth jet pT used for energy weight calculation)
+                    name = 'h_perpcone{}_matched_extra3_{}{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, ipoint, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
                 
                 # NB: comment out for now
                 # if self.thermal_model:
@@ -325,6 +343,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
               # Matched det histograms (with matched truth jet pT used for both jet pt selection and energy weight calculation)
               name = 'h_matched_extra2_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
+              # Matched det histograms (with matched truth jet pT used for energy weight calculation)
+              name = 'h_matched_extra3_{}{}_JetPt_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
               pt_bins = linbins(0,200,200)
               RL_bins = logbins(1E-4,1,50)
               h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
@@ -399,6 +426,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                     h.GetYaxis().SetTitle('R_{L}')
                     setattr(self, name, h)
 
+                    # Matched det histograms (with matched truth jet pT used for energy weight calculation)
+                    name = 'h_perpcone{}_matched_extra3_{}{}_JetPt_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                    pt_bins = linbins(0,200,200)
+                    RL_bins = logbins(1E-4,1,50)
+                    h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                    h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                    h.GetYaxis().SetTitle('R_{L}')
+                    setattr(self, name, h)
+
               # NB: comment out for now
               # if self.thermal_model:
               #   for R_max in self.max_distance:
@@ -444,8 +480,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           # Correlation between matched det and truth
           name = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 200, pt_bins)
+          pt_bins = linbins(0,300,300) # larger pt range for the matched jet pt check
+          h = ROOT.TH2D(name, name, 300, pt_bins, 200, pt_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('p_{T,ch jet}^{truth}')
           setattr(self, name, h)
@@ -553,7 +589,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           name = 'h_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
           RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 50, pt_bins, 50, RL_bins)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}')
           h.GetYaxis().SetTitle('R_{L}')
           setattr(self, name, h)
@@ -561,7 +597,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           name = 'h_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
           RL_bins = logbins(1E-4,1,50)
-          h = ROOT.TH2D(name, name, 50, pt_bins, 50, RL_bins)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}')
           h.GetYaxis().SetTitle('R_{L}')
           setattr(self, name, h)
@@ -572,7 +608,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               name = 'h_{}{}{}_{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, self.trk_pt_lo[ipt], self.trk_pt_hi[ipt], self.trk_alpha_lo[ialpha], self.trk_alpha_hi[ialpha], jetR, obs_label)
               pt_bins = linbins(0,200,200)
               RL_bins = logbins(1E-4,1,50)
-              h = ROOT.TH2D(name, name, 50, pt_bins, 50, RL_bins)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}')
               h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
@@ -580,7 +616,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               name = 'h_{}{}{}_{:.1f}{:.1f}_JetPt_Truth_R{}_{}'.format(observable, self.trk_pt_lo[ipt], self.trk_pt_hi[ipt], self.trk_alpha_lo[ialpha], self.trk_alpha_hi[ialpha], jetR, obs_label)
               pt_bins = linbins(0,200,200)
               RL_bins = logbins(1E-4,1,50)
-              h = ROOT.TH2D(name, name, 50, pt_bins, 50, RL_bins)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}')
               h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
@@ -914,6 +950,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             hname = 'h_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(jetR)
             self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt()) # NB: use the truth jet pt for both tje jet pt selection and energy weight calculation
 
+            hname = 'h_matched_extra3_{{}}_JetPt_R{}_{{}}'.format(jetR)
+            self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_pt_det) # NB: use the truth jet pt for energy weight calculation and det jet pt for jet pt selection
+
         # Fill correlation between matched det and truth jets
         if 'jet_pt' in observable:
           hname = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
@@ -946,6 +985,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           hname = 'h_perpcone{}_matched_extra2_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_truth.pt(), cone_parts_in_det_jet) 
+
+          hname = 'h_perpcone{}_matched_extra3_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
+          self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_truth.pt(), jet_pt_det, cone_parts_in_det_jet) 
 
         if self.do_rho_subtraction and 'rho_local' in observable:
           trk_thrd = obs_setting
