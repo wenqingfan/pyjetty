@@ -481,7 +481,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           # Correlation between matched det and truth
           name = 'h_matched_{}_JetPt_Truth_vs_Det_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,300,300) # larger pt range for the matched jet pt check
-          h = ROOT.TH2D(name, name, 300, pt_bins, 200, pt_bins)
+          h = ROOT.TH2D(name, name, 300, pt_bins, 300, pt_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('p_{T,ch jet}^{truth}')
           setattr(self, name, h)
