@@ -1098,7 +1098,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < int(1/self.dR_bin_width) and idR > -1:
+              if idR < len(self.dR_bins) and idR > -1:
                 pt_sum_list[idR] += c.pt()
                 # print('UE particle with pt',c.pt(),'and dR',dR)
                 # print('fill into',idR,'bin with total energy',pt_sum_list[idR],'and correpsonding area',self.dR_area_list[idR])
@@ -1112,10 +1112,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            hname = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            hname = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+              hname = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+              hname = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
 
       # type 2 -- fill for perp cone
       if (self.do_perpcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
@@ -1161,7 +1163,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < int(1/self.dR_bin_width) and idR > -1:
+              if idR < len(self.dR_bins) and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
@@ -1173,10 +1175,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            hname = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            hname = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+              hname = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+              hname = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
 
       # type 3 -- fill for cone parts around jet
       if (self.do_jetcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
@@ -1215,7 +1219,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < int(1/self.dR_bin_width) and idR > -1:
+              if idR < len(self.dR_bins) and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
@@ -1227,10 +1231,12 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            hname = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            hname = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
-            getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+              hname = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
+            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+              hname = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
     
     # # Find all subjets
     # trk_thrd = obs_setting
