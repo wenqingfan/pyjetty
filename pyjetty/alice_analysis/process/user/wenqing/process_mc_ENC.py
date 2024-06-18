@@ -563,8 +563,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           self.dR_bin_width = 0.05
           self.dR_bins = linbins(0,1,int(1/self.dR_bin_width))
-          self.dR_lo_list = dR_bins[:-1]
-          self.dR_hi_list = dR_bins[1:]
+          self.dR_lo_list = self.dR_bins[:-1]
+          self.dR_hi_list = self.dR_bins[1:]
           self.dR_area_list = []
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
             self.dR_area_list.append( np.pi*(dR_hi*dR_hi-dR_lo*dR_lo) ) # area of annulus from dR_lo to dR_hi
