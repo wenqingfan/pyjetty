@@ -1046,7 +1046,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              pt_sum_list[idR] += c.pt()
+              if idR < int(1/self.dR_bin_width) and idR > -1:
+                pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
@@ -1099,7 +1100,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              pt_sum_list[idR] += c.pt()
+              if idR < int(1/self.dR_bin_width) and idR > -1:
+                pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
@@ -1145,7 +1147,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              pt_sum_list[idR] += c.pt()
+              if idR < int(1/self.dR_bin_width) and idR > -1:
+                pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
