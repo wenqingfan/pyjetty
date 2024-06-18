@@ -559,6 +559,69 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               h.GetYaxis().SetTitle('local rho')
               setattr(self, name, h)
 
+        if 'rho_local_detail' in observable:
+
+          self.dR_bin_width = 0.05
+          self.dR_bins = linbins(0,1,int(1/dR_bin_width))
+          self.dR_lo_list = dR_bins[:-1]
+          self.dR_hi_list = dR_bins[1:]
+          self.dR_area_list = []
+          for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
+            self.dR_area_list.append( np.pi*(dR_hi*dR_hi-dR_lo*dR_lo) ) # area of annulus from dR_lo to dR_hi
+
+          for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
+            name = 'h_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            pt_bins = linbins(0,200,200)
+            rho_bins = linbins(0,500,100)
+            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+            h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+            h.GetYaxis().SetTitle('local rho')
+            setattr(self, name, h)
+
+            name = 'h_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            pt_bins = linbins(0,200,200)
+            rho_bins = linbins(0,500,100)
+            h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+            h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+            h.GetYaxis().SetTitle('local rho')
+            setattr(self, name, h)
+
+            if self.do_jetcone:
+              for jetcone_R in self.jetcone_R_list:
+                name = 'h_jetcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                rho_bins = linbins(0,500,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+                h.GetYaxis().SetTitle('local rho')
+                setattr(self, name, h)
+
+                name = 'h_jetcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                rho_bins = linbins(0,500,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                h.GetYaxis().SetTitle('local rho')
+                setattr(self, name, h)
+            
+            if self.do_perpcone:
+              for perpcone_R in perpcone_R_list:
+                name = 'h_perpcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                rho_bins = linbins(0,500,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+                h.GetYaxis().SetTitle('local rho')
+                setattr(self, name, h)
+
+                name = 'h_perpcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                rho_bins = linbins(0,500,100)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+                h.GetYaxis().SetTitle('local rho')
+                setattr(self, name, h)
+
         # # Diagnostic
         # if 'jet_diag' in observable:
         #   name = 'h_{}_JetEta_R{}_{}'.format(observable, jetR, obs_label)
@@ -973,6 +1036,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
+        if self.do_rho_subtraction and 'rho_local_detail' in observable:
+          trk_thrd = obs_setting
+          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          pt_sum_list = [0.]*self.dR_bins
+          for c in constituents_sorted:
+            if c.pt() < trk_thrd:
+              break
+            if c.user_index() < 0:
+              dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
+              idR = int(dR/self.dR_bin_width)
+              pt_sum_list[idR] += c.pt()
+          
+          for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
+            rho_local = pt_sum / dR_area
+            hname = 'h_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, rho_local)
+            hname = 'h_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+
       # type 2 -- fill for perp cone
       if (self.do_perpcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
         # if perpcone enabled, only fill the matched histograms at det-level and only fill EEC related histograms
@@ -1007,6 +1089,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
+        if self.do_rho_subtraction and 'rho_local_detail' in observable:
+          trk_thrd = obs_setting
+          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          pt_sum_list = [0.]*self.dR_bins
+          for c in constituents_sorted:
+            if c.pt() < trk_thrd:
+              break
+            if c.user_index() < 0:
+              dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
+              idR = int(dR/self.dR_bin_width)
+              pt_sum_list[idR] += c.pt()
+          
+          for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
+            rho_local = pt_sum / dR_area
+            hname = 'h_perpcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, rho_local)
+            hname = 'h_perpcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+
       # type 3 -- fill for cone parts around jet
       if (self.do_jetcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None): 
         if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
@@ -1033,6 +1134,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+
+        if self.do_rho_subtraction and 'rho_local_detail' in observable:
+          trk_thrd = obs_setting
+          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          pt_sum_list = [0.]*self.dR_bins
+          for c in constituents_sorted:
+            if c.pt() < trk_thrd:
+              break
+            if c.user_index() < 0:
+              dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
+              idR = int(dR/self.dR_bin_width)
+              pt_sum_list[idR] += c.pt()
+          
+          for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
+            rho_local = pt_sum / dR_area
+            hname = 'h_jetcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, rho_local)
+            hname = 'h_jetcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), rho_local)
     
     # # Find all subjets
     # trk_thrd = obs_setting
