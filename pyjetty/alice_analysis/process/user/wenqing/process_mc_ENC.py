@@ -561,7 +561,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if 'rho_local_detail' in observable:
 
-          self.dR_bin_width = 0.05
+          self.dR_bin_width = 0.02
           self.dR_bins = linbins(0,1,int(1/self.dR_bin_width))
           self.dR_lo_list = self.dR_bins[:-1]
           self.dR_hi_list = self.dR_bins[1:]
@@ -1048,6 +1048,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               idR = int(dR/self.dR_bin_width)
               if idR < int(1/self.dR_bin_width) and idR > -1:
                 pt_sum_list[idR] += c.pt()
+                print('UE particle with pt',c.pt(),'and dR',dR)
+                print('fill into',idR,'bin with total energy',pt_sum_list[idR],'and correpsonding area',self.dR_area_list[idR])
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
