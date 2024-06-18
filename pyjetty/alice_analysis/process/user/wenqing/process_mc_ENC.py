@@ -570,7 +570,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             self.dR_area_list.append( np.pi*(dR_hi*dR_hi-dR_lo*dR_lo) ) # area of annulus from dR_lo to dR_hi
 
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
-            name = 'h_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            name = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             pt_bins = linbins(0,200,200)
             rho_bins = linbins(0,500,100)
             h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -578,7 +578,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             h.GetYaxis().SetTitle('local rho')
             setattr(self, name, h)
 
-            name = 'h_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            name = 'h_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             pt_bins = linbins(0,200,200)
             rho_bins = linbins(0,500,100)
             h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -588,7 +588,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             if self.do_jetcone:
               for jetcone_R in self.jetcone_R_list:
-                name = 'h_jetcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                name = 'h_jetcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 rho_bins = linbins(0,500,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -596,7 +596,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
 
-                name = 'h_jetcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                name = 'h_jetcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 rho_bins = linbins(0,500,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -606,7 +606,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             
             if self.do_perpcone:
               for perpcone_R in perpcone_R_list:
-                name = 'h_perpcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                name = 'h_perpcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 rho_bins = linbins(0,500,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -614,7 +614,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
 
-                name = 'h_perpcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+                name = 'h_perpcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
                 rho_bins = linbins(0,500,100)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
@@ -1050,9 +1050,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
-            hname = 'h_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, rho_local)
-            hname = 'h_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 2 -- fill for perp cone
@@ -1103,9 +1103,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
-            hname = 'h_perpcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_perpcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, rho_local)
-            hname = 'h_perpcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_perpcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_truth.perp(), rho_local)
 
       # type 3 -- fill for cone parts around jet
@@ -1149,9 +1149,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
             rho_local = pt_sum / dR_area
-            hname = 'h_jetcone{}_matched_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_jetcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, rho_local)
-            hname = 'h_jetcone{}_matched_extra_{}{:.1f}{:.1f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
+            hname = 'h_jetcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(cone_R, observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_truth.perp(), rho_local)
     
     # # Find all subjets
