@@ -113,14 +113,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
   #---------------------------------------------------------------
   def initialize_user_output_objects_R(self, jetR):
 
-    # check the rate of the zero area jets (only filled if rho subtraction enabled)
-    name = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
-    pt_bins = linbins(0,200,200)
-    mult_bins = logbins(0,50,50)
-    h = ROOT.TH2D(name, name, 200, pt_bins, 50, mult_bins)
-    h.GetXaxis().SetTitle('p_{T,ch jet}')
-    h.GetYaxis().SetTitle('N_{const}')
-    setattr(self, name, h)
+    # # check the rate of the zero area jets (only filled if rho subtraction enabled)
+    # name = 'h_zero_area_N_vs_JetPt_R{}'.format(jetR)
+    # pt_bins = linbins(0,200,200)
+    # mult_bins = logbins(0,50,50)
+    # h = ROOT.TH2D(name, name, 200, pt_bins, 50, mult_bins)
+    # h.GetXaxis().SetTitle('p_{T,ch jet}')
+    # h.GetYaxis().SetTitle('N_{const}')
+    # setattr(self, name, h)
 
     perpcone_R_list = []
     if self.do_jetcone:
@@ -562,7 +562,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if 'rho_local_detail' in observable:
 
           self.dR_bin_width = 0.05
-          self.dR_bins = linbins(0,1,int(1/dR_bin_width))
+          self.dR_bins = linbins(0,1,int(1/self.dR_bin_width))
           self.dR_lo_list = dR_bins[:-1]
           self.dR_hi_list = dR_bins[1:]
           self.dR_area_list = []
