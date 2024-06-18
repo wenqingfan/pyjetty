@@ -1039,7 +1039,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*self.dR_bins
+          pt_sum_list = [0.]*int(1/self.dR_bin_width)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
@@ -1092,7 +1092,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*self.dR_bins
+          pt_sum_list = [0.]*int(1/self.dR_bin_width)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
@@ -1138,7 +1138,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*self.dR_bins
+          pt_sum_list = [0.]*int(1/self.dR_bin_width)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
