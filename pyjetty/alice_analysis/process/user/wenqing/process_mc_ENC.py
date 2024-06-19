@@ -570,11 +570,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             self.dR_area_list.append( np.pi*(dR_hi*dR_hi-dR_lo*dR_lo) ) # area of annulus from dR_lo to dR_hi
 
           self.jet_pt_bin_width = 20
-          self.jet_pt_bins = [20, 40, 60, 80, 100, 120]
-          self.jet_pt_lo_list = [20, 40, 60, 80, 100]
-          self.jet_pt_hi_list = [40, 60, 80, 100, 120]
-          print('jet_pt_lo_list',self.jet_pt_lo_list)
-          print('jet_pt_hi_list',self.jet_pt_hi_list)
+          self.jet_pt_bins = linbins(0,120,int(120/self.jet_pt_bin_width))
+          self.jet_pt_lo_list = self.jet_pt_bins[:-1]
+          self.jet_pt_hi_list = self.jet_pt_bins[1:]
 
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
             name = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
@@ -631,7 +629,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           for jet_pt_lo, jet_pt_hi in zip(self.jet_pt_lo_list, self.jet_pt_hi_list):
             name = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-            print('init histogram',name)
             rho_bins = linbins(0,500,100)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
             h.GetXaxis().SetTitle('#DeltaR')
