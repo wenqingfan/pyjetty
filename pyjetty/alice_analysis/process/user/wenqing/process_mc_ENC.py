@@ -570,9 +570,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             self.dR_area_list.append( np.pi*(dR_hi*dR_hi-dR_lo*dR_lo) ) # area of annulus from dR_lo to dR_hi
 
           self.jet_pt_bin_width = 20
-          self.jet_pt_bins = linbins(0,120,int(1/self.jet_pt_bin_width))
-          self.jet_pt_lo_list = self.jet_pt_bins[:-1]
-          self.jet_pt_hi_list = self.jet_pt_bins[1:]
+          self.jet_pt_bins = [20, 40, 60, 80, 100, 120]
+          self.jet_pt_lo_list = [20, 40, 60, 80, 100]
+          self.jet_pt_hi_list = [40, 60, 80, 100, 120]
           print('jet_pt_lo_list',self.jet_pt_lo_list)
           print('jet_pt_hi_list',self.jet_pt_hi_list)
 
