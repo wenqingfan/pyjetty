@@ -573,6 +573,8 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           self.jet_pt_bins = linbins(0,120,int(1/self.jet_pt_bin_width))
           self.jet_pt_lo_list = self.jet_pt_bins[:-1]
           self.jet_pt_hi_list = self.jet_pt_bins[1:]
+          print('jet_pt_lo_list',self.jet_pt_lo_list)
+          print('jet_pt_hi_list',self.jet_pt_hi_list)
 
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
             name = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
