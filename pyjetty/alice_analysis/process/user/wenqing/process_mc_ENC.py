@@ -630,14 +630,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           for jet_pt_lo, jet_pt_hi in zip(self.jet_pt_lo_list, self.jet_pt_hi_list):
             name = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
             rho_bins = linbins(0,500,100)
-            h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+            h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('local rho')
             setattr(self, name, h)
 
             name = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
             rho_bins = linbins(0,500,100)
-            h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+            h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('local rho')
             setattr(self, name, h)
@@ -646,14 +646,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               for jetcone_R in self.jetcone_R_list:
                 name = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(jetcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
                 rho_bins = linbins(0,500,100)
-                h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+                h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
 
                 name = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(jetcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
                 rho_bins = linbins(0,500,100)
-                h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+                h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
@@ -662,14 +662,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               for perpcone_R in perpcone_R_list:
                 name = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(perpcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
                 rho_bins = linbins(0,500,100)
-                h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+                h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
 
                 name = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(perpcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
                 rho_bins = linbins(0,500,100)
-                h = ROOT.TH2D(name, name, len(self.dR_bins), self.dR_bins, 100, rho_bins)
+                h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('local rho')
                 setattr(self, name, h)
@@ -1091,14 +1091,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*len(self.dR_bins)
+          pt_sum_list = [0.]*(len(self.dR_bins)-1)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < len(self.dR_bins) and idR > -1:
+              if idR < len(self.dR_bins)-1 and idR > -1:
                 pt_sum_list[idR] += c.pt()
                 # print('UE particle with pt',c.pt(),'and dR',dR)
                 # print('fill into',idR,'bin with total energy',pt_sum_list[idR],'and correpsonding area',self.dR_area_list[idR])
@@ -1112,10 +1112,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+            if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+            if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
 
@@ -1156,14 +1156,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*len(self.dR_bins)
+          pt_sum_list = [0.]*(len(self.dR_bins)-1)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < len(self.dR_bins) and idR > -1:
+              if idR < len(self.dR_bins)-1 and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
@@ -1175,10 +1175,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+            if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+            if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
 
@@ -1212,14 +1212,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         if self.do_rho_subtraction and 'rho_local_detail' in observable:
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
-          pt_sum_list = [0.]*len(self.dR_bins)
+          pt_sum_list = [0.]*(len(self.dR_bins)-1)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
               dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
               idR = int(dR/self.dR_bin_width)
-              if idR < len(self.dR_bins) and idR > -1:
+              if idR < len(self.dR_bins)-1 and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
           for pt_sum, dR_area, dR_lo, dR_hi in zip(pt_sum_list, self.dR_area_list, self.dR_lo_list, self.dR_hi_list):
@@ -1231,10 +1231,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
             ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
-            if ipt_det < len(self.jet_pt_bins) and ipt_det > -1:
+            if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
-            if ipt_truth < len(self.jet_pt_bins) and ipt_truth > -1:
+            if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), rho_local)
     
