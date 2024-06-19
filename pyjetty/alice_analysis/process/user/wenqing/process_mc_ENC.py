@@ -629,6 +629,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           for jet_pt_lo, jet_pt_hi in zip(self.jet_pt_lo_list, self.jet_pt_hi_list):
             name = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
+            print('init histogram',name)
             rho_bins = linbins(0,500,100)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 100, rho_bins)
             h.GetXaxis().SetTitle('#DeltaR')
