@@ -1266,10 +1266,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
-          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
           pt_sum_alldR = 0.
           pt_sum_list = [0.]*(len(self.dR_bins)-1)
-          for c in constituents_sorted:
+          for c in cone_parts_in_det_jet_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
@@ -1329,10 +1329,10 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
-          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
           pt_sum_alldR = 0.
           pt_sum_list = [0.]*(len(self.dR_bins)-1)
-          for c in constituents_sorted:
+          for c in cone_parts_in_det_jet_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
