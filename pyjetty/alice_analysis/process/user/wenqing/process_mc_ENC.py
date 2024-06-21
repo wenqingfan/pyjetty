@@ -561,6 +561,81 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
         if 'ptsum_local_detail' in observable:
 
+          #==================================
+          # hisograms without dR information
+          #==================================
+          name = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,200,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+          setattr(self, name, h)
+
+          name = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,200,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+          h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+          setattr(self, name, h)
+
+          # currently only fill the energy profile for sig particles for standard jets
+          name = 'h_matched_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,200,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
+          setattr(self, name, h)
+
+          name = 'h_matched_extra_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,200,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+          h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
+          setattr(self, name, h)
+
+          if self.do_jetcone:
+            for jetcone_R in self.jetcone_R_list:
+              name = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,200,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+              setattr(self, name, h)
+
+              name = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,200,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+              setattr(self, name, h)
+          
+          if self.do_perpcone:
+            for perpcone_R in perpcone_R_list:
+              name = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,200,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+              setattr(self, name, h)
+
+              name = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,200,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+              setattr(self, name, h)
+
+          #==================================
+          # hisograms with dR information
+          #==================================
           self.dR_bin_width = 0.02
           self.dR_bins = linbins(0,1,int(1/self.dR_bin_width))
           self.dR_lo_list = self.dR_bins[:-1]
@@ -573,58 +648,6 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           self.jet_pt_bins = linbins(0,120,int(120/self.jet_pt_bin_width))
           self.jet_pt_lo_list = self.jet_pt_bins[:-1]
           self.jet_pt_hi_list = self.jet_pt_bins[1:]
-
-          name = 'h_matched_{}alldR_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-          h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-          setattr(self, name, h)
-
-          name = 'h_matched_extra_{}alldR_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
-          h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-          h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-          setattr(self, name, h)
-
-          if self.do_jetcone:
-            for jetcone_R in self.jetcone_R_list:
-              name = 'h_jetcone{}_matched_{}alldR_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
-              pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
-              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-              setattr(self, name, h)
-
-              name = 'h_jetcone{}_matched_extra_{}alldR_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
-              pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
-              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-              setattr(self, name, h)
-          
-          if self.do_perpcone:
-            for perpcone_R in perpcone_R_list:
-              name = 'h_perpcone{}_matched_{}alldR_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
-              pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
-              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
-              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-              setattr(self, name, h)
-
-              name = 'h_perpcone{}_matched_extra_{}alldR_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
-              pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
-              h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
-              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
-              h.GetYaxis().SetTitle('p_{T, ch trk} sum')
-              setattr(self, name, h)
 
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
             name = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
@@ -692,6 +715,21 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum')
+            setattr(self, name, h)
+
+            # currently only fill the energy profile for sig particles for standard jets
+            name = 'h_matched_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
+            ptsum_bins = linbins(0,200,200)
+            h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
+            h.GetXaxis().SetTitle('#DeltaR')
+            h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
+            setattr(self, name, h)
+
+            name = 'h_matched_extra_sig_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
+            ptsum_bins = linbins(0,200,200)
+            h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
+            h.GetXaxis().SetTitle('#DeltaR')
+            h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
             setattr(self, name, h)
 
             if self.do_jetcone:
@@ -1144,38 +1182,53 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
           pt_sum_alldR = 0.
+          pt_sum_sig_alldR = 0.
           pt_sum_list = [0.]*(len(self.dR_bins)-1)
+          pt_sum_sig_list = [0.]*(len(self.dR_bins)-1)
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
-            if c.user_index() < 0:
-              pt_sum_alldR += c.pt()
-              dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
-              idR = int(dR/self.dR_bin_width)
-              if idR < len(self.dR_bins)-1 and idR > -1:
+            dR = self.utils.delta_R(c, jet_det.eta(), jet_det.phi())
+            idR = int(dR/self.dR_bin_width)
+            if idR < len(self.dR_bins)-1 and idR > -1:
+              if c.user_index() < 0:
+                pt_sum_alldR += c.pt()
                 pt_sum_list[idR] += c.pt()
                 # print('UE particle with pt',c.pt(),'and dR',dR)
                 # print('fill into',idR,'bin with total energy',pt_sum_list[idR],'and correpsonding area',self.dR_area_list[idR])
+              else:
+                pt_sum_sig_alldR += c.pt()
+                pt_sum_sig_list[idR] += c.pt()
           
-          hname = 'h_matched_{}alldR_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, pt_sum_alldR)
-          hname = 'h_matched_extra_{}alldR_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), pt_sum_alldR)
 
-          for pt_sum, dR_lo, dR_hi in zip(pt_sum_list, self.dR_lo_list, self.dR_hi_list):
+          hname = 'h_matched_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det, pt_sum_sig_alldR)
+          hname = 'h_matched_extra_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), pt_sum_sig_alldR)
+
+          for pt_sum, pt_sum_sig, dR_lo, dR_hi in zip(pt_sum_list, pt_sum_sig_list, self.dR_lo_list, self.dR_hi_list):
             hname = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, pt_sum)
             hname = 'h_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             getattr(self, hname).Fill(jet_truth.perp(), pt_sum)
             
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
-            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
+              hname = 'h_matched_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum_sig)
+            
+            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
+              hname = 'h_matched_extra_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
+              getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum_sig)
 
       # type 2 -- fill for perp cone
       if (self.do_perpcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
@@ -1226,9 +1279,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               if idR < len(self.dR_bins)-1 and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
-          hname = 'h_perpcone{}_matched_{}alldR_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          hname = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, pt_sum_alldR)
-          hname = 'h_perpcone{}_matched_extra_{}alldR_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), pt_sum_alldR)
 
           for pt_sum, dR_lo, dR_hi in zip(pt_sum_list, self.dR_lo_list, self.dR_hi_list):
@@ -1238,10 +1291,11 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             getattr(self, hname).Fill(jet_truth.perp(), pt_sum)
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
-            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
+            
+            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
@@ -1288,9 +1342,9 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               if idR < len(self.dR_bins)-1 and idR > -1:
                 pt_sum_list[idR] += c.pt()
           
-          hname = 'h_jetcone{}_matched_{}alldR_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          hname = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, pt_sum_alldR)
-          hname = 'h_jetcone{}_matched_extra_{}alldR_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          hname = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), pt_sum_alldR)
           
           for pt_sum, dR_lo, dR_hi in zip(pt_sum_list, self.dR_lo_list, self.dR_hi_list):
@@ -1300,10 +1354,11 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             getattr(self, hname).Fill(jet_truth.perp(), pt_sum)
 
             ipt_det = int(jet_pt_det/self.jet_pt_bin_width)
-            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_det < len(self.jet_pt_bins)-1 and ipt_det > -1:
               hname = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_det], self.jet_pt_hi_list[ipt_det], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
+            
+            ipt_truth = int(jet_truth.perp()/self.jet_pt_bin_width)
             if ipt_truth < len(self.jet_pt_bins)-1 and ipt_truth > -1:
               hname = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(cone_R, observable, self.jet_pt_lo_list[ipt_truth], self.jet_pt_hi_list[ipt_truth], jetR, obs_label)
               getattr(self, hname).Fill(0.5*(dR_lo+dR_hi), pt_sum)
