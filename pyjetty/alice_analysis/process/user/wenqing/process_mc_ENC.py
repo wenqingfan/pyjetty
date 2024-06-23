@@ -725,7 +725,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
             setattr(self, name, h)
 
-            name = 'h_matched_extra_sig_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
+            name = 'h_matched_extra_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
             ptsum_bins = linbins(0,200,200)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
