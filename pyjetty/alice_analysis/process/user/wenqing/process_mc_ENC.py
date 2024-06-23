@@ -566,7 +566,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           #==================================
           name = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,100,200)
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -574,7 +574,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           name = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,100,200)
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
           h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -583,7 +583,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           # currently only fill the energy profile for sig particles for standard jets
           name = 'h_matched_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,100,200)
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
           h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
@@ -591,7 +591,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           name = 'h_matched_extra_{}_sig_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           pt_bins = linbins(0,200,200)
-          ptsum_bins = linbins(0,200,200)
+          ptsum_bins = linbins(0,100,200)
           h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
           h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
           h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
@@ -601,7 +601,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             for jetcone_R in self.jetcone_R_list:
               name = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,100,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
               h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -609,7 +609,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
               name = 'h_jetcone{}_matched_extra_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,100,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
               h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -619,7 +619,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             for perpcone_R in perpcone_R_list:
               name = 'h_perpcone{}_matched_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,100,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
               h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -627,7 +627,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
               name = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
-              ptsum_bins = linbins(0,200,200)
+              ptsum_bins = linbins(0,100,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
               h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -652,7 +652,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           for dR_lo, dR_hi in zip(self.dR_lo_list, self.dR_hi_list):
             name = 'h_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             pt_bins = linbins(0,200,200)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -660,7 +660,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             name = 'h_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(observable, dR_lo, dR_hi, jetR, obs_label)
             pt_bins = linbins(0,200,200)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -670,7 +670,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               for jetcone_R in self.jetcone_R_list:
                 name = 'h_jetcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -678,7 +678,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
                 name = 'h_jetcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(jetcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -688,7 +688,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               for perpcone_R in perpcone_R_list:
                 name = 'h_perpcone{}_matched_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -696,7 +696,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
                 name = 'h_perpcone{}_matched_extra_{}{:.2f}{:.2f}_JetPt_R{}_{}'.format(perpcone_R, observable, dR_lo, dR_hi, jetR, obs_label)
                 pt_bins = linbins(0,200,200)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, 200, pt_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -704,14 +704,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
           for jet_pt_lo, jet_pt_hi in zip(self.jet_pt_lo_list, self.jet_pt_hi_list):
             name = 'h_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum')
             setattr(self, name, h)
 
             name = 'h_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -719,14 +719,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
 
             # currently only fill the energy profile for sig particles for standard jets
             name = 'h_matched_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
             setattr(self, name, h)
 
             name = 'h_matched_extra_{}_sig_JetPt{:.0f}{:.0f}_R{}_{}'.format(observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-            ptsum_bins = linbins(0,200,200)
+            ptsum_bins = linbins(0,50,200)
             h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
             h.GetXaxis().SetTitle('#DeltaR')
             h.GetYaxis().SetTitle('p_{T, ch trk} sum (sig)')
@@ -735,14 +735,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if self.do_jetcone:
               for jetcone_R in self.jetcone_R_list:
                 name = 'h_jetcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(jetcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
                 setattr(self, name, h)
 
                 name = 'h_jetcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(jetcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
@@ -751,14 +751,14 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
             if self.do_perpcone:
               for perpcone_R in perpcone_R_list:
                 name = 'h_perpcone{}_matched_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(perpcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
                 setattr(self, name, h)
 
                 name = 'h_perpcone{}_matched_extra_{}_JetPt{:.0f}{:.0f}_R{}_{}'.format(perpcone_R, observable, jet_pt_lo, jet_pt_hi, jetR, obs_label)
-                ptsum_bins = linbins(0,200,200)
+                ptsum_bins = linbins(0,50,200)
                 h = ROOT.TH2D(name, name, len(self.dR_bins)-1, self.dR_bins, 200, ptsum_bins)
                 h.GetXaxis().SetTitle('#DeltaR')
                 h.GetYaxis().SetTitle('p_{T, ch trk} sum')
