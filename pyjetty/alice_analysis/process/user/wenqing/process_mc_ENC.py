@@ -501,7 +501,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           pt_bins = linbins(0,200,200)
           area_bins = linbins(0,1,100)
           h = ROOT.TH2D(name, name, 200, pt_bins, 100, area_bins)
-          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
           h.GetYaxis().SetTitle('Area')
           setattr(self, name, h)
 
@@ -1165,7 +1165,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
         # Fill area v.s. matched truth jet pt for det jets
         if self.do_rho_subtraction and 'area' in observable:
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_det.area(), jet_truth.pt())
+          getattr(self, hname).Fill(jet_truth.pt(), jet_det.area())
 
         if self.do_rho_subtraction and 'rho_local' in observable:
           trk_thrd = obs_setting
