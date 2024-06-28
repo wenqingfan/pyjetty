@@ -1243,13 +1243,13 @@ class ProcessMCBase(process_base.ProcessBase):
 
   def calculate_distance(self, p0, p1):
     dphiabs = math.fabs(p0.phi() - p1.phi())
-    dphi = dphiabs
+    dphi = dphiabs
 
-    if dphiabs > math.pi:
-      dphi = 2*math.pi - dphiabs
+    if dphiabs > math.pi:
+      dphi = 2*math.pi - dphiabs
 
-    deta = p0.eta() - p1.eta()
-    return math.sqrt(deta*deta + dphi*dphi)
+    deta = p0.eta() - p1.eta()
+    return math.sqrt(deta*deta + dphi*dphi)
 
   #---------------------------------------------------------------
   # This function is called once for each event
