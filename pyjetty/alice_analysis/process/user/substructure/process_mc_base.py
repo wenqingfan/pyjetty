@@ -1290,18 +1290,17 @@ class ProcessMCBase(process_base.ProcessBase):
 
       candidates = []
       candidates_R = []
-        
-      for idet in range(len(fj_particles_det)):
-        det_part = fj_particles_det[idet]
-        
-        delta_R = self.calculate_distance(truth_part, det_part)
-        if delta_R < 0.05 and abs((det_part.perp() - truth_part.perp()) / truth_part.perp()) < 0.1 \
-                and det_part not in det_used:
-            candidates.append(det_part)
-            candidates_R.append(delta_R)
+
+      for idet in range(len(fj_particles_det)):
+        det_part = fj_particles_det[idet]
+
+        delta_R = self.calculate_distance(truth_part, det_part)
+        if delta_R < 0.05 and abs((det_part.perp() - truth_part.perp()) / truth_part.perp()) < 0.1 and det_part not in det_used:
+          candidates.append(det_part)
+          candidates_R.append(delta_R)
 
       # if match found
-      if len(candidates) > 0:
+      if len(candidates) > 0:
         det_match = candidates[np.argmin(candidates_R)]
         det_match.set_user_index(index)
         det_used.append(det_match)
@@ -1320,12 +1319,12 @@ class ProcessMCBase(process_base.ProcessBase):
       index += 1
 
     # handle unmatched particles, give them all different user_index s
-    for i in range(len(fj_particles_truth)):
+    for i in range(len(fj_particles_truth)):
       part = fj_particles_truth[i]
       if part.user_index() == dummy_index:
         part.set_user_index(index)
         index += 1
-    for i in range(len(fj_particles_det)):
+    for i in range(len(fj_particles_det)):
       part = fj_particles_det[i]
       if part.user_index() == dummy_index:
         part.set_user_index(index)
