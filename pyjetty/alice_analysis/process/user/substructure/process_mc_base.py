@@ -1283,7 +1283,7 @@ class ProcessMCBase(process_base.ProcessBase):
     index = 0
     det_used = []
     # note: CANNOT loop like this: <for truth_part in fj_particles_truth:>
-    for itruth in range(len(fj_particles_truth)):
+    for itruth in range(len(fj_particles_truth)):
       truth_part = fj_particles_truth[itruth]
 
       truth_part.set_user_index(index)
