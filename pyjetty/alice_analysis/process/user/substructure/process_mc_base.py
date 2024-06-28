@@ -331,10 +331,18 @@ class ProcessMCBase(process_base.ProcessBase):
       setattr(self, name, h)
 
     if self.is_pp and self.do_only_track_matching:
-      h = ROOT.TH2D('h2d_matched_part_dptoverpt_vs_truth_pt', 'h2d_matched_part_dptoverpt_vs_truth_pt', 200, -1., 1., 100, 0, 10)
-      h = ROOT.TH1D('h1d_matched_part_vs_truth_pt', 'h1d_matched_part_vs_truth_pt', 100, 0, 10)
-      h = ROOT.TH1D('h1d_truth_part_pt', 'h1d_truth_part_pt', 100, 0, 10)
-      h = ROOT.TH1D('h1d_det_part_pt', 'h1d_det_part_pt', 100, 0, 10)
+      name = 'h2d_matched_part_dptoverpt_vs_truth_pt'
+      h = ROOT.TH2D(name, name, 200, -1., 1., 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_matched_part_vs_truth_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_truth_part_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_det_part_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
 
   #---------------------------------------------------------------
   # Initialize histograms
