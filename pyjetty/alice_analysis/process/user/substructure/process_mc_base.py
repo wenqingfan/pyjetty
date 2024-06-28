@@ -1256,40 +1256,40 @@ class ProcessMCBase(process_base.ProcessBase):
   # Track matching (from Kyle)
   #---------------------------------------------------------------
   def perform_track_matching(self, fj_particles_det, fj_particles_truth):
-      
+    
     #handle case with no truth particles
     if type(fj_particles_truth) is float:
-        print("EVENT WITH NO TRUTH PARTICLES!!!")
-        return
-    
-    #handle case with no det particles
-    if type(fj_particles_det) is float:
-        print("EVENT WITH NO DET PARTICLES!!!")
-        fj_particles_det = []
-        
-    for det_part in fj_particles_det:
-        hname = 'h1d_det_part_pt'
-        getattr(self, hname).Fill(det_part.perp())
+      print("EVENT WITH NO TRUTH PARTICLES!!!")
+      return
+
+    #handle case with no det particles
+    if type(fj_particles_det) is float:
+      print("EVENT WITH NO DET PARTICLES!!!")
+      fj_particles_det = []
+
+    for det_part in fj_particles_det:
+      hname = 'h1d_det_part_pt'
+      getattr(self, hname).Fill(det_part.perp())
 
     ############################# TRACK MATCHING ################################
     # set all indicies to dummy index
     dummy_index = -1
     for i in range(len(fj_particles_truth)):
-      fj_particles_truth[i].set_user_index(dummy_index)
+      fj_particles_truth[i].set_user_index(dummy_index)
     for i in range(len(fj_particles_det)):
-      fj_particles_det[i].set_user_index(dummy_index)
+      fj_particles_det[i].set_user_index(dummy_index)
     
     # perform matching, give matches the same user_index
     index = 0
     det_used = []
     # note: CANNOT loop like this: <for truth_part in fj_particles_truth:>
     for itruth in range(len(fj_particles_truth)):
-      truth_part = fj_particles_truth[itruth]
-    
-      truth_part.set_user_index(index)
-        
-      candidates = []
-      candidates_R = []
+      truth_part = fj_particles_truth[itruth]
+
+      truth_part.set_user_index(index)
+
+      candidates = []
+      candidates_R = []
         
       for idet in range(len(fj_particles_det)):
         det_part = fj_particles_det[idet]
@@ -1302,32 +1302,31 @@ class ProcessMCBase(process_base.ProcessBase):
 
       # if match found
       if len(candidates) > 0:
-        det_match = candidates[np.argmin(candidates_R)]
-        det_match.set_user_index(index)
-        det_used.append(det_match)
+        det_match = candidates[np.argmin(candidates_R)]
+        det_match.set_user_index(index)
+        det_used.append(det_match)
 
-        dpt = det_match.perp() - truth_part.perp()
+        dpt = det_match.perp() - truth_part.perp()
 
         hname = 'h2d_matched_part_dptoverpt_vs_truth_pt'
-        getattr(self, hname).Fill(dpt/truth_part.perp(), truth_part.perp())
+        getattr(self, hname).Fill(dpt/truth_part.perp(), truth_part.perp())
 
-        hname = 'h1d_matched_part_vs_truth_pt'
-        getattr(self, hname).Fill(truth_part.perp())
-        
+        hname = 'h1d_matched_part_vs_truth_pt'
+        getattr(self, hname).Fill(truth_part.perp())
 
-      hname = 'h1d_truth_part_pt'
-      getattr(self, hname).Fill(truth_part.perp())
+      hname = 'h1d_truth_part_pt'
+      getattr(self, hname).Fill(truth_part.perp())
 
-      index += 1
+      index += 1
 
     # handle unmatched particles, give them all different user_index s
     for i in range(len(fj_particles_truth)):
-      part = fj_particles_truth[i]
-      if part.user_index() == dummy_index:
-        part.set_user_index(index)
-        index += 1
+      part = fj_particles_truth[i]
+      if part.user_index() == dummy_index:
+        part.set_user_index(index)
+        index += 1
     for i in range(len(fj_particles_det)):
-      part = fj_particles_det[i]
-      if part.user_index() == dummy_index:
-        part.set_user_index(index)
-        index += 1
+      part = fj_particles_det[i]
+      if part.user_index() == dummy_index:
+        part.set_user_index(index)
+        index += 1
