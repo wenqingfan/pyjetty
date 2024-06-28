@@ -1256,9 +1256,9 @@ class ProcessMCBase(process_base.ProcessBase):
   # Track matching (from Kyle)
   #---------------------------------------------------------------
   def perform_track_matching(self, fj_particles_det, fj_particles_truth):
-    
+
     #handle case with no truth particles
-    if type(fj_particles_truth) is float:
+    if type(fj_particles_truth) is float:
       print("EVENT WITH NO TRUTH PARTICLES!!!")
       return
 
