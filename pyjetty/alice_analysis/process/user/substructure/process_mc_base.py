@@ -156,6 +156,11 @@ class ProcessMCBase(process_base.ProcessBase):
         self.remove_outlier = config['remove_outlier']
     else:
         self.remove_outlier = False
+
+    if 'do_only_track_matching' in config:
+        self.do_only_track_matching = config['do_only_track_matching']
+    else:
+        self.do_only_track_matching = False
     
     if self.do_constituent_subtraction:
         self.is_pp = False
@@ -325,6 +330,12 @@ class ProcessMCBase(process_base.ProcessBase):
       h = ROOT.TH2F(name, name, 200, 0, 5000, 200, 0., 2.)
       setattr(self, name, h)
 
+    if self.is_pp and self.do_only_track_matching:
+      h = ROOT.TH2D('h2d_matched_part_dptoverpt_vs_truth_pt', 'h2d_matched_part_dptoverpt_vs_truth_pt', 200, -1., 1., 100, 0, 10)
+      h = ROOT.TH1D('h1d_matched_part_vs_truth_pt', 'h1d_matched_part_vs_truth_pt', 100, 0, 10)
+      h = ROOT.TH1D('h1d_truth_part_pt', 'h1d_truth_part_pt', 100, 0, 10)
+      h = ROOT.TH1D('h1d_det_part_pt', 'h1d_det_part_pt', 100, 0, 10)
+
   #---------------------------------------------------------------
   # Initialize histograms
   #---------------------------------------------------------------
@@ -343,7 +354,7 @@ class ProcessMCBase(process_base.ProcessBase):
           name = 'hDeltaR_All_R{}'.format(jetR)
           h = ROOT.TH2F(name, name, 300, 0, 300, 100, 0., 2.)
           setattr(self, name, h)
-          
+
       else:
       
           for R_max in self.max_distance:
@@ -442,6 +453,11 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.debug_level > 1:
       print('-------------------------------------------------')
       print('event {}'.format(self.event_number))
+
+    # diagnostic check in pp to verify that the matching criteria is good
+    if self.is_pp and self.do_only_track_matching:
+      self.perform_track_matching(fj_particles_det, fj_particles_truth)
+      return
 
     # print('debug5 det parts',fj_particles_det)
     # print('debug5 mcid',particles_mcid_det)
@@ -985,7 +1001,7 @@ class ProcessMCBase(process_base.ProcessBase):
         # in this case, the local background energy will be much larger than the "true" UE background seen in data
         # in addition, if there is a hard particle labelled as "background" in a jet with large det jet pt and very small true jet pt. If such case happen at a single digit level, one can get very werid outliers in the final EEC distributions
         # Try jet pt selection to start (can also require the hardest particle inside det jet to be from pythia)
-        # If a jet is considered a outlier, skip this jet
+        # If a jet is considered a outlier (det jet pt much much higher than truth jet pt), skip this jet
         if not self.is_pp and self.remove_outlier:
           if jet_pt_det_ungroomed - jet_pt_truth_ungroomed > 45:
             return
@@ -1224,3 +1240,94 @@ class ProcessMCBase(process_base.ProcessBase):
                                   **kwargs):
 
     raise NotImplementedError('You must implement fill_matched_jet_histograms()!')
+
+  def calculate_distance(self, p0, p1):
+    dphiabs = math.fabs(p0.phi() - p1.phi())
+    dphi = dphiabs
+
+    if dphiabs > math.pi:
+      dphi = 2*math.pi - dphiabs
+
+    deta = p0.eta() - p1.eta()
+    return math.sqrt(deta*deta + dphi*dphi)
+
+  #---------------------------------------------------------------
+  # This function is called once for each event
+  # Track matching (from Kyle)
+  #---------------------------------------------------------------
+  def perform_track_matching(self, fj_particles_det, fj_particles_truth):
+      
+    #handle case with no truth particles
+    if type(fj_particles_truth) is float:
+        print("EVENT WITH NO TRUTH PARTICLES!!!")
+        return
+    
+    #handle case with no det particles
+    if type(fj_particles_det) is float:
+        print("EVENT WITH NO DET PARTICLES!!!")
+        fj_particles_det = []
+        
+    for det_part in fj_particles_det:
+        hname = 'h1d_det_part_pt'
+        getattr(self, hname).Fill(det_part.perp())
+
+    ############################# TRACK MATCHING ################################
+    # set all indicies to dummy index
+    dummy_index = -1
+    for i in range(len(fj_particles_truth)):
+      fj_particles_truth[i].set_user_index(dummy_index)
+    for i in range(len(fj_particles_det)):
+      fj_particles_det[i].set_user_index(dummy_index)
+    
+    # perform matching, give matches the same user_index
+    index = 0
+    det_used = []
+    # note: CANNOT loop like this: <for truth_part in fj_particles_truth:>
+    for itruth in range(len(fj_particles_truth)):
+      truth_part = fj_particles_truth[itruth]
+    
+      truth_part.set_user_index(index)
+        
+      candidates = []
+      candidates_R = []
+        
+      for idet in range(len(fj_particles_det)):
+        det_part = fj_particles_det[idet]
+        
+        delta_R = self.calculate_distance(truth_part, det_part)
+        if delta_R < 0.05 and abs((det_part.perp() - truth_part.perp()) / truth_part.perp()) < 0.1 \
+                and det_part not in det_used:
+            candidates.append(det_part)
+            candidates_R.append(delta_R)
+
+      # if match found
+      if len(candidates) > 0:
+        det_match = candidates[np.argmin(candidates_R)]
+        det_match.set_user_index(index)
+        det_used.append(det_match)
+
+        dpt = det_match.perp() - truth_part.perp()
+
+        hname = 'h2d_matched_part_dptoverpt_vs_truth_pt'
+        getattr(self, hname).Fill(dpt/truth_part.perp(), truth_part.perp())
+
+        hname = 'h1d_matched_part_vs_truth_pt'
+        getattr(self, hname).Fill(truth_part.perp())
+        
+
+      hname = 'h1d_truth_part_pt'
+      getattr(self, hname).Fill(truth_part.perp())
+
+      index += 1
+
+    # handle unmatched particles, give them all different user_index s
+    for i in range(len(fj_particles_truth)):
+      part = fj_particles_truth[i]
+      if part.user_index() == dummy_index:
+        part.set_user_index(index)
+        index += 1
+    for i in range(len(fj_particles_det)):
+      part = fj_particles_det[i]
+      if part.user_index() == dummy_index:
+        part.set_user_index(index)
+        index += 1
