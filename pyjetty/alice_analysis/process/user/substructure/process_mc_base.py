@@ -1280,8 +1280,8 @@ class ProcessMCBase(process_base.ProcessBase):
       fj_particles_det[i].set_user_index(dummy_index)
 
     # perform matching, give matches the same user_index
-    index = 0
-    det_used = []
+    index = 0
+    det_used = []
     # note: CANNOT loop like this: <for truth_part in fj_particles_truth:>
     for itruth in range(len(fj_particles_truth)):
       truth_part = fj_particles_truth[itruth]
