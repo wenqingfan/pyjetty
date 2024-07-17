@@ -574,7 +574,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               h.GetYaxis().SetTitle('local rho')
               setattr(self, name, h)
 
-              name = 'h_perpcone{}_matched_bts_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              name = 'h_perpcone{}_matched_{}_bts_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
               bts_bins = linbins(0,1,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
@@ -582,7 +582,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               h.GetYaxis().SetTitle('bkg/sig ratio')
               setattr(self, name, h)
 
-              name = 'h_perpcone{}_matched_extra_bts_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              name = 'h_perpcone{}_matched_extra_{}_bts_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
               pt_bins = linbins(0,200,200)
               bts_bins = linbins(0,1,200)
               h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
