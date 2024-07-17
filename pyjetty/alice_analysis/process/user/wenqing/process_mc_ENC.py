@@ -522,6 +522,22 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           h.GetYaxis().SetTitle('local rho')
           setattr(self, name, h)
 
+          name = 'h_matched_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          bts_bins = linbins(0,1,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+          h.GetYaxis().SetTitle('bkg/sig ratio')
+          setattr(self, name, h)
+
+          name = 'h_matched_extra_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          pt_bins = linbins(0,200,200)
+          bts_bins = linbins(0,1,200)
+          h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
+          h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+          h.GetYaxis().SetTitle('bkg/sig ratio')
+          setattr(self, name, h)
+
           if self.do_jetcone:
             for jetcone_R in self.jetcone_R_list:
               name = 'h_jetcone{}_matched_{}_JetPt_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
@@ -556,6 +572,22 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               h = ROOT.TH2D(name, name, 200, pt_bins, 100, rho_bins)
               h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
               h.GetYaxis().SetTitle('local rho')
+              setattr(self, name, h)
+
+              name = 'h_perpcone{}_matched_bts_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              bts_bins = linbins(0,1,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{det}')
+              h.GetYaxis().SetTitle('bkg/sig ratio')
+              setattr(self, name, h)
+
+              name = 'h_perpcone{}_matched_extra_bts_{}_JetPt_R{}_{}'.format(perpcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              bts_bins = linbins(0,1,200)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 200, bts_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}^{truth}')
+              h.GetYaxis().SetTitle('bkg/sig ratio')
               setattr(self, name, h)
 
         if 'ptsum_local_detail' in observable:
@@ -1118,16 +1150,25 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           trk_thrd = obs_setting
           constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
           pt_sum = 0.
+          pt_sum_sig = 0.
           for c in constituents_sorted:
             if c.pt() < trk_thrd:
               break
             if c.user_index() < 0:
               pt_sum += c.pt()
+            else:
+              pt_sum_sig += c.pt()
+          
           rho_local = pt_sum / jet_det.area() # NB: using jet.area() for jet
           hname = 'h_matched_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          bts_ratio = pt_sum / pt_sum_sig
+          hname = 'h_matched_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det, bts_ratio)
+          hname = 'h_matched_extra_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
@@ -1202,6 +1243,15 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
               break
             if c.user_index() < 0:
               pt_sum += c.pt()
+
+          constituents_sorted = fj.sorted_by_pt(jet_det.constituents())
+          pt_sum_sig = 0.
+          for c in constituents_sorted:
+            if c.pt() < trk_thrd:
+              break
+            if not (c.user_index() < 0):
+              pt_sum_sig += c.pt()
+
           if (self.static_perpcone) == True or (cone_R != jetR):
             rho_local = pt_sum / (np.pi * cone_R * cone_R)
           else:
@@ -1210,6 +1260,11 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          bts_ratio = pt_sum / pt_sum_sig
+          hname = 'h_perpcone{}_matched_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det, bts_ratio)
+          hname = 'h_perpcone{}_matched_extra_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
@@ -1255,6 +1310,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           hname = 'h_jetcone{}_matched_extra_{{}}_JetPt_R{}_{{}}'.format(cone_R, jetR)
           self.fill_matched_observable_histograms(hname, observable, jet_det, jet_det_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_det, jet_truth.pt(), cone_parts_in_det_jet)          
 
+        # FIX ME: not really looking at the energy density in perpcone, can be deleted later
         if self.do_rho_subtraction and 'rho_local' in observable:
           trk_thrd = obs_setting
           cone_parts_in_det_jet_sorted = fj.sorted_by_pt(cone_parts_in_det_jet)
