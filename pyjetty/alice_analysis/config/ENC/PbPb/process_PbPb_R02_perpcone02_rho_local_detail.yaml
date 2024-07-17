@@ -10,7 +10,7 @@
 # The process step is intended to loop over all observables simultaneously
 # The analysis step is intended to run for a single observable block
 
-process_observables: ['jet_pt', 'rho_local', 'ptsum_local_detail']
+process_observables: ['jet_pt', 'rho_local']
 jetR: [0.2]
 jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
 mc_fraction_threshold: 0.5
