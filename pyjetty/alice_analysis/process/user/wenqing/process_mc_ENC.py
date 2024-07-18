@@ -1164,6 +1164,7 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
+          print('jet pt truth',jet_truth.perp(),'det',jet_pt_det,'pt_sum',pt_sum,'pt_sum_sig',pt_sum_sig)
           bts_ratio = pt_sum / pt_sum_sig
           hname = 'h_matched_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det, bts_ratio)
