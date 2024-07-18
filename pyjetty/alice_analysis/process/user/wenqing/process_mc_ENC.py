@@ -1164,12 +1164,13 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_matched_extra_{}_JetPt_R{}_{}'.format(observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
-          print('jet pt truth',jet_truth.perp(),'det',jet_pt_det,'pt_sum',pt_sum,'pt_sum_sig',pt_sum_sig)
-          bts_ratio = pt_sum / pt_sum_sig
-          hname = 'h_matched_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, bts_ratio)
-          hname = 'h_matched_extra_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
+          if pt_sum_sig > 0:
+            # safe guard, for jet pt with very low pT, it can happen. It should happen very rarely (especially for the pT range we measure), hence skipping those jets should affect the results
+            bts_ratio = pt_sum / pt_sum_sig
+            hname = 'h_matched_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, bts_ratio)
+            hname = 'h_matched_extra_{}_bts_JetPt_R{}_{}'.format(observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
@@ -1261,11 +1262,13 @@ class ProcessMC_ENC(process_mc_base.ProcessMCBase):
           getattr(self, hname).Fill(jet_pt_det, rho_local)
           hname = 'h_perpcone{}_matched_extra_{}_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_truth.perp(), rho_local)
-          bts_ratio = pt_sum / pt_sum_sig
-          hname = 'h_perpcone{}_matched_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_pt_det, bts_ratio)
-          hname = 'h_perpcone{}_matched_extra_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
-          getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
+          if pt_sum_sig > 0:
+            # safe guard, for jet pt with very low pT, it can happen. It should happen very rarely (especially for the pT range we measure), hence skipping those jets should affect the results
+            bts_ratio = pt_sum / pt_sum_sig
+            hname = 'h_perpcone{}_matched_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, bts_ratio)
+            hname = 'h_perpcone{}_matched_extra_{}_bts_JetPt_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+            getattr(self, hname).Fill(jet_truth.perp(), bts_ratio)
 
         if self.do_rho_subtraction and 'ptsum_local_detail' in observable:
           trk_thrd = obs_setting
