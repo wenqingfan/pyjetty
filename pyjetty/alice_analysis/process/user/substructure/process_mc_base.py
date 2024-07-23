@@ -1138,6 +1138,7 @@ class ProcessMCBase(process_base.ProcessBase):
               if perpcone_R == jetR:
                 if self.do_rho_subtraction and self.static_perpcone == False:
                   perpcone_R = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
+                  perpcone_R_static = jetR
 
               # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
               parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
@@ -1172,8 +1173,8 @@ class ProcessMCBase(process_base.ProcessBase):
               cone_parts_in_det_jet = parts_in_cone2
 
               # particles in dynmaic area constructed already, now switch back to jetR for histogram names used in fill_matched_jet_histograms
-              if perpcone_R == jetR and self.do_rho_subtraction and self.static_perpcone == False:
-                perpcone_R = jetR 
+              if perpcone_R_static == jetR and self.do_rho_subtraction and self.static_perpcone == False:
+                perpcone_R = perpcone_R_static
                 print('set cone R back to jet R for dynmaic cone size',perpcone_R)
 
               # Call user function to fill histos
