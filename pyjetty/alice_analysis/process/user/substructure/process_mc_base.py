@@ -1137,7 +1137,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
               if perpcone_R == jetR:
                 if self.do_rho_subtraction and self.static_perpcone == False:
-                    perpcone_R = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
+                  perpcone_R = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
 
               # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
               parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
@@ -1169,6 +1169,12 @@ class ProcessMCBase(process_base.ProcessBase):
                 
               cone_parts_in_det_jet = parts_in_cone1
 
+              cone_parts_in_det_jet = parts_in_cone2
+
+              # particles in dynmaic area constructed already, now switch back to jetR for histogram names used in fill_matched_jet_histograms
+              if perpcone_R == jetR and self.do_rho_subtraction and self.static_perpcone == False:
+                perpcone_R = jetR 
+
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
                                    jet_truth_groomed_lund, jet_pp_det, jetR,
@@ -1176,8 +1182,6 @@ class ProcessMCBase(process_base.ProcessBase):
                                    jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                    R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                    holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
-
-              cone_parts_in_det_jet = parts_in_cone2
 
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
