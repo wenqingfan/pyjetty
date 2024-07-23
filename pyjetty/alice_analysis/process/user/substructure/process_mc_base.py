@@ -1174,6 +1174,7 @@ class ProcessMCBase(process_base.ProcessBase):
               # particles in dynmaic area constructed already, now switch back to jetR for histogram names used in fill_matched_jet_histograms
               if perpcone_R == jetR and self.do_rho_subtraction and self.static_perpcone == False:
                 perpcone_R = jetR 
+                print('set cone R back to jet R for dynmaic cone size',perpcone_R)
 
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
