@@ -1128,23 +1128,22 @@ class ProcessMCBase(process_base.ProcessBase):
 
             for perpcone_R in perpcone_R_list:
 
-              constituents = jet_det.constituents()
-              parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+              perpcone_R_effective = perpcone_R # effective cone size when finding perpcone particles
 
-              # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
-              if perpcone_R != jetR:
+              # Use jet cone parts as "signal" for perp cone if cone radius != jetR or if we are only checking the jetcones (in this case, use cone particles for jetcone R = jetR also), else use jet constituents as "signal" for perp cone
+              if self.do_only_jetcone or perpcone_R != jetR:
                 parts_in_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, perpcone_R)
-
-              if perpcone_R == jetR:
+              else:
+                constituents = jet_det.constituents()
+                parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
                 if self.do_rho_subtraction and self.static_perpcone == False:
-                  perpcone_R = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
-                  perpcone_R_static = jetR
+                  perpcone_R_effective = math.sqrt(jet_det.area()/np.pi) # NB: for dynamic cone size
 
               # NB: a deep copy of fj_particles_det_cones are made before re-labeling the particle user_index (copy created in find_parts_around_jet) and assembling the perp cone parts
-              parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R)
+              parts_in_perpcone1 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet1, perpcone_R_effective)
               parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
                 
-              parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R)
+              parts_in_perpcone2 = self.find_parts_around_jet(fj_particles_det_cones, perp_jet2, perpcone_R_effective)
               parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
               
               # use 999 and -999 to distinguish from prevous used labeling numbers
@@ -1171,10 +1170,6 @@ class ProcessMCBase(process_base.ProcessBase):
               cone_parts_in_det_jet = parts_in_cone1
 
               cone_parts_in_det_jet = parts_in_cone2
-
-              # particles in dynmaic area constructed already, now switch back to jetR for histogram names used in fill_matched_jet_histograms
-              if perpcone_R_static == jetR and self.do_rho_subtraction and self.static_perpcone == False:
-                perpcone_R = perpcone_R_static
 
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
