@@ -373,7 +373,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     for c in c_select_perp:
       pt_sum_perp += c.pt()
 
-    if cone_R != jetR:
+    if cone_R != jetR or self.do_only_jetcone:
       rho_local_perp = pt_sum_perp / (np.pi * cone_R * cone_R)
     else:
       if self.static_perpcone == True:
