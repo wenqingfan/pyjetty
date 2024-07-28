@@ -505,10 +505,6 @@ class ProcessDataBase(process_base.ProcessBase):
         # construct perp cones and fill histograms
         for perpcone_R in perpcone_R_list:
 
-          if perpcone_R == jetR:
-            if self.do_rho_subtraction and self.static_perpcone == False:
-                perpcone_R = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
-
           parts_in_cone1 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, +1)
           self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
@@ -524,16 +520,19 @@ class ProcessDataBase(process_base.ProcessBase):
     perp_jet = fj.PseudoJet()
     perp_jet.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + rotation_sign*np.pi/2, jet.m())
 
-    constituents = jet.constituents()
-    parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
-
-    # FIX ME: current implemetation is to use jet constituents as "signal" for perp cone if cone radius == jetR, else use jet cone as "signal" for perp cone. May want to implement both jet and jet cone later for radius = jet R case
-    if perpcone_R != jetR:
+    perpcone_R_effective = perpcone_R
+    # Use jet cone parts as "signal" for perp cone if cone radius != jetR or if we are only checking the jetcones (in this case, use cone particles for jetcone R = jetR also), else use jet constituents as "signal" for perp cone
+    if self.do_only_jetcone or perpcone_R != jetR:
       parts_in_jet = self.find_parts_around_jet(parts, jet, perpcone_R)
+    else:
+      constituents = jet.constituents()
+      parts_in_jet = self.copy_parts(constituents) # NB: make a copy so that the original jet constituents will not be modifed
+      if self.do_rho_subtraction and self.static_perpcone == False:
+        perpcone_R_effective = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
 
     # NB1: a deep copy already created in find_parts_around_jet(). Operations on the deep copy does not affect the oringinal parts     
     # NB2: when iterating using for loop through all the particle list like "for part in parts", operations like part.* will not change the parts. Need to use parts[*].* to change the parts  
-    parts_in_perpcone = self.find_parts_around_jet(parts, perp_jet, perpcone_R)
+    parts_in_perpcone = self.find_parts_around_jet(parts, perp_jet, perpcone_R_effective)
     # for part in parts_in_perpcone:
     #   print('before rotation (pt, eta, phi)',part.pt(),part.eta(),part.phi())
     parts_in_perpcone = self.rotate_parts(parts_in_perpcone, -rotation_sign*np.pi/2)
