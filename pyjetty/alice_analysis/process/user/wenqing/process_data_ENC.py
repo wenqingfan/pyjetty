@@ -379,8 +379,13 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       if self.static_perpcone == True:
         rho_local_perp = pt_sum_perp / (np.pi * jetR * jetR)
       elif jet.has_area():
-        rho_local_perp = pt_sum_perp / jet.area()
+        if jet.area() == 0:
+        # NB: this type of hets are currently skipped in analyze_accepted_jets()
+          rho_local_perp = -1
+        else:
+          rho_local_perp = pt_sum_perp / jet.area()
       else:
+        # NB: this type of hets are currently skipped in analyze_accepted_jets()
         rho_local_perp = -1
 
     if self.ENC_pair_cut:
