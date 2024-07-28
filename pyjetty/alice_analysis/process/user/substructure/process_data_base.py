@@ -443,6 +443,14 @@ class ProcessDataBase(process_base.ProcessBase):
     if not self.utils.is_det_jet_accepted(jet):
       return
           
+    # when using rho subtraction for PbPb analysis, skip jets with no area info or with zero area (NB: need to check how often this happens and if this results in any bias)
+    if self.do_rho_subtraction:
+      if jet.has_area():
+        if jet.area() == 0:
+          return
+      else:
+        return
+
     # Fill base histograms
     if self.do_rho_subtraction and rho_bge > 0:
       jet_pt_ungroomed = jet.pt() - rho_bge*jet.area()
