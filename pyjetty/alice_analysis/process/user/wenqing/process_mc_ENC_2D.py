@@ -236,10 +236,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               match_found = True
               break
 
-          if not match_found:
+          # if not match_found:
 
-            hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
+          #   hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
+          #   getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
