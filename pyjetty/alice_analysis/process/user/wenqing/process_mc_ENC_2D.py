@@ -174,7 +174,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           # RL resolution check for pairs
           name = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
-          h = ROOT.TH2D(name, name, 50, RLbins, 50, RLbins)
+          h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
           h.GetXaxis().SetTitle('R_{L}^{det}')
           h.GetZaxis().SetTitle('R_{L}^{truth}')
           setattr(self, name, h)       
