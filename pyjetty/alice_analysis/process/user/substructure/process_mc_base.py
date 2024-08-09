@@ -380,6 +380,20 @@ class ProcessMCBase(process_base.ProcessBase):
       h = ROOT.TH1D(name, name, 100, 0, 10)
       setattr(self, name, h)
 
+    if !self.do_only_track_matching and (self.do_3D_unfold or self.do_2D_unfold):
+      name = 'h2d_matched_part_dptoverpt_vs_truth_pt'
+      h = ROOT.TH2D(name, name, 200, -0.2, 0.2, 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_matched_part_vs_truth_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_truth_part_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
+      name = 'h1d_det_part_pt'
+      h = ROOT.TH1D(name, name, 100, 0, 10)
+      setattr(self, name, h)
+
   #---------------------------------------------------------------
   # Initialize histograms
   #---------------------------------------------------------------
