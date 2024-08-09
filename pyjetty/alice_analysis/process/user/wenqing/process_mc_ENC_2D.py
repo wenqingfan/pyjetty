@@ -264,11 +264,16 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     constituents = fj.sorted_by_pt(jet.constituents())
     c_select = fj.vectorPJ()
 
+    # _v = fj.vectorPJ()
+    # for c in jet.constituents():
+    #   if c.perp() > 1:
+    #      _v.push_back(c)
+
     for c in constituents:
       if c.pt() < trk_thrd:
         break # NB: use the break statement since constituents are already sorted (so make sure the constituents are sorted)
       if c.user_index() >= 0:
-        c_select.append(c) # NB: only consider 'signal' particles
+        c_select.push_back(c) # NB: only consider 'signal' particles
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
@@ -290,8 +295,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     EEC_indicies2 = EEC_cb.indices2() # contains list of 2nd track in the pair
 
     for i in range(len(EEC_rs)):
-      event_index1 = c_select[EEC_indicies1[i]].user_index()
-      event_index2 = c_select[EEC_indicies2[i]].user_index()
+      event_index1 = _v[EEC_indicies1[i]].user_index()
+      event_index2 = _v[EEC_indicies2[i]].user_index()
       pairs.append(EEC_pair(event_index1, event_index2, EEC_weights[i], EEC_rs[i], jet_pt))
 
     return pairs
