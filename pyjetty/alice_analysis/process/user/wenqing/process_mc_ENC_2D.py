@@ -38,7 +38,6 @@ from pyjetty.alice_analysis.process.user.substructure import process_mc_base
 from pyjetty.alice_analysis.process.base import thermal_generator
 from pyjetty.mputils.csubtractor import CEventSubtractor
 
-
 def linbins(xmin, xmax, nbins):
   lspace = np.linspace(xmin, xmax, nbins+1)
   arr = array.array('f', lspace)
@@ -164,6 +163,15 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           h.GetXaxis().SetTitle('weight^{det}')
           h.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
           setattr(self, name, h)          
+
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  # Fill 2D histogram of (pt, obs)
+  # This is just a dummy function here
+  #---------------------------------------------------------------
+  def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
+                                 grooming_setting, obs_label, jet_pt_ungroomed):
+    return
 
   #---------------------------------------------------------------
   # This function is called per jet subconfigration 
