@@ -38,8 +38,6 @@ from pyjetty.alice_analysis.process.user.substructure import process_mc_base
 from pyjetty.alice_analysis.process.base import thermal_generator
 from pyjetty.mputils.csubtractor import CEventSubtractor
 
-from pyjetty.alice_analysis.analysis.base import common_base
-from pyjetty.alice_analysis.analysis.base import analysis_utils
 
 def linbins(xmin, xmax, nbins):
   lspace = np.linspace(xmin, xmax, nbins+1)
