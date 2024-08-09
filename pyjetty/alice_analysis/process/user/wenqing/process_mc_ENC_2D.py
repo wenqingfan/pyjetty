@@ -20,6 +20,7 @@ import ROOT
 import yaml
 import array
 import math
+from bisect import bisect
 # from array import *
 
 ROOT.gSystem.Load("/global/cfs/cdirs/alice/wenqing/mypyjetty/heppy/external/roounfold/roounfold-current/lib/libRooUnfold.so")
@@ -111,6 +112,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       binnings_reco = [np.logspace(-5,0,n_bins_reco[0]+1), \
                   np.array([40, 50, 60, 70, 80, 100, 120]).astype(float) ]
 
+      self.n_RLbins = 50
+      self.RLbins = logbins(1E-4,1,self.n_RLbins)
+      # self.RL_lo_list = self.RLbins[:-1]
+      # self.RL_hi_list = self.RLbins[1:]
+
     for observable in self.observable_list:
       
       # can take EEC with different energy power (currently only EEC with power n = 1 implemented)
@@ -143,26 +149,27 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           #=======================================
           # 2D unfolding for energy correlators
           #=======================================
-          name = 'h_{}_reco_R{}_{}'.format(observable, jetR, obs_label)
-          h2_reco = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
-          h2_reco.GetXaxis().SetTitle('weight^{det}')
-          h2_reco.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
-          setattr(self, name, h2_reco)
-          name = 'h_{}_gen_R{}_{}'.format(observable, jetR, obs_label)
-          h2_gen = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
-          h2_gen.GetXaxis().SetTitle('weight^{truth}')
-          h2_gen.GetZaxis().SetTitle('p^{truth}_{T,ch jet}')
-          setattr(self, name, h2_gen)
-          name = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
-          response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
-          setattr(self, name, response)
+          for iRL in range(self.n_RLbins):
+            name = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            h2_reco = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
+            h2_reco.GetXaxis().SetTitle('weight^{det}')
+            h2_reco.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
+            setattr(self, name, h2_reco)
+            name = 'h_{}{:d}_gen_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            h2_gen = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
+            h2_gen.GetXaxis().SetTitle('weight^{truth}')
+            h2_gen.GetZaxis().SetTitle('p^{truth}_{T,ch jet}')
+            setattr(self, name, h2_gen)
+            name = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
+            setattr(self, name, response)
 
-          # for purity correction
-          name = 'h_{}_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
-          h = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
-          h.GetXaxis().SetTitle('weight^{det}')
-          h.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
-          setattr(self, name, h)          
+            # for purity correction
+            name = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            h = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
+            h.GetXaxis().SetTitle('weight^{det}')
+            h.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
+            setattr(self, name, h)        
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -215,9 +222,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
         for d_pair in det_pairs:
 
-          # fill one RL bin for now
-          if d_pair.r > 0.04 and d_pair.r < 0.05:
-            hname = 'h_{}_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
+          # determine RL bin for det pairs
+          iRL = bisect(self.RLbins, d_pair.r)-1 # index from 0
+
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
 
         ########################## TTree output generation #########################
@@ -227,33 +236,39 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
         # pair matching
         for t_pair in truth_pairs:
 
-          # fill one RL bin for now
-          if t_pair.r > 0.04 and t_pair.r < 0.05:
-            hname = 'h_{}_gen_R{}_{}'.format(observable, jetR, obs_label)
+          # determine RL bin fr truth pairs
+          iRL = bisect(self.RLbins, t_pair.r)-1 # index from 0
+
+          if iRL ==40:
+            print("new trurh pair")
+
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_{}{:d}_gen_R{}_{}'.format(observable, iRL, jetR, obs_label)
             getattr(self, hname).Fill(t_pair.weight, t_pair.pt, self.pt_hat)
-            print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
+            if iRL == 40:
+              print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
 
           match_found = False
           for d_pair in det_pairs:
 
             if d_pair.is_equal(t_pair):
 
-              # fill one RL bin for now (assuming very similar d_pair.r and t_pair.r)
-              if t_pair.r > 0.04 and t_pair.r < 0.05:
+              # NB: assuming very similar d_pair.r and t_pair.r
+              if iRL == 40:
                 print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
-                hname = 'h_{}_reco_R{}_{}'.format(observable, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
-                hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
+              hname = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
+              hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
 
-                match_found = True
-                break
+              match_found = True
+              break
 
           if not match_found:
-            print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
-            hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
+            if iRL == 40:
+              print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
+            hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
             getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
-        print("next gen pair")
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
