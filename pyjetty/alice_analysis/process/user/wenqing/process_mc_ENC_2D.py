@@ -286,12 +286,12 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     EEC_weights = EEC_cb.weights() # cb.correlator(npoint).weights() constains list of weights
     EEC_rs = EEC_cb.rs() # cb.correlator(npoint).rs() contains list of RL
-    EEC_indicies1 = int(EEC_cb.indices1()) # contains list of 1st track in the pair (index should be based on the indices in c_select)
-    EEC_indicies2 = int(EEC_cb.indices2()) # contains list of 2nd track in the pair
+    EEC_indicies1 = EEC_cb.indices1() # contains list of 1st track in the pair (index should be based on the indices in c_select)
+    EEC_indicies2 = EEC_cb.indices2() # contains list of 2nd track in the pair
 
     for i in range(len(EEC_rs)):
-      event_index1 = c_select[EEC_indicies1[i]].user_index()
-      event_index2 = c_select[EEC_indicies2[i]].user_index()
+      event_index1 = c_select[int(EEC_indicies1[i])].user_index()
+      event_index2 = c_select[int(EEC_indicies2[i])].user_index()
       pairs.append(EEC_pair(event_index1, event_index2, EEC_weights[i], EEC_rs[i], jet_pt))
 
     return pairs
