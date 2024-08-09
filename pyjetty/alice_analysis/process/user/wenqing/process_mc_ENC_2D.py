@@ -150,6 +150,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           # 2D unfolding for energy correlators
           #=======================================
           for iRL in range(self.n_RLbins):
+            
             name = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
             h2_reco = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
             h2_reco.GetXaxis().SetTitle('weight^{det}')
@@ -169,7 +170,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             h = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
             h.GetXaxis().SetTitle('weight^{det}')
             h.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
-            setattr(self, name, h)        
+            setattr(self, name, h)  
+
+          # RL resolution check for pairs
+          name = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
+          h = ROOT.TH2D(name, name, 50, RLbins, 50, RLbins)
+          h.GetXaxis().SetTitle('R_{L}^{det}')
+          h.GetZaxis().SetTitle('R_{L}^{truth}')
+          setattr(self, name, h)       
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
@@ -239,24 +247,28 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           # determine RL bin fr truth pairs
           iRL = bisect(self.RLbins, t_pair.r)-1 # index from 0
 
-          if iRL ==40:
-            print("new trurh pair")
+          # if iRL ==40:
+          #   print("new trurh pair")
 
           if iRL >= 0 and iRL < self.n_RLbins:
             hname = 'h_{}{:d}_gen_R{}_{}'.format(observable, iRL, jetR, obs_label)
             getattr(self, hname).Fill(t_pair.weight, t_pair.pt, self.pt_hat)
-            if iRL == 40:
-              print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
+            # if iRL == 40:
+            #   print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
 
           match_found = False
           for d_pair in det_pairs:
 
             if d_pair.is_equal(t_pair):
 
-              # NB: assuming very similar d_pair.r and t_pair.r
-              if iRL == 40:
-                print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
+              # fill the RL at det v.s. truth level (no energy weight)
+              hname = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
+              getattr(self, hname).Fill(d_pair.r, t_pair.r, self.pt_hat)
+              
+              # if iRL == 40:
+              #   print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
 
+              # NB: assuming very similar d_pair.r and t_pair.r
               if iRL >= 0 and iRL < self.n_RLbins:
                 hname = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
                 getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
@@ -267,9 +279,9 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               break
 
           if not match_found:
-            
-            if iRL == 40:
-              print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
+
+            # if iRL == 40:
+            #   print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
 
             if iRL >= 0 and iRL < self.n_RLbins:
               hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
