@@ -98,11 +98,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     else:
       # define binnings
       # these are the truth level binnings
-      n_bins_truth = [20, 8] # WARNING RooUnfold seg faults if too many bins used
+      n_bins_truth = [20, 10] # WARNING RooUnfold seg faults if too many bins used
       # these are the truth level binnings
       # binnings[0] -- weight, binnings[1] -- jet pT
       binnings_truth = [np.logspace(-5,0,n_bins_truth[0]+1), \
-                  np.array([20, 30, 40, 50, 60, 80, 100, 150, 200]).astype(float) ]
+                  np.array([20, 30, 40, 50, 60, 70, 80, 100, 120, 150, 200]).astype(float) ]
       # slight difference for reco pt bin
       # binnings[0] -- weight, binnings[1] -- jet pT
       n_bins_reco = [20, 6]
@@ -112,7 +112,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     for observable in self.observable_list:
       
       # can take EEC with different energy power (currently only EEC with power n = 1 implemented)
-      if observable == 'EEC':
+      if observable == 'jet_ENC_RL':
       
         for trk_thrd in self.obs_settings[observable]:
 
@@ -191,7 +191,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     for observable in self.observable_list:
       
-      if observable == 'EEC':
+      if observable == 'jet_ENC_RL':
         
         # truth level EEC pairs
         truth_pairs = self.get_EEC_pairs(jet_truth, jet_truth.perp(), trk_thrd, ipoint=2)
