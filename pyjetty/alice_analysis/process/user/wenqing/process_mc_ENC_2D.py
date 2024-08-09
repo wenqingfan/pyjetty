@@ -112,8 +112,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       binnings_reco = [np.logspace(-5,0,n_bins_reco[0]+1), \
                   np.array([40, 50, 60, 70, 80, 100, 120]).astype(float) ]
 
-      self.n_RLbins = 50
-      self.RLbins = logbins(1E-4,1,self.n_RLbins)
+      self.n_RLbins = 30
+      self.RLbins = logbins(1E-2,1,self.n_RLbins)
       # self.RL_lo_list = self.RLbins[:-1]
       # self.RL_hi_list = self.RLbins[1:]
 
