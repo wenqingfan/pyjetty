@@ -22,6 +22,8 @@ import array
 import math
 # from array import *
 
+ROOT.gSystem.Load("/global/cfs/cdirs/alice/wenqing/mypyjetty/heppy/external/roounfold/roounfold-current/lib/libRooUnfold.so")
+
 # Fastjet via python (from external library heppy)
 import fastjet as fj
 import fjcontrib
