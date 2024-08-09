@@ -141,7 +141,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           h1_gen.GetYaxis().SetTitle('Counts')
           setattr(self, name, h1_gen)
           # name = 'h_jetpt_response1D_R{}_{}'.format(jetR, trk_thrd)
-          name = 'response1D'
+          name = "response1D"
           response1D = ROOT.RooUnfoldResponse(h1_reco, h1_gen)
           setattr(self, name, response1D)
 
@@ -213,7 +213,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     getattr(self, hname).Fill(jet_pt_det)
     hname = 'h_jetpt_gen1D_R{}_{}'.format(jetR, obs_label)
     getattr(self, hname).Fill(jet_truth.perp())
-    hname = 'response1D'
+    hname = "response1D"
     # hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
     getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
