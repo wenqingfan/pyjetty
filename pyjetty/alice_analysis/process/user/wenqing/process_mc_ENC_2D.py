@@ -140,7 +140,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           h1_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
           h1_gen.GetYaxis().SetTitle('Counts')
           setattr(self, name, h1_gen)
-          name = 'h_jetpt_response1D_R{}_{}'.format(jetR, trk_thrd)
+          # name = 'h_jetpt_response1D_R{}_{}'.format(jetR, trk_thrd)
+          name = 'response1D'
           response1D = ROOT.RooUnfoldResponse(h1_reco, h1_gen)
           setattr(self, name, response1D)
 
@@ -209,11 +210,12 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     trk_thrd = obs_setting
 
     hname = 'h_jetpt_reco1D_R{}_{}'.format(jetR, obs_label)
-    getattr(self, hname).Fill(jet_pt_det, self.pt_hat)
+    getattr(self, hname).Fill(jet_pt_det)
     hname = 'h_jetpt_gen1D_R{}_{}'.format(jetR, obs_label)
-    getattr(self, hname).Fill(jet_truth.perp(), self.pt_hat)
-    hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
-    getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
+    getattr(self, hname).Fill(jet_truth.perp())
+    hname = 'response1D'
+    # hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
+    getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
     for observable in self.observable_list:
       
@@ -235,7 +237,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           if iRL >= 0 and iRL < self.n_RLbins:
             hname = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
+            getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
 
         ########################## TTree output generation #########################
         # composite of truth and smeared pairs, fill the TTree preprocessed
@@ -252,7 +254,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           if iRL >= 0 and iRL < self.n_RLbins:
             hname = 'h_{}{:d}_gen_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            getattr(self, hname).Fill(t_pair.weight, t_pair.pt, self.pt_hat)
+            getattr(self, hname).Fill(t_pair.weight, t_pair.pt)
             # if iRL == 40:
             #   print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
 
@@ -263,7 +265,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
               # fill the RL at det v.s. truth level (no energy weight)
               hname = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
-              getattr(self, hname).Fill(d_pair.r, t_pair.r, self.pt_hat)
+              getattr(self, hname).Fill(d_pair.r, t_pair.r)
               
               # if iRL == 40:
               #   print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
@@ -271,9 +273,9 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               # NB: assuming very similar d_pair.r and t_pair.r
               if iRL >= 0 and iRL < self.n_RLbins:
                 hname = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
                 hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt)
 
               match_found = True
               break
@@ -285,7 +287,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
             if iRL >= 0 and iRL < self.n_RLbins:
               hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
+              getattr(self, hname).Miss(t_pair.weight, t_pair.pt)
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
