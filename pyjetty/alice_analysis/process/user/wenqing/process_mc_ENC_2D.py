@@ -218,7 +218,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           # fill one RL bin for now
           if d_pair.r > 0.04 and d_pair.r < 0.05:
             hname = 'h_{}_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
+            getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
 
         ########################## TTree output generation #########################
         # composite of truth and smeared pairs, fill the TTree preprocessed
@@ -230,7 +230,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           # fill one RL bin for now
           if t_pair.r > 0.04 and t_pair.r < 0.05:
             hname = 'h_{}_gen_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Fill(t_pair.weight, t_pair.pt)
+            getattr(self, hname).Fill(t_pair.weight, t_pair.pt, self.pt_hat)
+            print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
 
           match_found = False
           for d_pair in det_pairs:
@@ -239,18 +240,20 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
               # fill one RL bin for now (assuming very similar d_pair.r and t_pair.r)
               if t_pair.r > 0.04 and t_pair.r < 0.05:
+                print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
                 hname = 'h_{}_reco_R{}_{}'.format(observable, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
                 hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
-                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
 
                 match_found = True
                 break
 
           if not match_found:
-
+            print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
             hname = 'h_{}_response_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Miss(t_pair.weight, t_pair.pt)
+            getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
+        print("next gen pair")
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
