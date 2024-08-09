@@ -418,7 +418,7 @@ class ProcessBase(common_base.CommonBase):
       obj = getattr(self, attr)
 
       # Write all ROOT histograms and trees to file
-      types = (ROOT.TH1, ROOT.THnBase, ROOT.TTree)
+      types = (ROOT.TH1, ROOT.THnBase, ROOT.TTree, ROOT.RooUnfoldResponse)
       if isinstance(obj, types):
         obj.Write()
   
