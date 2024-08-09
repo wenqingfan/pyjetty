@@ -61,9 +61,23 @@ class ProcessMCBase(process_base.ProcessBase):
   
     # Initialize base class
     super(ProcessMCBase, self).__init__(input_file, config_file, output_dir, debug_level, **kwargs)
-    
+
     # Initialize configuration
     self.initialize_config()
+
+    # find pt_hat for set of events in input_file, assumes all events in input_file are in the same pt_hat bin
+    if self.do_3D_unfold or self.do_2D_unfold:
+      self.pt_hat_bin = int(input_file.split('/')[len(input_file.split('/'))-4]) # depends on exact format of input_file name
+      if self.is_pp:
+        with open("/global/cfs/projectdirs/alice/alicepro/hiccup/rstorage/alice/data/LHC18b8/scaleFactors.yaml", 'r') as stream:
+            pt_hat_yaml = yaml.safe_load(stream)
+      else:
+        with open("/global/cfs/projectdirs/alice/alicepro/hiccup/rstorage/alice/data/LHC20g4/scaleFactors.yaml", 'r') as stream:
+            pt_hat_yaml = yaml.safe_load(stream)
+
+      self.pt_hat = pt_hat_yaml[self.pt_hat_bin]
+      print("pt hat bin : " + str(self.pt_hat_bin))
+      print("pt hat weight : " + str(self.pt_hat))
     
   #---------------------------------------------------------------
   # Initialize config file into class members
@@ -177,6 +191,28 @@ class ProcessMCBase(process_base.ProcessBase):
       self.thermal_generator = thermal_generator.ThermalGenerator(N_avg, sigma_N, beta)
     else:
       self.thermal_model = False
+
+    # if process for 3D unfolding of energy correlators
+    if 'do_3D_unfold' in config:
+      self.do_3D_unfold = config['do_3D_unfold']
+    else:
+      self.do_3D_unfold = False
+
+    if self.do_3D_unfold == True:
+      # NB: have not implemented 3D unfolding for jet cone or fast simulation setup
+      self.do_jetcone = False 
+      self.ENC_fastsim = False 
+
+    # if process for 2D unfolding of energy correlators
+    if 'do_2D_unfold' in config:
+      self.do_2D_unfold = config['do_2D_unfold']
+    else:
+      self.do_2D_unfold = False
+
+    if self.do_2D_unfold == True:
+      # NB: have not implemented 2D unfolding for jet cone or fast simulation setup
+      self.do_jetcone = False 
+      self.ENC_fastsim = False 
 
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
@@ -400,6 +436,51 @@ class ProcessMCBase(process_base.ProcessBase):
       h = ROOT.TH2F(name, name, 300, 0, 300, 100, 0., 1.)
       setattr(self, name, h)
 
+      if self.do_3D_unfold or self.do_2D_unfold:
+
+        if self.is_pp:
+          # define binnings
+          # these are the truth level binnings for jet pT
+          n_ptbins_truth = 7 
+          ptbinnings_truth = np.array([5, 10, 20, 40, 60, 80, 100, 150]).astype(float)
+          # slight difference for reco jet pT bin
+          n_ptbins_reco = 6
+          ptbinnings_reco = np.array([10, 20, 40, 60, 80, 100, 150]).astype(float)
+          
+          # efficiency and purity check for 1D jet pT unfolding
+          name = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
+          h = ROOT.TH1D(name, name, n_ptbins_truth, ptbinnings_truth)
+          h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+          h.GetYaxis().SetTitle('Counts')
+          setattr(self, name, h)
+
+          name = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
+          h = ROOT.TH1D(name, name, n_ptbins_reco, ptbinnings_reco)
+          h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+          h.GetYaxis().SetTitle('Counts')
+          setattr(self, name, h)
+        else:
+          # define binnings
+          # these are the truth level binnings for jet pT
+          n_ptbins_truth = 10 
+          ptbinnings_truth = np.array([20, 30, 40, 50, 60, 70, 80, 100, 120, 150, 200]).astype(float)
+          # slight difference for reco jet pT bin
+          n_ptbins_reco = 6
+          ptbinnings_reco = np.array([40, 50, 60, 70, 80, 100, 120]).astype(float)
+          
+          # efficiency and purity check for 1D jet pT unfolding
+          name = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
+          h = ROOT.TH1D(name, name, n_ptbins_truth, ptbinnings_truth)
+          h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+          h.GetYaxis().SetTitle('Counts')
+          setattr(self, name, h)
+
+          name = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
+          h = ROOT.TH1D(name, name, n_ptbins_reco, ptbinnings_reco)
+          h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+          h.GetYaxis().SetTitle('Counts')
+          setattr(self, name, h)
+
   #---------------------------------------------------------------
   # Main function to loop through and analyze events
   #---------------------------------------------------------------
@@ -532,6 +613,9 @@ class ProcessMCBase(process_base.ProcessBase):
           fj_particles_truth[index].set_python_info(ecorr_user_info)
           # fj_particles_truth[index].set_user_index(int(index))
 
+    if self.do_3D_unfold or self.do_2D_unfold:
+      self.perform_track_matching(fj_particles_det, fj_particles_truth)
+    
     if self.jetscape:
       if type(fj_particles_det_holes) != fj.vectorPJ or type(fj_particles_truth_holes) != fj.vectorPJ:
         print('fj_particles_holes type mismatch -- skipping event')
@@ -741,8 +825,13 @@ class ProcessMCBase(process_base.ProcessBase):
       
       # if rho subtraction, require jet pt > 5 after subtration
       if self.do_rho_subtraction and rho_bge > 0:
-        if jet.perp()-rho_bge*jet.area() < 5:
-          # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
+        if jet.has_area():
+          if jet.area() == 0:
+            is_jet_selected = False # Skip jets with zero area when using the median subtraction method for PbPb
+          if jet.perp()-rho_bge*jet.area() < 5:
+            # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
+            is_jet_selected = False
+        else:
           is_jet_selected = False
 
       if is_jet_selected:
@@ -806,6 +895,18 @@ class ProcessMCBase(process_base.ProcessBase):
           
     # Loop through jets and fill response histograms if both det and truth jets are unique match
     result = [self.fill_jet_matches(jet_det, jetR, R_max, fj_particles_det_holes, fj_particles_truth_holes, rho_bge, fj_particles_det_cones, fj_particles_truth_cones) for jet_det in jets_det_selected]
+    
+    # FIX ME: debugging message (from Kyle): not implemented in this code
+    # if self.do_3D_unfold:
+    #   myptselector = 40.
+    #   if det_match.perp() > myptselector : n_matches += 1
+
+    #     """
+    #     if event_counter % 1000 == 0 and n_truth > 0 and n_reco > 0:
+    #       print("truth {} det {} matches {}, [ {}, {} ]".format(n_truth, n_reco, n_matches, n_matches / n_truth, n_matches / n_reco))
+        
+    #     event_counter += 1
+    #     """
 
   #---------------------------------------------------------------
   # Fill some background histograms
@@ -869,6 +970,10 @@ class ProcessMCBase(process_base.ProcessBase):
     hname = 'h_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
     self.fill_unmatched_jet_histograms(jet, jetR, hname)
 
+    if self.do_3D_unfold or self.do_2D_unfold:
+      hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
+      getattr(self, hname).Fill(jet.perp(), self.pt_hat)
+
   #---------------------------------------------------------------
   # Fill det jet histograms
   #---------------------------------------------------------------
@@ -900,6 +1005,14 @@ class ProcessMCBase(process_base.ProcessBase):
           hname = 'h_{{}}_JetPt_R{}_{{}}_Rmax{}'.format(jetR, R_max)
           self.fill_unmatched_jet_histograms(jet, jetR, hname, rho_bge)
         # NB: check if also want to have these histograms for non-termal model when using CS subtraction
+
+    if self.do_3D_unfold or self.do_2D_unfold:
+      jet_pt = jet.pt()
+      if self.do_rho_subtraction:
+        jet_pt = jet.pt()-rho_bge*jet.area()
+      
+      hname = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
+      getattr(self, hname).Fill(jet_pt, self.pt_hat)
   
   #---------------------------------------------------------------
   # This function is called once for each jet
@@ -1288,13 +1401,13 @@ class ProcessMCBase(process_base.ProcessBase):
       fj_particles_det[i].set_user_index(dummy_index)
 
     # perform matching, give matches the same user_index
-    index = 0
+    index = 0 # NB: Kyle used index >=1, but it should be okay to start from 0 
     det_used = []
     # note: CANNOT loop like this: <for truth_part in fj_particles_truth:>
     for itruth in range(len(fj_particles_truth)):
       truth_part = fj_particles_truth[itruth]
 
-      truth_part.set_user_index(index)
+      truth_part.set_user_index(index) # truth particle with index 0 to len(fj_particles_truth)-1
 
       candidates = []
       candidates_R = []
@@ -1309,7 +1422,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
       # if match found
       if len(candidates) > 0:
-        det_match = candidates[np.argmin(candidates_R)]
+        det_match = candidates[np.argmin(candidates_R)] # use the closest
         det_match.set_user_index(index)
         det_used.append(det_match)
 
