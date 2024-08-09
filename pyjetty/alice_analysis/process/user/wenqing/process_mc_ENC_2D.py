@@ -256,19 +256,24 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               # NB: assuming very similar d_pair.r and t_pair.r
               if iRL == 40:
                 print('matched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
-              hname = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
-              hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
+
+              if iRL >= 0 and iRL < self.n_RLbins:
+                hname = 'h_{}{:d}_reco_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, self.pt_hat)
+                hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt, self.pt_hat)
 
               match_found = True
               break
 
           if not match_found:
+            
             if iRL == 40:
               print('unmatched reco pair with distance',d_pair.r,'weight',d_pair.weight,'pt',d_pair.pt)
-            hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
+
+            if iRL >= 0 and iRL < self.n_RLbins:
+              hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
