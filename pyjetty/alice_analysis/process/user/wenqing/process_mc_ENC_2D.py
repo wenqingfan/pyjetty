@@ -18,9 +18,8 @@ import argparse
 import numpy as np
 import ROOT
 import yaml
-import math
 import array
-from array import *
+import math
 from bisect import bisect
 # from array import *
 
@@ -255,7 +254,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
     else:
       x = ([jet_pt_det, jet_truth.perp()])
-      x_array = array('d', x)
+      x_array = array.array('d', x)
       hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
       getattr(self, hname).Fill(x_array)
 
@@ -324,7 +323,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 else:
                   hname = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
                   x = ([np.log10(d_pair.weight), d_pair.pt, np.log10(t_pair.weight), t_pair.pt])
-                  x_array = array('d', x)
+                  x_array = array.array('d', x)
                   getattr(self, hname).Fill(x_array)
 
               match_found = True
@@ -343,7 +342,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               else:
                 hname = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
                 x = ([np.log10(t_pair.weight), t_pair.pt])
-                x_array = array('d', x)
+                x_array = array.array('d', x)
                 getattr(self, hname).Fill(x_array)
       
   #---------------------------------------------------------------
