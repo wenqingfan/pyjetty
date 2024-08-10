@@ -210,7 +210,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             setattr(self, name, h)  
 
           # RL resolution check for pairs
-          name = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+          name = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
           h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
           h.GetXaxis().SetTitle('R_{L}^{det}')
           h.GetZaxis().SetTitle('R_{L}^{truth}')
@@ -245,16 +245,16 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     trk_thrd = obs_setting
 
-    hname = 'h_jetpt_reco1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+    hname = 'h_jetpt_reco1D_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
     getattr(self, hname).Fill(jet_pt_det)
-    hname = 'h_jetpt_gen1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+    hname = 'h_jetpt_gen1D_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
     getattr(self, hname).Fill(jet_truth.perp())
     
     if self.save_RUResponse:
-      hname = 'h_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+      hname = 'h_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
     else:
-      hname = 'THnF_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+      hname = 'THnF_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
     for observable in self.observable_list:
@@ -304,7 +304,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             if d_pair.is_equal(t_pair):
 
               # fill the RL at det v.s. truth level (no energy weight)
-              hname = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
+              hname = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
               getattr(self, hname).Fill(d_pair.r, t_pair.r)
               
               # if iRL == 40:
