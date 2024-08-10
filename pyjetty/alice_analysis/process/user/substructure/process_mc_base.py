@@ -214,6 +214,12 @@ class ProcessMCBase(process_base.ProcessBase):
       self.do_jetcone = False 
       self.ENC_fastsim = False 
 
+    # unless this flag is set to true, save RM in ThnF format
+    if 'save_RUResponse' in config:
+      self.save_RUResponse = config['save_RUResponse']
+    else:
+      self.save_RUResponse = False
+
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
     #   The observable list stores the observable setting, e.g. subjetR
@@ -986,7 +992,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
     if self.do_3D_unfold or self.do_2D_unfold:
       hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
-      getattr(self, hname).Fill(jet.perp(), self.pt_hat)
+      getattr(self, hname).Fill(jet.perp())
 
   #---------------------------------------------------------------
   # Fill det jet histograms
@@ -1026,7 +1032,7 @@ class ProcessMCBase(process_base.ProcessBase):
         jet_pt = jet.pt()-rho_bge*jet.area()
       
       hname = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
-      getattr(self, hname).Fill(jet_pt, self.pt_hat)
+      getattr(self, hname).Fill(jet_pt)
   
   #---------------------------------------------------------------
   # This function is called once for each jet
