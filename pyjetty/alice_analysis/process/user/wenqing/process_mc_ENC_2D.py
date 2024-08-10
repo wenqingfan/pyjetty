@@ -130,6 +130,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           #      1D unfolding for jet pT
           #=======================================
           # 1D to 1D RM
+          # FIX ME: only work when trk_thrd is integer
           name = 'h_jetpt_reco1D_R{:.0f}_{:.0f}'.format(jetR*10, trk_thrd)
           h1_reco = ROOT.TH1D(name, name, n_bins_reco[1], binnings_reco[1])
           h1_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
@@ -164,12 +165,12 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           #=======================================
           for iRL in range(self.n_RLbins):
             
-            name = 'h_{}{:d}_reco_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+            name = 'h_{}{:d}_reco_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
             h2_reco = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
             h2_reco.GetXaxis().SetTitle('weight^{det}')
             h2_reco.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h2_reco)
-            name = 'h_{}{:d}_gen_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+            name = 'h_{}{:d}_gen_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
             h2_gen = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
             h2_gen.GetXaxis().SetTitle('weight^{truth}')
             h2_gen.GetZaxis().SetTitle('p^{truth}_{T,ch jet}')
@@ -178,7 +179,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             if self.save_RUResponse:
               # save response matrix in RooUnfoldResponse format directly
               # fill misses pair by pair
-              name = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+              name = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
               response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
               response.SetName(name)
               setattr(self, name, response)
@@ -202,14 +203,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               self.create_thn(name, title, dim, nbins, min, max)
 
             # for purity correction
-            name = 'h_{}{:d}_reco_unmatched_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+            name = 'h_{}{:d}_reco_unmatched_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
             h = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
             h.GetXaxis().SetTitle('weight^{det}')
             h.GetZaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h)  
 
           # RL resolution check for pairs
-          name = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+          name = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
           h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
           h.GetXaxis().SetTitle('R_{L}^{det}')
           h.GetZaxis().SetTitle('R_{L}^{truth}')
@@ -244,16 +245,16 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     trk_thrd = obs_setting
 
-    hname = 'h_jetpt_reco1D_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+    hname = 'h_jetpt_reco1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
     getattr(self, hname).Fill(jet_pt_det)
-    hname = 'h_jetpt_gen1D_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+    hname = 'h_jetpt_gen1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
     getattr(self, hname).Fill(jet_truth.perp())
     
     if self.save_RUResponse:
-      hname = 'h_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+      hname = 'h_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
     else:
-      hname = 'THnF_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+      hname = 'THnF_jetpt_response1D_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
     for observable in self.observable_list:
@@ -275,7 +276,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           iRL = bisect(self.RLbins, d_pair.r)-1 # index from 0
 
           if iRL >= 0 and iRL < self.n_RLbins:
-            hname = 'h_{}{:d}_reco_unmatched_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+            hname = 'h_{}{:d}_reco_unmatched_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
             getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
 
         ########################## TTree output generation #########################
@@ -292,7 +293,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           #   print("new trurh pair")
 
           if iRL >= 0 and iRL < self.n_RLbins:
-            hname = 'h_{}{:d}_gen_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+            hname = 'h_{}{:d}_gen_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
             getattr(self, hname).Fill(t_pair.weight, t_pair.pt)
             # if iRL == 40:
             #   print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
@@ -303,7 +304,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             if d_pair.is_equal(t_pair):
 
               # fill the RL at det v.s. truth level (no energy weight)
-              hname = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, obs_label)
+              hname = 'h2d_matched_pair_RL_truth_vs_det_R{:.0f}_{:.0f}'.format(jetR, trk_thrd)
               getattr(self, hname).Fill(d_pair.r, t_pair.r)
               
               # if iRL == 40:
@@ -312,14 +313,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               # NB: assuming very similar d_pair.r and t_pair.r
               if iRL >= 0 and iRL < self.n_RLbins:
                 
-                hname = 'h_{}{:d}_reco_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+                hname = 'h_{}{:d}_reco_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
                 getattr(self, hname).Fill(d_pair.weight, d_pair.pt)
                 
                 if self.save_RUResponse:
-                  hname = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label, self.pt_hat) # NB: if RooUnfoldResponse format, applying scaling during while processing
+                  hname = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd, self.pt_hat) # NB: if RooUnfoldResponse format, applying scaling during while processing
                   getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt)
                 else:
-                  hname = 'THnF_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+                  hname = 'THnF_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
                   getattr(self, hname).Fill(np.log10(d_pair.weight), d_pair.pt, np.log10(t_pair.weight), t_pair.pt)
 
               match_found = True
@@ -333,10 +334,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             if iRL >= 0 and iRL < self.n_RLbins:
               
               if self.save_RUResponse:
-                hname = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+                hname = 'h_{}{:d}_response_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
                 getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)  # NB: if RooUnfoldResponse format, applying scaling during while processing
               else:
-                hname = 'THnF_{}{:d}_response_miss_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, obs_label)
+                hname = 'THnF_{}{:d}_response_miss_R{:.0f}_{:.0f}'.format(observable, iRL, jetR*10, trk_thrd)
                 getattr(self, hname).Fill(np.log10(t_pair.weight), t_pair.pt)
       
   #---------------------------------------------------------------
