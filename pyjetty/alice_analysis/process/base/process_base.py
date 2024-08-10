@@ -108,6 +108,11 @@ class ProcessBase(common_base.CommonBase):
     else:
         self.m = 0.1396
 
+    if 'save_RUResponse' in config:
+      self.save_RUResponse = config['save_RUResponse']
+    else:
+      self.save_RUResponse = False
+
   #---------------------------------------------------------------
   # Create thn and set as class attribute from name, dim
   #   and lists of nbins, xmin, xmax.
@@ -418,7 +423,10 @@ class ProcessBase(common_base.CommonBase):
       obj = getattr(self, attr)
 
       # Write all ROOT histograms and trees to file
-      types = (ROOT.TH1, ROOT.THnBase, ROOT.TTree, ROOT.RooUnfoldResponse)
+      if self.save_RUResponse:
+        types = (ROOT.TH1, ROOT.THnBase, ROOT.TTree, ROOT.RooUnfoldResponse)
+      else:
+        types = (ROOT.TH1, ROOT.THnBase, ROOT.TTree)
       if isinstance(obj, types):
         obj.Write()
   
