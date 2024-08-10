@@ -253,8 +253,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
     else:
+      x = ([jet_pt_det, jet_truth.perp()])
+      x_array = array('d', x)
       hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
-      getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
+      getattr(self, hname).Fill(x_array)
 
     for observable in self.observable_list:
       
@@ -320,7 +322,9 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                   getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt)
                 else:
                   hname = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                  getattr(self, hname).Fill(np.log10(d_pair.weight), d_pair.pt, np.log10(t_pair.weight), t_pair.pt)
+                  x = ([np.log10(d_pair.weight), d_pair.pt, np.log10(t_pair.weight), t_pair.pt])
+                  x_array = array('d', x)
+                  getattr(self, hname).Fill(x_array)
 
               match_found = True
               break
@@ -337,7 +341,9 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)  # NB: if RooUnfoldResponse format, applying scaling during while processing
               else:
                 hname = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                getattr(self, hname).Fill(np.log10(t_pair.weight), t_pair.pt)
+                x = ([np.log10(t_pair.weight), t_pair.pt])
+                x_array = array('d', x)
+                getattr(self, hname).Fill(x_array)
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
