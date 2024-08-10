@@ -18,8 +18,8 @@ import argparse
 import numpy as np
 import ROOT
 import yaml
-import array
 import math
+from array import *
 from bisect import bisect
 # from array import *
 
