@@ -253,10 +253,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
       getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
     else:
-      x = ([jet_pt_det, jet_truth.perp()])
-      x_array = array.array('d', x)
+      # x = ([jet_pt_det, jet_truth.perp()])
+      # x_array = array.array('d', x)
       hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
-      getattr(self, hname).Fill(x_array)
+      getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
     for observable in self.observable_list:
       
