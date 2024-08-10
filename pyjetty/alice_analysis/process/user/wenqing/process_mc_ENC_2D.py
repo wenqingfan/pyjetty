@@ -154,7 +154,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             nbins = [30, 20]
             min = [0., 0.]
             max = [150., 200.]
-            name = 'ThnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
+            name = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
             self.create_thn(name, title, dim, nbins, min, max)
 
           # efficiency and purity check (involving un-matched jets) is filled in process_mc_base.py
@@ -190,7 +190,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               nbins = [30, 20, 20, 20]
               min = [0., 0., -5., -5.]
               max = [150., 200., 0., 0.]
-              name = 'ThnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              name = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
               self.create_thn(name, title, dim, nbins, min, max)
 
               dim = 2
@@ -198,7 +198,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               nbins = [30, 20]
               min = [0., -5.]
               max = [150., 0.]
-              name = 'ThnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              name = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
               self.create_thn(name, title, dim, nbins, min, max)
 
             # for purity correction
