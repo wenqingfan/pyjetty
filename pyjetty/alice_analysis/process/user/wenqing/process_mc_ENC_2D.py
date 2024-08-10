@@ -320,8 +320,9 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                   getattr(self, hname).Fill(d_pair.weight, d_pair.pt, t_pair.weight, t_pair.pt)
                 else:
                   hname = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                  x = ([np.log10(d_pair.weight), d_pair.pt, np.log10(t_pair.weight), t_pair.pt])
-                  x_array = array.array('f', x)
+                  x = ([np.log10(d_pair.weight), np.log10(t_pair.weight), d_pair.pt, t_pair.pt])
+                  x_array = array.array('d', x)
+                  print(x_array)
                   getattr(self, hname).Fill(x_array)
 
               match_found = True
@@ -339,7 +340,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 getattr(self, hname).Miss(t_pair.weight, t_pair.pt, self.pt_hat)  # NB: if RooUnfoldResponse format, applying scaling during while processing
               else:
                 hname = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
-                getattr(self, hname).Fill(np.log10(t_pair.weight), t_pair.pt)
+                getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
