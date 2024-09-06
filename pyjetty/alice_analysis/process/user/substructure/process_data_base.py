@@ -115,6 +115,11 @@ class ProcessDataBase(process_base.ProcessBase):
     else:
       self.do_only_jetcone = False
 
+    if 'do_2perpcone' in config:
+      self.do_2perpcone = config['do_2perpcone']
+    else:
+      self.do_2perpcone = False
+
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
     else:
@@ -521,6 +526,29 @@ class ProcessDataBase(process_base.ProcessBase):
           self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
+      # Fill histograms for two perpcone setup, currently only allow this setting when the standard perpcone histogram filling is disabled
+      if not self.do_perpcone and self.do_2perpcone:
+        
+        # construct perpcone size list
+        perpcone_R_list = []
+        if self.do_jetcone:
+          if self.do_only_jetcone:
+            for jetcone_R in self.jetcone_R_list:
+              perpcone_R_list.append(jetcone_R)
+          else:
+            perpcone_R_list.append(jetR)
+            for jetcone_R in self.jetcone_R_list:
+              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+                perpcone_R_list.append(jetcone_R)
+        else:
+          perpcone_R_list.append(jetR)
+
+        # construct perp cones and fill histograms
+        for perpcone_R in perpcone_R_list:
+
+          parts_in_cone = self.construct_parts_in_2perpcone(parts, jet, jetR, perpcone_R)
+          self.fill_perp_cone_histograms(parts_in_cone, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
+
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
     # print('jet pt',jet.perp()-rho_bge*jet.area(),'phi',jet.phi(),'eta',jet.eta(),'area',jet.area())
@@ -552,6 +580,35 @@ class ProcessDataBase(process_base.ProcessBase):
       part.set_user_index(999)
       parts_in_cone.append(part)
     for part in parts_in_perpcone:
+      part.set_user_index(-999)
+      parts_in_cone.append(part)
+
+    return parts_in_cone
+
+  def construct_parts_in_2perpcone(self, parts, jet, jetR, perpcone_R):
+
+    perpcone_R_effective = perpcone_R
+    if self.do_rho_subtraction and self.static_perpcone == False and perpcone_R == jetR:
+      perpcone_R_effective = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
+
+    # find perpcone at +pi/2 away and rotate it to jet direction
+    perp_jet1 = fj.PseudoJet()
+    perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + np.pi/2, jet.m())
+    parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R_effective)
+    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone, -np.pi/2)
+
+    # perpcone at -pi/2 away and rotate it to jet direction
+    perp_jet2 = fj.PseudoJet()
+    perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
+    parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R_effective)
+    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone, +np.pi/2)
+
+    # label one perpcone as "sig" and the other as "bkg" so the perp1-perp2 and perp1(2)-perp1(2) correlations can be saved separately
+    parts_in_cone = fj.vectorPJ()
+    for part in parts_in_perpcone1:
+      part.set_user_index(999)
+      parts_in_cone.append(part)
+    for part in parts_in_perpcone2:
       part.set_user_index(-999)
       parts_in_cone.append(part)
 
