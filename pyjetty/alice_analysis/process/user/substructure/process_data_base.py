@@ -115,10 +115,10 @@ class ProcessDataBase(process_base.ProcessBase):
     else:
       self.do_only_jetcone = False
 
-    if 'do_2perpcone' in config:
-      self.do_2perpcone = config['do_2perpcone']
+    if 'do_2cones' in config:
+      self.do_2cones = config['do_2cones']
     else:
-      self.do_2perpcone = False
+      self.do_2cones = False
 
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
@@ -499,7 +499,7 @@ class ProcessDataBase(process_base.ProcessBase):
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
       # Fill histograms for perpcone
-      if self.do_perpcone:
+      if self.do_perpcone and not self.do_2cones:
         
         # construct perpcone size list
         perpcone_R_list = []
@@ -526,8 +526,8 @@ class ProcessDataBase(process_base.ProcessBase):
           self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
-      # Fill histograms for two perpcone setup, currently only allow this setting when the standard perpcone histogram filling is disabled
-      if not self.do_perpcone and self.do_2perpcone:
+      # Fill histograms for two perpcone (currently cannot run both 1 cone and 2 cones for perpcone)
+      if self.do_perpcone and self.do_2cones:
         
         # construct perpcone size list
         perpcone_R_list = []
