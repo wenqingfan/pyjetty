@@ -25,7 +25,7 @@ remove_outlier: True
 
 do_rho_subtraction: True
 do_perpcone: False
-do_perpcone2: True
+do_2perpcone: True
 static_perpcone: True
 do_jetcone: False
 do_only_jetcone: False
