@@ -595,13 +595,13 @@ class ProcessDataBase(process_base.ProcessBase):
     perp_jet1 = fj.PseudoJet()
     perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + np.pi/2, jet.m())
     parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R_effective)
-    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone, -np.pi/2)
+    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
 
     # perpcone at -pi/2 away and rotate it to jet direction
     perp_jet2 = fj.PseudoJet()
     perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
     parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R_effective)
-    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone, +np.pi/2)
+    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
 
     # label one perpcone as "sig" and the other as "bkg" so the perp1-perp2 and perp1(2)-perp1(2) correlations can be saved separately
     parts_in_cone = fj.vectorPJ()
