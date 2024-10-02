@@ -993,7 +993,7 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.do_3D_unfold or self.do_2D_unfold:
       hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
       getattr(self, hname).Fill(jet.perp())
-      print("fill unmatched truth jet pt (L996)", jet.perp())
+      print("fill unmatched truth jet pt (L996)", jet.perp(), "eta", jet.eta())
 
   #---------------------------------------------------------------
   # Fill det jet histograms
