@@ -1166,9 +1166,9 @@ class ProcessMCBase(process_base.ProcessBase):
             delta_pt = (jet_pt_det_ungroomed - jet_pp_det_pt)
             getattr(self, 'hDeltaPt_emb_R{}_Rmax{}'.format(jetR, R_max)).Fill(jet_pt_truth_ungroomed, delta_pt)
             
-        print("number of subconfiguration",len(self.obs_settings[observable]))
         # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
         observable = self.observable_list[0]
+        print("number of subconfiguration",len(self.obs_settings[observable]))
         for i in range(len(self.obs_settings[observable])):
         
           obs_setting = self.obs_settings[observable][i]
