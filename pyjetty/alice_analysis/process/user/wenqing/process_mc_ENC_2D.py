@@ -293,6 +293,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     else:
       jet_pt_det = jet_det.perp()
 
+    print("matched truth jet pt",jet_truth.perp(),"eta",jet_truth.eta())
+
     trk_thrd = obs_setting
 
     hname = 'h_jetpt_reco1D_matched_R{}_{}'.format(jetR, obs_label)
