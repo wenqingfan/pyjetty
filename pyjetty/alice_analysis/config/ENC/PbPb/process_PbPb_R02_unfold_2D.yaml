@@ -25,7 +25,7 @@ ENC_pair_cut: False
 remove_outlier: True
 
 do_rho_subtraction: True
-do_perpcone: True
+do_perpcone: False
 static_perpcone: False
 do_jetcone: False
 do_only_jetcone: False
