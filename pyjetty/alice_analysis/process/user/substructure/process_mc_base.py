@@ -1134,7 +1134,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
         # # debug
         # print('debug8--jet det', jet_det_pt, 'size', len(jet_det.constituents()))
-        print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
+        # print('debug8--jet_truth', jet_truth.pt(), 'size', len(jet_truth.constituents()))
         
         jet_pt_det_ungroomed = jet_det_pt
         jet_pt_truth_ungroomed = jet_truth.pt()
@@ -1168,7 +1168,6 @@ class ProcessMCBase(process_base.ProcessBase):
             
         # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
         observable = self.observable_list[0]
-        print("number of subconfiguration",len(self.obs_settings[observable]))
         for i in range(len(self.obs_settings[observable])):
         
           obs_setting = self.obs_settings[observable][i]
@@ -1219,6 +1218,10 @@ class ProcessMCBase(process_base.ProcessBase):
                                jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0)
+
+          # skip perpcone and jetcone if process for unfolding
+          if self.do_3D_unfold or self.do_2D_unfold:
+            return
 
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
