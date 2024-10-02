@@ -416,7 +416,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 hname = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
                 x = ([t_pair.pt, np.log10(t_pair.weight), jet_pt_det])
                 x_array = array.array('d', x)
-                getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight), jet_pt_det)
+                getattr(self, hname).Fill(x_array)
       
   #---------------------------------------------------------------
   # Return EEC pairs with the input threshold cut
