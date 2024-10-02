@@ -201,26 +201,26 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           for iRL in range(self.n_RLbins):
             
             name = 'h_{}{:d}_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_reco = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
+            h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
             h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
             h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h2_reco)
             
             name = 'h_{}{:d}_gen_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
+            h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
             h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
             h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h2_gen)
 
             name = 'h_{}{:d}_gen_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
+            h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
             h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
             h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h2_gen)
             
             # histogram to study the kinematic efficiency effect due to truncation of det jet pt
             name = 'h_{}{:d}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[0], binnings_truth[0], n_bins_truth[1], binnings_truth[1])
+            h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
             h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
             h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h2_gen_kin)
@@ -254,7 +254,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
             # for purity correction
             name = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h = ROOT.TH2D(name, name, n_bins_reco[0], binnings_reco[0], n_bins_reco[1], binnings_reco[1])
+            h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
             h.GetYaxis().SetTitle('log10(weight^{det})')
             h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h)  
