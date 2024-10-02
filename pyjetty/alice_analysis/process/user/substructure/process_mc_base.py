@@ -881,7 +881,7 @@ class ProcessMCBase(process_base.ProcessBase):
           print('event rejected due to jet acceptance')
         return
       
-      # self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
+      self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
   
     # Fill truth-level jet histograms (before matching)
     for jet_truth in jets_truth_selected:
@@ -993,7 +993,6 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.do_3D_unfold or self.do_2D_unfold:
       hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
       getattr(self, hname).Fill(jet.perp())
-      print("fill unmatched truth jet pt (L996)", jet.perp(), "eta", jet.eta())
 
   #---------------------------------------------------------------
   # Fill det jet histograms
@@ -1061,8 +1060,6 @@ class ProcessMCBase(process_base.ProcessBase):
         jet_pt = jet.perp()-rho_bge*jet.area() # use subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
       else:
         jet_pt = jet.perp()
-
-      print("fill unmatched truth jet pt (L991->L1065)", jet_pt)
 
       # Call user function to fill histograms
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
@@ -1222,7 +1219,7 @@ class ProcessMCBase(process_base.ProcessBase):
           # skip perpcone and jetcone if process for unfolding
           if self.do_3D_unfold or self.do_2D_unfold:
             return
-
+          
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
             for jetcone_R in self.jetcone_R_list:
