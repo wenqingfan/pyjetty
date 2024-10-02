@@ -881,7 +881,7 @@ class ProcessMCBase(process_base.ProcessBase):
           print('event rejected due to jet acceptance')
         return
       
-      self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
+      # self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
   
     # Fill truth-level jet histograms (before matching)
     for jet_truth in jets_truth_selected:
