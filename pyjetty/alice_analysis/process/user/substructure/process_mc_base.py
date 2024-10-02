@@ -993,6 +993,7 @@ class ProcessMCBase(process_base.ProcessBase):
     if self.do_3D_unfold or self.do_2D_unfold:
       hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
       getattr(self, hname).Fill(jet.perp())
+      print("fill unmatched truth jet pt (L996)", jet.perp())
 
   #---------------------------------------------------------------
   # Fill det jet histograms
@@ -1060,6 +1061,8 @@ class ProcessMCBase(process_base.ProcessBase):
         jet_pt = jet.perp()-rho_bge*jet.area() # use subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
       else:
         jet_pt = jet.perp()
+
+      print("fill unmatched truth jet pt (L991->L1065)", jet_pt)
 
       # Call user function to fill histograms
       self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
