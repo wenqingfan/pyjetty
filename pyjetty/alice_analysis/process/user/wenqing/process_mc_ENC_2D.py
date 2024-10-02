@@ -288,6 +288,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     # if some det or truth part does not have a match, it is given a unique index
     # also assumes all jet and particle level cuts have been applied already
 
+    # skip perpcone and jetcone if process for unfolding
+    # avoid double-counting the same jets in the perpcone/jetcone settings
+    if self.do_perpcone or self.do_jetcone:
+      return
+    
     if self.do_rho_subtraction:
       jet_pt_det = jet_pt_det_ungroomed
     else:
