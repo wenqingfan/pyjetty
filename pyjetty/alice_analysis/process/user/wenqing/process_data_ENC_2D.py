@@ -162,7 +162,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
                     #=======================================
                     # 2D unfolding for energy correlators
                     #=======================================
-                    name = 'h_perpcone{}_{}{:d}_{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    name = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                     h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
                     h.GetYaxis().SetTitle('log10(weight)')
                     h.GetXaxis().SetTitle('p_{T,ch jet}')
@@ -268,7 +268,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
         return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
     else:
       jet_pt = jet.perp()
-    print('unsubtracted pt',jet.perp(),'subtracted',jet_pt,'# of constituents >',trk_thrd,'is',len(c_select))
+    # print('unsubtracted pt',jet.perp(),'subtracted',jet_pt,'# of constituents >',trk_thrd,'is',len(c_select))
 
     for observable in self.observable_list:
 
@@ -370,7 +370,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           iRL = bisect(self.RLbins, RL)-1 # index from 0
 
           if iRL >= 0 and iRL < self.n_RLbins:
-            hname = 'h_perpcone{}_{}{:d}_{}_R{}_{}'.format(cone_R, observable, iRL, pair_type_label, jetR, obs_label)
+            hname = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(cone_R, observable, iRL, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt, np.log10(weight))
 
   #---------------------------------------------------------------
