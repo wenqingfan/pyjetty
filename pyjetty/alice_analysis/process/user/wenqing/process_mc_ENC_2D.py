@@ -714,7 +714,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     c_select = fj.vectorPJ()
 
-    for c in cone_parts:
+    cone_parts_sorted = fj.sorted_by_pt(cone_parts) # make sure it's sorted before applying the threshold cur via "break"
+    for c in cone_parts_sorted:
       if c.pt() < trk_thrd:
         break # NB: use the break statement since constituents are already sorted (so make sure the constituents are sorted)
       c_select.append(c)
