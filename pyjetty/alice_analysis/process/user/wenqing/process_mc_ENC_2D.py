@@ -720,6 +720,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       if c.pt() < trk_thrd:
         break # NB: use the break statement since constituents are already sorted (so make sure the constituents are sorted)
       c_select.append(c)
+      if c.user_index()==-999:
+        print('found a perp part with index',c.user_index())
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
