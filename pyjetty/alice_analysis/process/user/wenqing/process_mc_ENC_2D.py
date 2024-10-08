@@ -434,7 +434,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
         if (cone_R == 0) and (cone_parts_in_det_jet == None):
 
           ################### all pair types ###################
-          det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, False)
+          det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
 
           for d_pair in det_pairs_all:
             pair_type = d_pair.pair_type 
@@ -469,10 +469,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           
           ################### Onlt signal pairs ###################
           # truth level EEC pairs
-          truth_pairs = self.get_EEC_pairs(jet_truth, jet_truth.perp(), trk_thrd, ipoint=2, True)
+          truth_pairs = self.get_EEC_pairs(jet_truth, jet_truth.perp(), trk_thrd, ipoint=2, only_signal_pairs=True)
 
           # det level EEC pairs (only ss pairs)
-          det_pairs = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, True)          
+          det_pairs = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=True)          
 
           ######### purity correction #########
           # calculate det EEC cross section irregardless if truth match exists
@@ -615,7 +615,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   # NB: this is not the most efficient implementation 
   # when using multiple threshold cuts 
   #---------------------------------------------------------------
-  def get_EEC_pairs(self, jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs):
+  def get_EEC_pairs(self, jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=True):
 
     pairs = []
 
