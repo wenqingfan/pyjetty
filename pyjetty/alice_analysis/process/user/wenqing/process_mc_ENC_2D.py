@@ -62,21 +62,69 @@ class EEC_pair:
     return (self.index1 == pair2.index1 and self.index2 == pair2.index2) \
       or (self.index1 == pair2.index2 and self.index2 == pair2.index1)
 
-  def pair_type(self):
-    type1 = self.index1
-    type2 = self.index2
+  def jet_pair_type(self):
+    # initialize to ss pair
+    type1 = 1
+    type2 = 1
+
+    if self.index1 < -999:
+      type1 = -1 # embed part
+    else:
+      type1 = 1  # pythia part
+      print('pythia part with >=0 index',self.index1) # double-check if the pythia part index is >=0
+
+    if self.index2 < -999:
+      type2 = -1 # embed part
+    else:
+      type2 = 1  # pythia part
+      print('pythia part with >=0 index',self.index2) # double-check if the pythia part index is >=0
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
     if type1 < 0 and type2 < 0:
       # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
       return 0 # means bkg-bkg
-    if type1 < 0 and type2 >= 0:
+    if type1 < 0 and type2 > 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
-    if type1 >= 0 and type2 < 0:
+    if type1 > 0 and type2 < 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
-    if type1 >= 0 and type2 >= 0:
+    if type1 > 0 and type2 > 0:
+      # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
+      return 2 # means sig-sig
+
+  def perpcone_pair_type(self):
+    # initialize to ss pair
+    type1 = 1
+    type2 = 1
+
+    if self.index1 < -999:
+      type1 = 1 # jet part from embedding
+    else if self.index1 >= 0:
+      type1 = 1 # jet part from pythia
+    else:
+      type1 = -1 # perp part
+      print('perp part with -999 index',self.index1) # double-check if the perp part index is -999
+
+    if self.index2 < -999:
+      type2 = 1 # jet part from embedding
+    else if self.index2 >= 0:
+      type2 = 1 # jet part from pythia
+    else:
+      type2 = -1 # perp part
+      print('perp part with -999 index',self.index2) # double-check if the perp part index is -999
+
+    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+    if type1 < 0 and type2 < 0:
+      # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
+      return 0 # means bkg-bkg
+    if type1 < 0 and type2 > 0:
+      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      return 1 # means sig-bkg
+    if type1 > 0 and type2 < 0:
+      # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
+      return 1 # means sig-bkg
+    if type1 > 0 and type2 > 0:
       # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
       return 2 # means sig-sig
   
@@ -437,7 +485,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
 
           for d_pair in det_pairs_all:
-            pair_type = d_pair.pair_type() 
+            pair_type = d_pair.jet_pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
             print('pair index1', d_pair.index1, 'index2', d_pair.index2, 'pair type', pair_type, 'label', pair_type_label)
 
@@ -582,7 +630,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           # FIX ME: what about the purity effect?
           for d_pair in det_pairs_all:
-            pair_type = d_pair.pair_type() 
+            pair_type = d_pair.perpcone_pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
 
             hname = 'h_perpcone{}_{}_sigma_{}_reco_unmatched_R{}_{}'.format(cone_R, observable, pair_type_label, jetR, obs_label)
