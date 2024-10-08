@@ -437,7 +437,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
 
           for d_pair in det_pairs_all:
-            pair_type = d_pair.pair_type 
+            pair_type = d_pair.pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
             print('pair index1', d_pair.index1, 'index2', d_pair.index2, 'pair type', pair_type, 'label', pair_type_label)
 
@@ -582,7 +582,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           # FIX ME: what about the purity effect?
           for d_pair in det_pairs_all:
-            pair_type = d_pair.pair_type 
+            pair_type = d_pair.pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
 
             hname = 'h_perpcone{}_{}_sigma_{}_reco_unmatched_R{}_{}'.format(cone_R, observable, pair_type_label, jetR, obs_label)
