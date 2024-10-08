@@ -1215,10 +1215,6 @@ class ProcessMCBase(process_base.ProcessBase):
                                jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0)
-
-          # skip perpcone and jetcone if process for unfolding
-          if self.do_3D_unfold or self.do_2D_unfold:
-            return
           
           # If check cone, pass the list of cone particles
           if self.do_jetcone:
@@ -1287,17 +1283,21 @@ class ProcessMCBase(process_base.ProcessBase):
               parts_in_cone1 = fj.vectorPJ()
               # fill parts from jet
               for part in parts_in_jet:
-                part.set_user_index(999)
+                # FIX ME: use the index after track matching or 999?
+                # part.set_user_index(999)
+                print('jet constituent index',part.get_user_index()) 
                 parts_in_cone1.append(part)
               # fill parts from perp cone 1
               for part in parts_in_perpcone1:
                 part.set_user_index(-999)
+                print('perpcone particle index',part.get_user_index()) 
                 parts_in_cone1.append(part)
               
               parts_in_cone2 = fj.vectorPJ()
               # fill parts from jet
               for part in parts_in_jet:
-                part.set_user_index(999)
+                # FIX ME: use the index after track matching or 999?
+                # part.set_user_index(999)
                 parts_in_cone2.append(part)
               # fill parts from perp cone 2
               for part in parts_in_perpcone2:
