@@ -714,9 +714,12 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     c_select = fj.vectorPJ()
 
+    print('1st cone parts size is',len(cone_parts_in_det_jet))
+
     for c in cone_parts:
       if c.pt() < trk_thrd:
         break # NB: use the break statement since constituents are already sorted (so make sure the constituents are sorted)
+      c_select.append(c)
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
