@@ -402,6 +402,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               self.create_thn(name, title, dim, nbins, min, max)
 
               ######### all pair types ##########
+              dim = 4
+              title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
+              nbins = [30, 20, 20, 20]
+              min = [0., 0., -5., -5.]
+              max = [150., 200., 0., 0.]
               for pair_type_label in self.pair_type_labels:
                 name = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
                 self.create_thn(name, title, dim, nbins, min, max)
