@@ -100,7 +100,7 @@ class EEC_pair:
 
     if self.index1 < -999:
       type1 = 1 # jet part from embedding
-    else if self.index1 >= 0:
+    elif self.index1 >= 0:
       type1 = 1 # jet part from pythia
     else:
       type1 = -1 # perp part
@@ -108,7 +108,7 @@ class EEC_pair:
 
     if self.index2 < -999:
       type2 = 1 # jet part from embedding
-    else if self.index2 >= 0:
+    elif self.index2 >= 0:
       type2 = 1 # jet part from pythia
     else:
       type2 = -1 # perp part
