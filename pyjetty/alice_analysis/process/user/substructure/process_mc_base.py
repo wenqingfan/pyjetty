@@ -1306,6 +1306,9 @@ class ProcessMCBase(process_base.ProcessBase):
                 
               cone_parts_in_det_jet = parts_in_cone1
               print('1st cone parts size is',len(cone_parts_in_det_jet))
+              for c in cone_parts_in_det_jet:
+                if c.user_index()==-999:
+                  print('found a perp part with index',c.user_index())
 
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
