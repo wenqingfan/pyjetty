@@ -1285,12 +1285,10 @@ class ProcessMCBase(process_base.ProcessBase):
               for part in parts_in_jet:
                 # FIX ME: use the index after track matching or 999?
                 # part.set_user_index(999)
-                print('jet constituent index',part.user_index()) 
                 parts_in_cone1.append(part)
               # fill parts from perp cone 1
               for part in parts_in_perpcone1:
                 part.set_user_index(-999)
-                print('perpcone particle index',part.user_index()) 
                 parts_in_cone1.append(part)
               
               parts_in_cone2 = fj.vectorPJ()
