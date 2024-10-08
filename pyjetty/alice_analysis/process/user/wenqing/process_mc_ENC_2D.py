@@ -512,10 +512,6 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               hname = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
               getattr(self, hname).Fill(t_pair_pt, np.log10(t_pair_weight)) 
 
-              if iRL==10 and pair_type==1:
-                print('debug det pair pt',d_pair.pt,'weight',d_pair.weight)
-                print('debug truth pair pt',t_pair_pt,'weight',t_pair_weight)
-
               if not self.save_RUResponse:
                 hname = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
                 x = ([d_pair.pt, t_pair_pt, np.log10(d_pair.weight), np.log10(t_pair_weight)])
