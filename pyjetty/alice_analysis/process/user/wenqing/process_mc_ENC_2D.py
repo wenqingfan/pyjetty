@@ -353,7 +353,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               setattr(self, name, h2_reco)
 
               name = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
-              h2_gen = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+              h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
               h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
               h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
               setattr(self, name, h2_gen)
@@ -367,7 +367,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                   setattr(self, name, h2_reco)
 
                   name = 'h_perpcone{}_{}{:d}{}_gen_unmatched_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
-                  h2_gen = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                  h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
                   h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
                   h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
                   setattr(self, name, h2_gen)
@@ -511,6 +511,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
               hname = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
               getattr(self, hname).Fill(t_pair_pt, np.log10(t_pair_weight)) 
+
+              if iRL==10 and pair_type==1:
+                print('debug det pair pt',d_pair.pt,'weight',d_pair.weight)
+                print('debug truth pair pt',t_pair_pt,'weight',t_pair_weight)
 
               if not self.save_RUResponse:
                 hname = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
