@@ -104,7 +104,7 @@ class EEC_pair:
       type1 = 1 # jet part from pythia
     else:
       type1 = -1 # perp part
-      print('perp part with -999 index',self.index1) # double-check if the perp part index is -999
+      # print('perp part with -999 index',self.index1) # double-check if the perp part index is -999
 
     if self.index2 < -999:
       type2 = 1 # jet part from embedding
@@ -112,7 +112,7 @@ class EEC_pair:
       type2 = 1 # jet part from pythia
     else:
       type2 = -1 # perp part
-      print('perp part with -999 index',self.index2) # double-check if the perp part index is -999
+      # print('perp part with -999 index',self.index2) # double-check if the perp part index is -999
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
     if type1 < 0 and type2 < 0:
@@ -631,7 +631,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           for d_pair in det_pairs_all:
             pair_type = d_pair.perpcone_pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
-            print('pair index1', d_pair.index1, 'index2', d_pair.index2, 'pair type', pair_type, 'label', pair_type_label)
+            # print('pair index1', d_pair.index1, 'index2', d_pair.index2, 'pair type', pair_type, 'label', pair_type_label)
 
             hname = 'h_perpcone{}_{}_sigma_{}_reco_unmatched_R{}_{}'.format(cone_R, observable, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
@@ -719,8 +719,6 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       if c.pt() < trk_thrd:
         break # NB: use the break statement since constituents are already sorted (so make sure the constituents are sorted)
       c_select.append(c)
-      if c.user_index()==-999:
-        print('double check: found a perp part > 1GeV with index',c.user_index())
     
     if self.ENC_pair_cut and (not 'Truth' in hname):
       dphi_cut = -9999 # means no dphi cut
