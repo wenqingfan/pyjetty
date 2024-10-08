@@ -71,13 +71,13 @@ class EEC_pair:
       type1 = -1 # embed part
     else:
       type1 = 1  # pythia part
-      print('pythia part with >=0 index',self.index1) # double-check if the pythia part index is >=0
+      # print('pythia part with >=0 index',self.index1) # double-check if the pythia part index is >=0
 
     if self.index2 < -999:
       type2 = -1 # embed part
     else:
       type2 = 1  # pythia part
-      print('pythia part with >=0 index',self.index2) # double-check if the pythia part index is >=0
+      # print('pythia part with >=0 index',self.index2) # double-check if the pythia part index is >=0
 
     # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
     if type1 < 0 and type2 < 0:
