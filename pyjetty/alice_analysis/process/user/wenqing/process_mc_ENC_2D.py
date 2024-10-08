@@ -615,7 +615,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   # NB: this is not the most efficient implementation 
   # when using multiple threshold cuts 
   #---------------------------------------------------------------
-  def get_EEC_pairs(self, jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=True):
+  def get_EEC_pairs(self, jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs):
 
     pairs = []
 
