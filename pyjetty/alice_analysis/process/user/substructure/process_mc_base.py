@@ -1305,16 +1305,7 @@ class ProcessMCBase(process_base.ProcessBase):
                 parts_in_cone2.append(part)
                 
               cone_parts_in_det_jet = parts_in_cone1
-
-              cone_parts_in_det_jet = parts_in_cone2
-
-              # Call user function to fill histos
-              self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
-                                   jet_truth_groomed_lund, jet_pp_det, jetR,
-                                   obs_setting, grooming_setting, obs_label,
-                                   jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
-                                   R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
+              print('1st cone parts size is',len(cone_parts_in_det_jet))
 
               # Call user function to fill histos
               self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
@@ -1323,6 +1314,16 @@ class ProcessMCBase(process_base.ProcessBase):
                                    jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                    R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                    holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
+
+              # cone_parts_in_det_jet = parts_in_cone2
+
+              # # Call user function to fill histos
+              # self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+              #                      jet_truth_groomed_lund, jet_pp_det, jetR,
+              #                      obs_setting, grooming_setting, obs_label,
+              #                      jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+              #                      R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+              #                      holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
