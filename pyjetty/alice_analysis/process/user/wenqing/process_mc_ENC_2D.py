@@ -714,7 +714,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     c_select = fj.vectorPJ()
 
-    print('1st cone parts size is',len(cone_parts_in_det_jet))
+    print('double check: 1st cone parts size is',len(cone_parts))
 
     for c in cone_parts:
       if c.pt() < trk_thrd:
