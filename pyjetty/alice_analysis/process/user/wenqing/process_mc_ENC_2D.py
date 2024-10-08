@@ -578,7 +578,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
         if (self.do_perpcone) and (cone_R > 0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet == None): 
 
           ################### all pair types ###################
-          det_pairs_all = self.get_EEC_pairs(cone_parts_in_det_jet, jet_pt_det, trk_thrd, ipoint=2) 
+          det_pairs_all = self.get_perpcone_EEC_pairs(cone_parts_in_det_jet, jet_pt_det, trk_thrd, ipoint=2) 
 
           # FIX ME: what about the purity effect?
           for d_pair in det_pairs_all:
@@ -660,7 +660,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   #---------------------------------------------------------------
   # Return EEC pairs for cone particles
   #---------------------------------------------------------------
-  def get_EEC_pairs(self, cone_parts, jet_pt, trk_thrd, ipoint=2):
+  def get_perpcone_EEC_pairs(self, cone_parts, jet_pt, trk_thrd, ipoint=2):
 
     pairs = []
 
