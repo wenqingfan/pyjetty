@@ -467,24 +467,26 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     trk_thrd = obs_setting
 
-    hname = 'h_jetpt_reco1D_matched_R{}_{}'.format(jetR, obs_label)
-    getattr(self, hname).Fill(jet_pt_det)
-    hname = 'h_jetpt_gen1D_matched_R{}_{}'.format(jetR, obs_label)
-    getattr(self, hname).Fill(jet_truth.perp())
-    
-    if self.save_RUResponse:
-      hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
-      getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
-    else:
-      hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
-      getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
-
     for observable in self.observable_list:
       
       if observable == 'jet_ENC_RL':
         
         # type 1 -- fill for jet constituents
         if (cone_R == 0) and (cone_parts_in_det_jet == None):
+
+          ####### Fill jet pt histogram only once for jet EEC #######
+          # to avoid double/triple-counting when perpcone or jetcone is enabled
+          hname = 'h_jetpt_reco1D_matched_R{}_{}'.format(jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt_det)
+          hname = 'h_jetpt_gen1D_matched_R{}_{}'.format(jetR, obs_label)
+          getattr(self, hname).Fill(jet_truth.perp())
+          
+          if self.save_RUResponse:
+            hname = 'h_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, jet_truth.perp(), self.pt_hat)
+          else:
+            hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
 
           ################### all pair types ###################
           det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
