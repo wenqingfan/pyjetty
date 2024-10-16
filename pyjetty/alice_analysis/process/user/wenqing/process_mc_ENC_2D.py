@@ -456,6 +456,13 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h) 
 
+            # for purity correction after unfolding
+            name = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+            h.GetYaxis().SetTitle('log10(weight^{truth})')
+            h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+            setattr(self, name, h) 
+
           # RL resolution check for pairs
           name = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
           h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
@@ -643,6 +650,13 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
                   hname = 'h_{}{:d}_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
                   getattr(self, hname).Fill(d_pair.pt, np.log10(d_pair.weight))
+
+                  # this is for purity correction after unfolding and bkg subtraction
+                  # NB1: two ways to fill weight here: 1. use det particle pT; 2. use truth particle pT (meaning truth for both jet pT and particle pT)
+                  # NB2: one other implicit assumption is small migration for RL (in fact iRL used here is determined from truth RL)
+                  # FIX ME: option 2 mention in NB1 is hard coded here
+                  hname = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
                   
                   if self.save_RUResponse:
                     hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label, self.pt_hat) # NB: if RooUnfoldResponse format, applying scaling during while processing
