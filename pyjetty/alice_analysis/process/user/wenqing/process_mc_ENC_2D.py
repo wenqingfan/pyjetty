@@ -249,6 +249,15 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           ######### all pair types ##########
           for pair_type_label in self.pair_type_labels:
 
+            # histograms for unmatched jets (only filled for thermal closure)
+            name = 'h_{}_sigma{}_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            pt_bins = linbins(0,200,40)
+            h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+            h.GetYaxis().SetTitle('R^{det}_{L}')
+            h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+            setattr(self, name, h)
+
+            # histograms for matched jets
             name = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
             pt_bins = linbins(0,200,40)
             h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
@@ -272,6 +281,15 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
             if self.do_perpcone:
               for perpcone_R in perpcone_R_list:
+                # histograms for unmatched jets (only filled for thermal closure)
+                name = 'h_perpcone{}_{}_sigma{}_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetYaxis().SetTitle('R^{det}_{L}')
+                h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h)
+
+                # histograms for matched jets
                 name = 'h_perpcone{}_{}_sigma{}_reco_unmatched_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,40)
                 h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
@@ -367,6 +385,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             ######### all pair types ##########
             for pair_type_label in self.pair_type_labels:
 
+              # histograms for unmatched jets (only filled for thermal closure)
+              name = 'h_{}{:d}{}_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+              h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+              h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
+              h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h2_raw)
+
+              # histograms for matched jets
               name = 'h_{}{:d}{}_reco_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
               h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
               h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
@@ -387,6 +413,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
               if self.do_perpcone:
                 for perpcone_R in perpcone_R_list:
+                  # histograms for unmatched jets (only filled for thermal closure)
+                  name = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                  h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                  h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
+                  h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                  setattr(self, name, h2_raw)
+
+                  # histograms for matched jets
                   name = 'h_perpcone{}_{}{:d}{}_reco_unmatched_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                   h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
                   h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
@@ -478,6 +512,81 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
                                  grooming_setting, obs_label, jet_pt_ungroomed):
     return
+
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  #---------------------------------------------------------------
+  def fill_jet_histograms(self, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                          obs_label, jet_pt_ungroomed, suffix):
+
+    trk_thrd = obs_setting
+
+    if self.do_rho_subtraction:
+      jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0:
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
+    else:
+      jet_pt = jet.perp()
+    # print('unsubtracted pt',jet.perp(),'subtracted',jet_pt,'# of constituents >',trk_thrd,'is',len(c_select))
+
+    for observable in self.observable_list:
+
+      if observable == 'jet_ENC_RL':
+        pairs_all = self.get_EEC_pairs(jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=False)
+        for pair in pairs_all:
+          pair_type = pair.jet_pair_type() 
+          pair_type_label = self.pair_type_labels[pair_type]
+
+          RL = pair.r
+          weight = pair.weight
+          
+          hname = 'h_{}_sigma{}_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt, RL, weight)
+
+          # determine RL bin for det pairs
+          iRL = bisect(self.RLbins, RL)-1 # index from 0
+
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_{}{:d}{}_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt, np.log10(weight))
+          
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  #---------------------------------------------------------------
+  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+
+    # combine sig jet and perp cone with trk threshold cut
+    trk_thrd = obs_setting
+
+    if self.do_rho_subtraction:
+      jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0:
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
+    else:
+      jet_pt = jet.perp()
+    
+    for observable in self.observable_list:
+
+      if observable == 'jet_ENC_RL':
+
+        pairs_all = self.get_perpcone_EEC_pairs(cone_parts, jet_pt, trk_thrd, ipoint=2) 
+
+        for pair in pairs_all:
+          pair_type = pair.perpcone_pair_type() 
+          pair_type_label = self.pair_type_labels[pair_type]
+
+          RL = pair.r
+          weight = pair.weight
+          
+          hname = 'h_perpcone{}_{}_sigma{}_R{}_{}'.format(cone_R, observable, pair_type_label, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt, RL, weight)
+
+          # determine RL bin for det pairs
+          iRL = bisect(self.RLbins, RL)-1 # index from 0
+
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(cone_R, observable, iRL, pair_type_label, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt, np.log10(weight))
 
   #---------------------------------------------------------------
   # This function is called per jet subconfigration 
