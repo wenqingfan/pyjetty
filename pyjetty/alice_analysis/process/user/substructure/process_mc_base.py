@@ -903,7 +903,7 @@ class ProcessMCBase(process_base.ProcessBase):
       
       if self.is_pp:
         self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge)
-      elif:
+      else:
         self.fill_det_before_matching(jet_det, jetR, R_max, rho_bge, fj_particles_det_cones)
   
     # Fill truth-level jet histograms (before matching)
