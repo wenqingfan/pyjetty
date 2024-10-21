@@ -1024,13 +1024,12 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   def fill_det_before_matching(self, jet, jetR, R_max, rho_bge = 0, fj_particles_cones = None):
     
-    if self.is_pp or self.fill_Rmax_indep_hists:
-      jet_pt = jet.pt()
-      if self.do_rho_subtraction:
-        jet_pt = jet.pt()-rho_bge*jet.area()
-      for constituent in jet.constituents():
-        z = constituent.pt() / jet_pt
-        getattr(self, 'hZ_Det_R{}'.format(jetR)).Fill(jet_pt, z)
+    jet_pt = jet.pt()
+    if self.do_rho_subtraction:
+      jet_pt = jet.pt()-rho_bge*jet.area()
+    for constituent in jet.constituents():
+      z = constituent.pt() / jet_pt
+      getattr(self, 'hZ_Det_R{}'.format(jetR)).Fill(jet_pt, z)
       
     # for const in jet.constituents():
     #   if const.perp()>0.15:
@@ -1052,8 +1051,8 @@ class ProcessMCBase(process_base.ProcessBase):
         # NB: check if also want to have these histograms for non-termal model when using CS subtraction
 
     if self.do_3D_unfold or self.do_2D_unfold:
-        hname = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
-        getattr(self, hname).Fill(jet_pt_ungroomed)
+      hname = 'h_jetpt_reco1D_unmatched_R{}'.format(jetR)
+      getattr(self, hname).Fill(jet_pt)
   
   #---------------------------------------------------------------
   # This function is called once for each jet
