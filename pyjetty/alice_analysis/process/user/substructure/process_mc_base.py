@@ -1060,11 +1060,8 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   def fill_unmatched_jet_histograms(self, jet, jetR, hname, rho_bge = 0, fj_particles_cones = None):
 
-    # Set suffix for filling histograms
-    if R_max:
-      suffix = '_Rmax{}'.format(R_max)
-    else:
-      suffix = ''
+    # NB: dummy suffix (Rmax not implemented here. Can be implemented later)
+    suffix = ''
 
     # Loop through each jet subconfiguration (i.e. subobservable / grooming setting)
     observable = self.observable_list[0]
