@@ -1388,6 +1388,24 @@ class ProcessMCBase(process_base.ProcessBase):
     raise NotImplementedError('You must implement fill_observable_histograms()!')
 
   #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  # You must implement this
+  #---------------------------------------------------------------
+  def fill_jet_histograms(self, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                          obs_label, jet_pt_ungroomed, suffix):
+  
+    raise NotImplementedError('You must implement fill_jet_histograms()!')
+
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  # You must implement this
+  #---------------------------------------------------------------
+  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+                          obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  
+    raise NotImplementedError('You must implement fill_perp_cone_histograms()!')
+
+  #---------------------------------------------------------------
   # This function is called once for each matched jet subconfiguration
   # You must implement this
   #---------------------------------------------------------------
