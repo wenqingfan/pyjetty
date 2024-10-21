@@ -169,17 +169,19 @@ class ProcessMCBase(process_base.ProcessBase):
       # -- fill and save perpcone hists for the jet constituents and jet cone with size 0.4
       # a special case: if analyze jet cones and only analyze jet cones, then skip the EEC histograms for perpcones of jetR if jetR is not in the jetcone_R_list (just to speed things up)
       self.perpcone_R_list = []
-      if self.do_jetcone:
-        if self.do_only_jetcone:
-          for jetcone_R in self.jetcone_R_list:
-            self.perpcone_R_list.append(jetcone_R)
+      # NB: Have only tested for the input configuration with only one jetR
+      for jetR in self.jetR_list:
+        if self.do_jetcone:
+          if self.do_only_jetcone:
+            for jetcone_R in self.jetcone_R_list:
+              self.perpcone_R_list.append(jetcone_R)
+          else:
+            self.perpcone_R_list.append(jetR)
+            for jetcone_R in self.jetcone_R_list:
+              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
+                self.perpcone_R_list.append(jetcone_R)
         else:
           self.perpcone_R_list.append(jetR)
-          for jetcone_R in self.jetcone_R_list:
-            if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-              self.perpcone_R_list.append(jetcone_R)
-      else:
-        self.perpcone_R_list.append(jetR)
 
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
