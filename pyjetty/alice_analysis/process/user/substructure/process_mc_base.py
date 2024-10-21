@@ -1093,7 +1093,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
         # fill unmatched det-level histograms for the thermal closure test
         if self.thermal_model and (not 'Truth' in hname):
-          fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+          self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix) # or fill unmatched jet histogram (should be defined in process_mc_ENC_2D)
 
           if self.do_perpcone:
@@ -1104,7 +1104,7 @@ class ProcessMCBase(process_base.ProcessBase):
               self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
               
               parts_in_cone2 = self.construct_parts_in_perpcone(fj_particles_cones, jet, jetR, perpcone_R, -1)
-              fill_perpcone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
+              self.fill_perpcone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
   
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
