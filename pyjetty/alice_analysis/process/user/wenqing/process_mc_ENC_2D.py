@@ -185,19 +185,6 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     if self.do_rho_subtraction:
       self.pair_type_labels = ['_bb','_sb','_ss']
 
-    perpcone_R_list = []
-    if self.do_jetcone:
-      if self.do_only_jetcone:
-        for jetcone_R in self.jetcone_R_list:
-          perpcone_R_list.append(jetcone_R)
-      else:
-        perpcone_R_list.append(jetR)
-        for jetcone_R in self.jetcone_R_list:
-          if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-            perpcone_R_list.append(jetcone_R)
-    else:
-      perpcone_R_list.append(jetR)
-
     for observable in self.observable_list:
       
       # can take EEC with different energy power (currently only EEC with power n = 1 implemented)
@@ -280,7 +267,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             setattr(self, name, h)
 
             if self.do_perpcone:
-              for perpcone_R in perpcone_R_list:
+              for perpcone_R in self.perpcone_R_list:
                 # histograms for unmatched jets (only filled for thermal closure)
                 name = 'h_perpcone{}_{}_sigma{}_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,40)
@@ -412,7 +399,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               setattr(self, name, h2_gen_kin)
 
               if self.do_perpcone:
-                for perpcone_R in perpcone_R_list:
+                for perpcone_R in self.perpcone_R_list:
                   # histograms for unmatched jets (only filled for thermal closure)
                   name = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                   h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
@@ -479,7 +466,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 self.create_thn(name, title, dim, nbins, min, max)
 
                 if self.do_perpcone:
-                  for perpcone_R in perpcone_R_list:
+                  for perpcone_R in self.perpcone_R_list:
                     name = 'THnF_perpcone{}_{}{:d}{}_response_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                     self.create_thn(name, title, dim, nbins, min, max)
 
@@ -515,6 +502,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
+  # EEC for unmatched jets (used in the thermal closure test)
+  # only filled for the det-level histograms
   #---------------------------------------------------------------
   def fill_jet_histograms(self, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                           obs_label, jet_pt_ungroomed, suffix):
@@ -552,6 +541,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
+  # EEC for unmatched jets (used in the thermal closure test)
+  # only filled for the det-level histograms
   #---------------------------------------------------------------
   def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
 
