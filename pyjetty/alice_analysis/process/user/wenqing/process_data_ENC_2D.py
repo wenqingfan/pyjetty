@@ -73,9 +73,9 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     else:
       # define binnings
       # binnings[0] -- log10(weight), binnings[1] -- jet pT
-      n_bins = [20, 6]
+      n_bins = [20, 30]
       binnings = [np.linspace(-5,0,n_bins[0]+1), \
-                  np.array([40, 50, 60, 70, 80, 100, 120]).astype(float) ]
+                  np.linspace(0,150,n_bins[1]+1) ]
 
       self.n_RLbins = 30
       self.RLbins = logbins(1E-2,1,self.n_RLbins)
