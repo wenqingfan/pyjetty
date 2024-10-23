@@ -504,11 +504,11 @@ class ProcessMCBase(process_base.ProcessBase):
         else:
           # define binnings
           # these are the truth level binnings for jet pT
-          n_ptbins_truth = 10 
-          ptbinnings_truth = np.array([20, 30, 40, 50, 60, 70, 80, 100, 120, 150, 200]).astype(float)
+          n_ptbins_truth = 20 
+          ptbinnings_truth = np.linspace(0,200,n_ptbins_truth+1)
           # slight difference for reco jet pT bin
-          n_ptbins_reco = 6
-          ptbinnings_reco = np.array([40, 50, 60, 70, 80, 100, 120]).astype(float)
+          n_ptbins_reco = 30
+          ptbinnings_reco = np.linspace(0,150,n_ptbins_reco+1)
           
           # efficiency and purity check for 1D jet pT unfolding
           name = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
