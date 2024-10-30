@@ -32,7 +32,7 @@ do_only_jetcone: False
 jetcone_R_list: [0.2]
 
 thermal_model:
-  beta: 0.35
+  beta: 0.4
   N_avg: 2500
   sigma_N: 500
 
