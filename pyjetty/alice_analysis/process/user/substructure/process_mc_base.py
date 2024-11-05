@@ -75,7 +75,7 @@ class ProcessMCBase(process_base.ProcessBase):
         with open("/global/cfs/projectdirs/alice/alicepro/hiccup/rstorage/alice/data/LHC20g4/scaleFactors.yaml", 'r') as stream:
             pt_hat_yaml = yaml.safe_load(stream)
 
-      self.pt_hat = pt_hat_yaml[self.pt_hat_bin]
+      self.pt_hat = 1#pt_hat_yaml[self.pt_hat_bin]
       print("pt hat bin : " + str(self.pt_hat_bin))
       print("pt hat weight : " + str(self.pt_hat))
     
