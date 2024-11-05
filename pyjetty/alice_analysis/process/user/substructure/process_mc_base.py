@@ -67,17 +67,18 @@ class ProcessMCBase(process_base.ProcessBase):
 
     # find pt_hat for set of events in input_file, assumes all events in input_file are in the same pt_hat bin
     if self.do_3D_unfold or self.do_2D_unfold:
-      self.pt_hat_bin = int(input_file.split('/')[len(input_file.split('/'))-4]) # depends on exact format of input_file name
-      if self.is_pp:
-        with open("/global/cfs/projectdirs/alice/alicepro/hiccup/rstorage/alice/data/LHC18b8/scaleFactors.yaml", 'r') as stream:
-            pt_hat_yaml = yaml.safe_load(stream)
-      else:
-        with open("/global/cfs/projectdirs/alice/alicepro/hiccup/rstorage/alice/data/LHC20g4/scaleFactors.yaml", 'r') as stream:
-            pt_hat_yaml = yaml.safe_load(stream)
+      if save_RUResponse == True:
+        self.pt_hat_bin = int(input_file.split('/')[len(input_file.split('/'))-4]) # depends on exact format of input_file name
+        with open(self.pt_hat_yaml_file, 'r') as stream:
+          pt_hat_yaml = yaml.safe_load(stream)
 
-      self.pt_hat = 1#pt_hat_yaml[self.pt_hat_bin]
-      print("pt hat bin : " + str(self.pt_hat_bin))
-      print("pt hat weight : " + str(self.pt_hat))
+          self.pt_hat = pt_hat_yaml[self.pt_hat_bin]
+          print("pt hat bin : " + str(self.pt_hat_bin))
+          print("pt hat weight : " + str(self.pt_hat))
+      else:
+        print("No need to read the scaling factors, just set pt_hat to some dummy value")
+        self.pt_hat_bin = 20
+        self.pt_hat = 1
     
   #---------------------------------------------------------------
   # Initialize config file into class members
@@ -241,6 +242,9 @@ class ProcessMCBase(process_base.ProcessBase):
       self.save_RUResponse = config['save_RUResponse']
     else:
       self.save_RUResponse = False
+
+    if save_RUResponse == True:
+      self.pt_hat_yaml_file = config['pt_hat_yaml_file']
 
     # Create dictionaries to store grooming settings and observable settings for each observable
     # Each dictionary entry stores a list of subconfiguration parameters
