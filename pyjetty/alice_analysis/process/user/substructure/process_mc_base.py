@@ -243,7 +243,7 @@ class ProcessMCBase(process_base.ProcessBase):
     else:
       self.save_RUResponse = False
 
-    if save_RUResponse == True:
+    if self.save_RUResponse == True:
       self.pt_hat_yaml_file = config['pt_hat_yaml_file']
 
     # Create dictionaries to store grooming settings and observable settings for each observable
