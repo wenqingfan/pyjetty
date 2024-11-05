@@ -67,7 +67,7 @@ class ProcessMCBase(process_base.ProcessBase):
 
     # find pt_hat for set of events in input_file, assumes all events in input_file are in the same pt_hat bin
     if self.do_3D_unfold or self.do_2D_unfold:
-      if save_RUResponse == True:
+      if self.save_RUResponse == True:
         self.pt_hat_bin = int(input_file.split('/')[len(input_file.split('/'))-4]) # depends on exact format of input_file name
         with open(self.pt_hat_yaml_file, 'r') as stream:
           pt_hat_yaml = yaml.safe_load(stream)
