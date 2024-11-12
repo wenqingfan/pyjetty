@@ -479,7 +479,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
             # for purity correction after unfolding
             name = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+            h = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
             h.GetYaxis().SetTitle('log10(weight^{truth})')
             h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h) 
