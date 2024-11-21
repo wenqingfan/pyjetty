@@ -91,6 +91,11 @@ class ProcessMCBase(process_base.ProcessBase):
     # Read config file
     with open(self.config_file, 'r') as stream:
       config = yaml.safe_load(stream)
+
+    if 'gen_only' in config:
+      self.gen_only = config['gen_only']
+    else:
+      self.gen_only = False
       
     self.fast_simulation = config['fast_simulation']
     if self.fast_simulation == True:
@@ -751,6 +756,16 @@ class ProcessMCBase(process_base.ProcessBase):
         print('jet selector for truth-level matches is:', jet_selector_truth_matched)
       
       # Analyze
+      if self.gen_only:
+        
+        # Only process truth jets if gen_only is set to true
+        cs_truth = fj.ClusterSequence(fj_particles_truth, jet_def)
+        jets_truth = fj.sorted_by_pt(cs_truth.inclusive_jets())
+        jets_truth_selected = jet_selector_det(jets_truth)
+      
+        self.analyze_jets_gen(jets_truth_selected, jetR)
+        continue # skip the rest
+
       if self.is_pp:
 
         # Find pp det and truth jets
@@ -888,13 +903,24 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   # Analyze jets of a given event.
   #---------------------------------------------------------------
+  def analyze_jets_gen(self, jets_truth_selected, jetR):
+  
+    if self.debug_level > 1:
+      print('Number of det-level jets: {}'.format(len(jets_det_selected)))
+
+    for jet_truth in jets_truth_selected:
+      self.fill_truth_before_matching(jet_truth, jetR)
+      
+  #---------------------------------------------------------------
+  # Analyze jets of a given event.
+  #---------------------------------------------------------------
   def analyze_jets(self, jets_det_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
                    jets_det_pp_selected = None, R_max = None,
                    fj_particles_det_holes = None, fj_particles_truth_holes = None, rho_bge = 0, fj_particles_det_cones = None, fj_particles_truth_cones = None):
   
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
-    
+
     # Fill det-level jet histograms (before matching)
     for jet_det in jets_det_selected:
       
