@@ -77,7 +77,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       binnings = [np.linspace(-5,0,n_bins[0]+1), \
                   np.linspace(0,150,n_bins[1]+1) ]
 
-      self.n_RLbins = 30
+      self.n_RLbins = 25
       self.RLbins = logbins(1E-2,1,self.n_RLbins)
 
     for jetR in self.jetR_list:
