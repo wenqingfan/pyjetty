@@ -18,7 +18,7 @@ eta_max: 0.9
 debug_level: 0
 dry_run: False
 gen_only: True
-fast_simulation: False
+fast_simulation: True
 jetscape: True
 ENC_fastsim: False # only set to True when fast_simulation is set to True
 ENC_pair_cut: False
