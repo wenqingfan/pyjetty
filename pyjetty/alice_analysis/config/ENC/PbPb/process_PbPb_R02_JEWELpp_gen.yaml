@@ -1,0 +1,57 @@
+# Configuration for:
+#   (a) Processing of ROOT trees into histograms
+#   (b) Analysis of histograms into final result
+#
+# The observables are structured into observable blocks (e.g. theta_g, subjet_z, etc.)
+# each containing multiple individual subconfigurations (e.g. zcut, beta, subjetR, etc.),
+# where each subconfiguration corresponds to a single unfolded result.
+# One can also specify a list of jetR, which will be looped over.
+#
+# The process step is intended to loop over all observables simultaneously
+# The analysis step is intended to run for a single observable block
+
+process_observables: ['jet_ENC_RL', 'jet_pt']
+jetR: [0.2, 0.3, 0.4]
+jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
+reject_tracks_fraction: 0.0
+eta_max: 0.9
+debug_level: 0
+dry_run: False
+gen_only: True
+fast_simulation: False
+jetscape: False
+ENC_fastsim: False # only set to True when fast_simulation is set to True
+ENC_pair_cut: False
+
+# Observable block
+jet_ENC_RL:
+
+  common_settings:
+    plot_overlay_list:
+      - ['config1', 'config2', 'config3']
+      
+  config1:
+    trk_thrd: 1.0
+
+  config2:
+    trk_thrd: 0.15
+
+  config3:
+    trk_thrd: 2.0
+
+# Observable block
+jet_pt:
+
+  common_settings:
+    plot_overlay_list:
+      - ['config1', 'config2', 'config3']
+      
+  config1:
+    trk_thrd: 1.0
+
+  config2:
+    trk_thrd: 0.15
+
+  config3:
+    trk_thrd: 2.0
+
