@@ -291,7 +291,14 @@ class ProcessMCBase(process_base.ProcessBase):
       tree_dir = ''
     else:
       tree_dir = 'PWGHF_TreeCreator'
-    io_det = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
+    if self.gen_only:
+        # if only processing gen level info, we do not need the det level
+        # for now we set the det level to gen level so this code can run when only tree_Particle_gen is available
+        io_det = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
+                                  track_tree_name='tree_Particle_gen', use_ev_id_ext=False,
+                                  is_jetscape=self.jetscape, event_plane_range=self.event_plane_range, is_ENC=self.ENC_fastsim, is_det_level=False)
+    else:
+        io_det = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
                                   track_tree_name='tree_Particle', use_ev_id_ext=False,
                                   is_jetscape=self.jetscape, event_plane_range=self.event_plane_range, is_ENC=self.ENC_fastsim, is_det_level=True)
     df_fjparticles_det = io_det.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction)
