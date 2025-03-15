@@ -140,7 +140,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           self.pair_type_labels = ['']
 
           if self.do_rho_subtraction:
-            self.pair_type_labels = ['_bb','_sb','_ss']
+            self.pair_type_labels = ['_ss','_sb','_bb']
           
           if self.do_perpcone:
             
@@ -228,10 +228,10 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     type1 = constituents[part1].user_index()
     type2 = constituents[part2].user_index()
 
-    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+    # NB: match the strings in self.pair_type_label = ['ss','sb','bb']
     if type1 < 0 and type2 < 0:
       # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
-      return 0 # means bkg-bkg
+      return 2 # means bkg-bkg
     if type1 < 0 and type2 >= 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
@@ -240,7 +240,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       return 1 # means sig-bkg
     if type1 >= 0 and type2 >= 0:
       # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
-      return 2 # means sig-sig
+      return 0 # means sig-sig
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
