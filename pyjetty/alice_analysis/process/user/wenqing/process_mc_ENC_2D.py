@@ -79,10 +79,10 @@ class EEC_pair:
       type2 = 1  # pythia part
       # print('pythia part with >=0 index',self.index2) # double-check if the pythia part index is >=0
 
-    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+    # NB: match the strings in self.pair_type_label = ['ss','sb','bb']
     if type1 < 0 and type2 < 0:
       # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
-      return 0 # means bkg-bkg
+      return 2 # means bkg-bkg
     if type1 < 0 and type2 > 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
@@ -91,7 +91,7 @@ class EEC_pair:
       return 1 # means sig-bkg
     if type1 > 0 and type2 > 0:
       # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
-      return 2 # means sig-sig
+      return 0 # means sig-sig
 
   def perpcone_pair_type(self):
     # initialize to ss pair
@@ -114,10 +114,10 @@ class EEC_pair:
       type2 = -1 # perp part
       # print('perp part with -999 index',self.index2) # double-check if the perp part index is -999
 
-    # NB: match the strings in self.pair_type_label = ['bb','sb','ss']
+    # NB: match the strings in self.pair_type_label = ['ss','sb','bb']
     if type1 < 0 and type2 < 0:
       # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
-      return 0 # means bkg-bkg
+      return 2 # means bkg-bkg
     if type1 < 0 and type2 > 0:
       # print('sig-bkg (',type1,type2,') pt1',constituents[part1].perp(),'pt2',constituents[part2].perp())
       return 1 # means sig-bkg
@@ -126,7 +126,7 @@ class EEC_pair:
       return 1 # means sig-bkg
     if type1 > 0 and type2 > 0:
       # print('sig-sig (',type1,type2,') pt1',constituents[part1].perp()
-      return 2 # means sig-sig
+      return 0 # means sig-sig
   
   def __str__(self):
     return "EEC pair with (index1, index2, weight, RL, pt) = (" + \
@@ -186,7 +186,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
     self.pair_type_labels = ['']
     if self.do_rho_subtraction:
-      self.pair_type_labels = ['_bb','_sb','_ss']
+      self.pair_type_labels = ['_ss','_sb','_bb']
 
     for observable in self.observable_list:
       
@@ -639,8 +639,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           for d_pair in det_pairs_all:
             pair_type = d_pair.jet_pair_type() 
-            print("pair type is",pair_type)
-            pair_type_label = ''#self.pair_type_labels[pair_type]
+            pair_type_label = self.pair_type_labels[pair_type]
 
             hname = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
