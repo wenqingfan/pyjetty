@@ -640,7 +640,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           for d_pair in det_pairs_all:
             pair_type = d_pair.jet_pair_type() 
             print("pair type is",pair_type)
-            pair_type_label = self.pair_type_labels[pair_type]
+            pair_type_label = ''#self.pair_type_labels[pair_type]
 
             hname = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
