@@ -154,16 +154,19 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     if self.is_pp:
       # define binnings
       # these are the truth level binnings
-      n_bins_truth = [20, 7] # WARNING RooUnfold seg faults if too many bins used
+      n_bins_truth = [20, 20] # WARNING RooUnfold seg faults if too many bins used
       # these are the truth level binnings
       # binnings[0] -- log10(weight), binnings[1] -- jet pT
       binnings_truth = [np.linspace(-5,0,n_bins_truth[0]+1), \
-                  np.array([5, 10, 20, 40, 60, 80, 100, 150]).astype(float) ]
+                  np.linspace(0,200,n_bins_truth[1]+1) ]
       # slight difference for reco pt bin
       # binnings[0] -- log10(weight), binnings[1] -- jet pT
-      n_bins_reco = [20, 6]
+      n_bins_reco = [20, 30]
       binnings_reco = [np.linspace(-5,0,n_bins_reco[0]+1), \
-                  np.array([10, 20, 40, 60, 80, 100, 150]).astype(float) ]
+                  np.linspace(0,150,n_bins_reco[1]+1) ]
+
+      self.n_RLbins = 25
+      self.RLbins = logbins(1E-2,1,self.n_RLbins)
     else:
       # define binnings
       # these are the truth level binnings
