@@ -187,6 +187,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     self.pair_type_labels = ['']
     if self.do_rho_subtraction:
       self.pair_type_labels = ['_ss','_sb','_bb']
+    if self.is_pp:
+      self.pair_type_labels = ['_ss']
 
     for observable in self.observable_list:
       
@@ -636,7 +638,6 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           ################### all pair types ###################
           det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
-          print('diagnostic--all pairs',len(det_pairs_all)
 
           for d_pair in det_pairs_all:
             pair_type = d_pair.jet_pair_type() 
@@ -682,7 +683,6 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           # det level EEC pairs (only ss pairs)
           det_pairs = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=True)          
-          print('diagnostic--sginal pairs',len(det_pairs_all)
 
           ######### purity correction #########
           # calculate det EEC cross section irregardless if truth match exists
