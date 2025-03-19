@@ -141,6 +141,8 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
           if self.do_rho_subtraction:
             self.pair_type_labels = ['_ss','_sb','_bb']
+          if self.is_pp:
+            self.pair_type_labels = ['_ss']
           
           if self.do_perpcone:
             
@@ -359,7 +361,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
           # separate out sig-sig, sig-bkg, bkg-bkg correlations for EEC pairs
           pair_type_label = ''
-          if self.do_rho_subtraction:
+          if self.do_rho_subtraction or self.is_pp:
             pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
             pair_type_label = self.pair_type_labels[pair_type]
 
