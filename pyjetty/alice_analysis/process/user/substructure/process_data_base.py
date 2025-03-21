@@ -108,7 +108,7 @@ class ProcessDataBase(process_base.ProcessBase):
     else:
         self.do_randomcone = False
     if self.do_randomcone:
-        seed = int(time.time() * 1000) + os.getpid()
+        seed = (int(time.time() * 1000) + os.getpid()) % (2**32)
         np.random.seed(seed)
 
     if 'do_jetcone' in config:
@@ -510,7 +510,7 @@ class ProcessDataBase(process_base.ProcessBase):
       # Control rotation angle = rotation_sign*pi/2
       rotation_sign = 1.
       if self.do_randomcone:
-          rotation_sign = np.random.uniform(4./3., 2./3., size=10)
+          rotation_sign = np.random.uniform(4./3., 2./3.)
       
       # Fill histograms for perpcone
       if self.do_perpcone and not self.do_2cones:
