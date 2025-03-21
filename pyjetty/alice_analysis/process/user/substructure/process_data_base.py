@@ -28,6 +28,7 @@ import time
 
 # Data analysis and plotting
 import numpy as np
+import os
 import ROOT
 import yaml
 import math
@@ -101,6 +102,14 @@ class ProcessDataBase(process_base.ProcessBase):
         self.static_perpcone = config['static_perpcone']
     else:
         self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
+    if 'do_randomcone' in config:
+        self.do_randomcone = config['do_randomcone']
+        self.do_perpcone = self.do_randomcone
+    else:
+        self.do_randomcone = False
+    if self.do_randomcone:
+        seed = int(time.time() * 1000) + os.getpid()
+        np.random.seed(seed)
 
     if 'do_jetcone' in config:
       self.do_jetcone = config['do_jetcone']
@@ -498,6 +507,11 @@ class ProcessDataBase(process_base.ProcessBase):
           self.fill_jet_cone_histograms(parts_in_cone, jetcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
+      # Control rotation angle = rotation_sign*pi/2
+      rotation_sign = 1.
+      if self.do_randomcone:
+          rotation_sign = np.random.uniform(4./3., 2./3., size=10)
+      
       # Fill histograms for perpcone
       if self.do_perpcone and not self.do_2cones:
         
@@ -518,11 +532,11 @@ class ProcessDataBase(process_base.ProcessBase):
         # construct perp cones and fill histograms
         for perpcone_R in perpcone_R_list:
 
-          parts_in_cone1 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, +1)
+          parts_in_cone1 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, +rotation_sign)
           self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
-          parts_in_cone2 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, -1)
+          parts_in_cone2 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, -rotation_sign)
           self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
@@ -546,7 +560,7 @@ class ProcessDataBase(process_base.ProcessBase):
         # construct perp cones and fill histograms
         for perpcone_R in perpcone_R_list:
 
-          parts_in_cone = self.construct_parts_in_2perpcone(parts, jet, jetR, perpcone_R)
+          parts_in_cone = self.construct_parts_in_2perpcone(parts, jet, jetR, perpcone_R, rotation_sign)
           self.fill_perp_cone_histograms(parts_in_cone, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
@@ -585,7 +599,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
     return parts_in_cone
 
-  def construct_parts_in_2perpcone(self, parts, jet, jetR, perpcone_R):
+  def construct_parts_in_2perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
     perpcone_R_effective = perpcone_R
     if self.do_rho_subtraction and self.static_perpcone == False and perpcone_R == jetR:
@@ -593,15 +607,15 @@ class ProcessDataBase(process_base.ProcessBase):
 
     # find perpcone at +pi/2 away and rotate it to jet direction
     perp_jet1 = fj.PseudoJet()
-    perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + np.pi/2, jet.m())
+    perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + rotation_sign*np.pi/2, jet.m())
     parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R_effective)
-    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -np.pi/2)
+    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -rotation_sign*np.pi/2)
 
     # perpcone at -pi/2 away and rotate it to jet direction
     perp_jet2 = fj.PseudoJet()
-    perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - np.pi/2, jet.m())
+    perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - rotation_sign*np.pi/2, jet.m())
     parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R_effective)
-    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +np.pi/2)
+    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +rotation_sign*np.pi/2)
 
     # label one perpcone as "sig" and the other as "bkg" so the perp1-perp2 and perp1(2)-perp1(2) correlations can be saved separately
     parts_in_cone = fj.vectorPJ()
