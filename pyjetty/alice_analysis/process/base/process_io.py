@@ -18,6 +18,7 @@ import sys
 import uproot
 import pandas
 import numpy as np
+import yaml
 
 # Fastjet via python (from external library fjpydev)
 import fastjet as fj
@@ -99,7 +100,7 @@ class ProcessIO(common_base.CommonBase):
   #             remove a certain random fraction of tracks;
   #             randomly assign proton and kaon mass to some tracks
   #---------------------------------------------------------------
-  def load_data(self, m=0.1396, reject_tracks_fraction=0., offset_indices=False,
+  def load_data(self, m=0.1396, reject_tracks_fraction=0., reject_tracks_config=None, offset_indices=False,
                 group_by_evid=True, random_mass=False, min_pt=0.):
     
     self.reject_tracks_fraction = reject_tracks_fraction
@@ -109,8 +110,54 @@ class ProcessIO(common_base.CommonBase):
     print('    track_tree_name = {}'.format(self.track_tree_name))
 
     self.track_df = self.load_dataframe()
+
+    # Check if pT-dependent track keeping is requested
+    if reject_tracks_config:
+      with open(reject_tracks_config, 'r') as f:
+        config = yaml.safe_load(f)
+      
+      pt_bins = config.get('ptBinning', [0., 999.])
+      keep_fractions = config.get('keepFraction', [1.0])  # Use 'keepFraction' as keep_fractions
+      print('Using the following input for tracking efficiency uncertainty')
+      print('pt binning:',pt_bins)
+      print('fraction of tracks to keep:',keep_fractions)
+      
+      # Ensure keep_fractions matches the length of pt_bins - 1
+      if len(keep_fractions) != len(pt_bins) - 1:
+        raise ValueError(f"Length of keepFraction ({len(keep_fractions)}) "
+                         f"must be one less than ptBinning ({len(pt_bins)})")
+      
+      # Create a copy of the track dataframe to modify
+      df_to_drop = self.track_df.copy()
+      
+      # Track keeping based on pT bins
+      df_to_drop['bin_index'] = pandas.cut(df_to_drop['ParticlePt'], 
+                                            bins=pt_bins, 
+                                            labels=False, 
+                                            include_lowest=True)
+      
+      # Tracks to keep for each pT bin
+      tracks_to_keep = []
+      for bin_index, keep_fraction in enumerate(keep_fractions):
+        # Get tracks in this pT bin
+        bin_tracks = df_to_drop[df_to_drop['bin_index'] == bin_index]
+        
+        # Number of tracks to keep
+        n_keep = int(len(bin_tracks) * keep_fraction)
+        
+        if n_keep > 0:
+          # Randomly select tracks to keep
+          np.random.seed()
+          indices_to_keep = np.random.choice(bin_tracks.index, n_keep, replace=False)
+          tracks_to_keep.extend(indices_to_keep)
+      
+      # Keep only selected tracks
+      if tracks_to_keep:
+        print(f'    Keeping {len(tracks_to_keep)} of {len(self.track_df.index)} tracks with pT-dependent selection')
+        self.track_df = self.track_df.loc[tracks_to_keep]
     
-    if self.reject_tracks_fraction > 1e-3:
+    # Original track rejection method (kept for backwards compatibility)
+    elif self.reject_tracks_fraction > 1e-3:
       n_remove = int(reject_tracks_fraction * len(self.track_df.index))
       print('    Removing {} of {} tracks from {}'.format(
         n_remove, len(self.track_df.index), self.track_tree_name))
