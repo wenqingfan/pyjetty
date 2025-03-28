@@ -137,6 +137,10 @@ class ProcessMCBase(process_base.ProcessBase):
     
     self.jet_matching_distance = config['jet_matching_distance']
     self.reject_tracks_fraction = config['reject_tracks_fraction']
+    if 'reject_tracks_config' in config:
+      self.reject_tracks_config = config['reject_tracks_config']
+    else:
+      self.reject_tracks_config = None
     if 'mc_fraction_threshold' in config:
       self.mc_fraction_threshold = config['mc_fraction_threshold']
     if 'do_rho_subtraction' in config:
@@ -301,7 +305,7 @@ class ProcessMCBase(process_base.ProcessBase):
         io_det = process_io.ProcessIO(input_file=self.input_file, tree_dir=tree_dir,
                                   track_tree_name='tree_Particle', use_ev_id_ext=False,
                                   is_jetscape=self.jetscape, event_plane_range=self.event_plane_range, is_ENC=self.ENC_fastsim, is_det_level=True)
-    df_fjparticles_det = io_det.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction)
+    df_fjparticles_det = io_det.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction, reject_tracks_config=self.reject_tracks_config)
     self.nEvents_det = len(df_fjparticles_det.index)
     self.nTracks_det = len(io_det.track_df.index)
     print('--- {} seconds ---'.format(time.time() - self.start_time))
@@ -312,7 +316,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                            track_tree_name='tree_Particle', use_ev_id_ext=False,
                                             is_jetscape=self.jetscape, holes=True,
                                             event_plane_range=self.event_plane_range)
-        df_fjparticles_det_holes = io_det_holes.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction)
+        df_fjparticles_det_holes = io_det_holes.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction, reject_tracks_config=self.reject_tracks_config)
         self.nEvents_det_holes = len(df_fjparticles_det_holes.index)
         self.nTracks_det_holes = len(io_det_holes.track_df.index)
         print('--- {} seconds ---'.format(time.time() - self.start_time))
@@ -337,7 +341,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                               track_tree_name='tree_Particle_gen', use_ev_id_ext=False,
                                               is_jetscape=self.jetscape, holes=True,
                                               event_plane_range=self.event_plane_range)
-        df_fjparticles_truth_holes = io_truth_holes.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction)
+        df_fjparticles_truth_holes = io_truth_holes.load_data(m=self.m, reject_tracks_fraction=self.reject_tracks_fraction, reject_tracks_config=self.reject_tracks_config)
         self.nEvents_truth_holes = len(df_fjparticles_truth_holes.index)
         self.nTracks_truth_holes = len(io_truth_holes.track_df.index)
         print('--- {} seconds ---'.format(time.time() - self.start_time))
