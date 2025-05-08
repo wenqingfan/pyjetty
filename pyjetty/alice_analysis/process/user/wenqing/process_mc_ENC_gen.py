@@ -139,6 +139,10 @@ class ProcessMC_ENC_Gen(process_mc_base.ProcessMCBase):
     for observable in self.observable_list:
       if 'ENC' in observable or 'EEC_noweight' in observable or 'EEC_weight2' in observable:
         for ipoint in range(2, 3):
+          if self.smearRL:
+              sigma = 0.001 # 1 mrad
+              noise = np.random.normal(0, sigma, new_corr.correlator(ipoint).rs().size())
+              #print("ipoint",ipoint,"thrd",trk_thrd,"noise",noise)
           for index in range(new_corr.correlator(ipoint).rs().size()):
 
             # processing only like-sign pairs when self.ENC_pair_like is on
@@ -150,8 +154,12 @@ class ProcessMC_ENC_Gen(process_mc_base.ProcessMCBase):
               continue
             
             if 'ENC' in observable:
-              getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-              getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+              if self.smearRL:
+                  getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
+              else:
+                  getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
             if ipoint==2 and 'EEC_noweight' in observable:
               getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
