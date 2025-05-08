@@ -96,6 +96,14 @@ class ProcessMCBase(process_base.ProcessBase):
       self.gen_only = config['gen_only']
     else:
       self.gen_only = False
+    
+    if self.gen_only == True:
+      if 'smearRL' in config:
+          self.smearRL = config['smearRL']
+      else:
+          self.smearRL = False
+    else: # if not gen only, set smearRL flag to False
+      self.smearRL = False  
       
     self.fast_simulation = config['fast_simulation']
     if self.fast_simulation == True:
