@@ -200,79 +200,83 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           obs_label = self.utils.obs_label(trk_thrd, None) 
 
           #=======================================
-          #        Sigma_ENC histogram
+          #  jet or jetcone sigma_ENC histogram
+          # and the corresponding jetcone hists
           #=======================================
-          ######### only signal pairs ##########
-          name = 'h_{}_sigma_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,40)
-          h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-          h.GetYaxis().SetTitle('R^{det}_{L}')
-          h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
-          setattr(self, name, h)
-
-          name = 'h_{}_sigma_reco_matched_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,40)
-          h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-          h.GetYaxis().SetTitle('R^{det}_{L}')
-          h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
-          setattr(self, name, h)
-
-          name = 'h_{}_sigma_gen_unmatched_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,40)
-          h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-          h.GetYaxis().SetTitle('R^{truth}_{L}')
-          h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-          setattr(self, name, h)
-
-          name = 'h_{}_sigma_gen_unmatched_kin_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,40)
-          h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-          h.GetYaxis().SetTitle('R^{truth}_{L}')
-          h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-          setattr(self, name, h)
-
-          name = 'h_{}_sigma_gen_matched_R{}_{}'.format(observable, jetR, obs_label)
-          pt_bins = linbins(0,200,40)
-          h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-          h.GetYaxis().SetTitle('R^{truth}_{L}')
-          h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-          setattr(self, name, h)
-
-          ######### all pair types ##########
-          for pair_type_label in self.pair_type_labels:
-
-            # histograms for unmatched jets (only filled for thermal closure)
-            name = 'h_{}_sigma{}_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+          if not self.do_jetcone:
+            ######### only signal pairs in jet ##########
+            name = 'h_{}_sigma_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
             pt_bins = linbins(0,200,40)
             h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
             h.GetYaxis().SetTitle('R^{det}_{L}')
             h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h)
 
-            # histograms for matched jets
-            name = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            name = 'h_{}_sigma_reco_matched_R{}_{}'.format(observable, jetR, obs_label)
             pt_bins = linbins(0,200,40)
             h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
             h.GetYaxis().SetTitle('R^{det}_{L}')
             h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
             setattr(self, name, h)
 
-            name = 'h_{}_sigma{}_gen_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            name = 'h_{}_sigma_gen_unmatched_R{}_{}'.format(observable, jetR, obs_label)
             pt_bins = linbins(0,200,40)
             h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-            h.GetYaxis().SetTitle('R^{det}_{L}')
+            h.GetYaxis().SetTitle('R^{truth}_{L}')
             h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h)
 
-            name = 'h_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            name = 'h_{}_sigma_gen_unmatched_kin_R{}_{}'.format(observable, jetR, obs_label)
             pt_bins = linbins(0,200,40)
             h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-            h.GetYaxis().SetTitle('R^{det}_{L}')
+            h.GetYaxis().SetTitle('R^{truth}_{L}')
             h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
             setattr(self, name, h)
 
-            if self.do_perpcone:
-              for perpcone_R in self.perpcone_R_list:
+            name = 'h_{}_sigma_gen_matched_R{}_{}'.format(observable, jetR, obs_label)
+            pt_bins = linbins(0,200,40)
+            h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+            h.GetYaxis().SetTitle('R^{truth}_{L}')
+            h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+            setattr(self, name, h)
+
+            ######### all pair types in jet ##########
+            for pair_type_label in self.pair_type_labels:
+
+              # histograms for unmatched jets (only filled for thermal closure)
+              name = 'h_{}_sigma{}_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h)
+
+              # histograms for matched jets
+              name = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h)
+
+              name = 'h_{}_sigma{}_gen_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h)
+
+              name = 'h_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h)
+
+            ######### all pair types in perpcone ##########
+            if self.do_perpcone:  
+              perpcone_R = jetR
+              for pair_type_label in self.pair_type_labels:
                 # histograms for unmatched jets (only filled for thermal closure)
                 name = 'h_perpcone{}_{}_sigma{}_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
                 pt_bins = linbins(0,200,40)
@@ -302,7 +306,112 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 h.GetYaxis().SetTitle('R^{det}_{L}')
                 h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
                 setattr(self, name, h)
+          
+          else:
+            for jetcone_R in self.jetcone_R_list:
+              ######### only signal pairs in jetcone ##########
+              name = 'h_jetcone{}_{}_sigma_reco_unmatched_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h)
 
+              name = 'h_jetcone{}_{}_sigma_reco_matched_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{det}_{L}')
+              h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h)
+
+              name = 'h_jetcone{}_{}_sigma_gen_unmatched_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{truth}_{L}')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h)
+
+              name = 'h_jetcone{}_{}_sigma_gen_unmatched_kin_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{truth}_{L}')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h)
+
+              name = 'h_jetcone{}_{}_sigma_gen_matched_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+              h.GetYaxis().SetTitle('R^{truth}_{L}')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h)
+
+              ######### all pair types in jetcone ##########
+              for pair_type_label in self.pair_type_labels:
+
+                # histograms for unmatched jets (only filled for thermal closure)
+                name = 'h_jetcone{}_{}_sigma{}_R{}_{}'.format(jetcone_R, observable, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetYaxis().SetTitle('R^{det}_{L}')
+                h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h)
+
+                # histograms for matched jets
+                name = 'h_jetcone{}_{}_sigma{}_reco_unmatched_R{}_{}'.format(jetcone_R, observable, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetYaxis().SetTitle('R^{det}_{L}')
+                h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h)
+
+                name = 'h_jetcone{}_{}_sigma{}_gen_unmatched_R{}_{}'.format(jetcone_R, observable, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetYaxis().SetTitle('R^{det}_{L}')
+                h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h)
+
+                name = 'h_jetcone{}_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(jetcone_R, observable, pair_type_label, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetYaxis().SetTitle('R^{det}_{L}')
+                h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h)
+              
+              ######### all pair types in perpcone ##########
+              if self.do_perpcone:  
+                perpcone_R = jetcone_R
+                for pair_type_label in self.pair_type_labels:
+                  # histograms for unmatched jets (only filled for thermal closure)
+                  name = 'h_perpcone{}_{}_sigma{}_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,40)
+                  h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                  h.GetYaxis().SetTitle('R^{det}_{L}')
+                  h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                  setattr(self, name, h)
+
+                  # histograms for matched jets
+                  name = 'h_perpcone{}_{}_sigma{}_reco_unmatched_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,40)
+                  h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                  h.GetYaxis().SetTitle('R^{det}_{L}')
+                  h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                  setattr(self, name, h)
+
+                  name = 'h_perpcone{}_{}_sigma{}_gen_unmatched_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,40)
+                  h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                  h.GetYaxis().SetTitle('R^{det}_{L}')
+                  h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                  setattr(self, name, h)
+
+                  name = 'h_perpcone{}_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(perpcone_R, observable, pair_type_label, jetR, obs_label)
+                  pt_bins = linbins(0,200,40)
+                  h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                  h.GetYaxis().SetTitle('R^{det}_{L}')
+                  h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                  setattr(self, name, h)
+          
           #=======================================
           #      1D unfolding for jet pT
           #=======================================
@@ -345,66 +454,73 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
           #=======================================
           # 2D unfolding for energy correlators
+          # either for jet constituents or 
+          # jet cone particles
+          # and the corresponding perpcone
           #=======================================
           for iRL in range(self.n_RLbins):
-            
-            ######### only signal pairs ##########
-            name = 'h_{}{:d}_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
-            h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
-            h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
-            setattr(self, name, h2_reco)
-            
-            name = 'h_{}{:d}_gen_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
-            h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
-            h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-            setattr(self, name, h2_gen)
-
-            name = 'h_{}{:d}_gen_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
-            h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
-            h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-            setattr(self, name, h2_gen)
-            
-            # histogram to study the kinematic efficiency effect due to truncation of det jet pt
-            name = 'h_{}{:d}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
-            h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
-            h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-            setattr(self, name, h2_gen_kin)
-
-            ######### all pair types ##########
-            for pair_type_label in self.pair_type_labels:
-
-              # histograms for unmatched jets (only filled for thermal closure)
-              name = 'h_{}{:d}{}_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
-              h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
-              h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
-              h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
-              setattr(self, name, h2_raw)
-
-              # histograms for matched jets
-              name = 'h_{}{:d}{}_reco_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+            if not self.do_jetcone:
+              
+              ######### only signal pairs in jet ##########
+              name = 'h_{}{:d}_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
               h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
               h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
               h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
               setattr(self, name, h2_reco)
-
-              name = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+              
+              name = 'h_{}{:d}_gen_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
               h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
               h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
               h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
               setattr(self, name, h2_gen)
 
-              name = 'h_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+              name = 'h_{}{:d}_gen_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+              h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+              h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h2_gen)
+              
+              # histogram to study the kinematic efficiency effect due to truncation of det jet pt
+              name = 'h_{}{:d}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, jetR, obs_label)
               h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
               h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
               h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
               setattr(self, name, h2_gen_kin)
 
+              ######### all pair types in jet ##########
+              for pair_type_label in self.pair_type_labels:
+
+                # histograms for unmatched jets (only filled for thermal closure)
+                name = 'h_{}{:d}{}_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
+                h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h2_raw)
+
+                # histograms for matched jets
+                name = 'h_{}{:d}{}_reco_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
+                h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h2_reco)
+
+                name = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+                h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h2_gen)
+
+                name = 'h_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
+                h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h2_gen_kin)
+
+              ######### all pair types in perpcone ##########
               if self.do_perpcone:
-                for perpcone_R in self.perpcone_R_list:
+                perpcone_R = jetR
+                for pair_type_label in self.pair_type_labels:
+            
                   # histograms for unmatched jets (only filled for thermal closure)
                   name = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                   h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
@@ -430,72 +546,241 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                   h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
                   h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
                   setattr(self, name, h2_gen_kin)
-            
-            ######### only signal pairs ##########
-            if self.save_RUResponse:
-              # save response matrix in RooUnfoldResponse format directly
-              # fill misses pair by pair
-              name = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
-              response.SetName(name)
-              setattr(self, name, response)
+          
             else:
-              ######### only signal pairs ##########
-              # save response matrix in THnF format
-              dim = 4
-              title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
-              nbins = [30, 20, 20, 20]
-              min = [0., 0., -5., -5.]
-              max = [150., 200., 0., 0.]
-              name = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              self.create_thn(name, title, dim, nbins, min, max)
+              for jetcone_R in self.jetcone_R_list:
 
-              # fill misses in separate histograms
-              dim = 3
-              # save the matched det jet pt for study of kinematic effect later
-              title = ['p^{truth}_{T,ch jet}', 'log10(weight^{truth})', 'p^{det}_{T,ch jet}']
-              nbins = [20, 20, 30]
-              min = [0., -5., 0.]
-              max = [200., 0., 150.]
-              name = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              self.create_thn(name, title, dim, nbins, min, max)
+                ######### only signal pairs in jetcone ##########
+                name = 'h_jetcone{}_{}{:d}_reco_matched_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
+                h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h2_reco)
+                
+                name = 'h_jetcone{}_{}{:d}_gen_matched_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+                h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h2_gen)
 
-              ######### all pair types ##########
-              dim = 4
-              title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
-              nbins = [30, 20, 20, 20]
-              min = [0., 0., -5., -5.]
-              max = [150., 200., 0., 0.]
-              for pair_type_label in self.pair_type_labels:
-                name = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                name = 'h_jetcone{}_{}{:d}_gen_unmatched_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+                h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h2_gen)
+                
+                # histogram to study the kinematic efficiency effect due to truncation of det jet pt
+                name = 'h_jetcone{}_{}{:d}_gen_unmatched_kin_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
+                h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h2_gen_kin)
+
+                ######### all pair types in jetcone ##########
+                for pair_type_label in self.pair_type_labels:
+
+                  # histograms for unmatched jets (only filled for thermal closure)
+                  name = 'h_jetcone{}_{}{:d}{}_R{}_{}'.format(jetcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                  h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                  h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
+                  h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                  setattr(self, name, h2_raw)
+
+                  # histograms for matched jets
+                  name = 'h_jetcone{}_{}{:d}{}_reco_unmatched_R{}_{}'.format(jetcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                  h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                  h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
+                  h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                  setattr(self, name, h2_reco)
+
+                  name = 'h_jetcone{}_{}{:d}{}_gen_unmatched_R{}_{}'.format(jetcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                  h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                  h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+                  h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                  setattr(self, name, h2_gen)
+
+                  name = 'h_jetcone{}_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(jetcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                  h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                  h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
+                  h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                  setattr(self, name, h2_gen_kin)
+                
+                ######### all pair types in perpcone ##########
+                if self.do_perpcone:
+                  perpcone_R = jetcone_R
+                  for pair_type_label in self.pair_type_labels:
+                    # histograms for unmatched jets (only filled for thermal closure)
+                    name = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    h2_raw = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                    h2_raw.GetYaxis().SetTitle('log10(weight^{det})')
+                    h2_raw.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                    setattr(self, name, h2_raw)
+
+                    # histograms for matched jets
+                    name = 'h_perpcone{}_{}{:d}{}_reco_unmatched_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    h2_reco = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                    h2_reco.GetYaxis().SetTitle('log10(weight^{det})')
+                    h2_reco.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                    setattr(self, name, h2_reco)
+
+                    name = 'h_perpcone{}_{}{:d}{}_gen_unmatched_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    h2_gen = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                    h2_gen.GetYaxis().SetTitle('log10(weight^{truth})')
+                    h2_gen.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                    setattr(self, name, h2_gen)
+
+                    name = 'h_perpcone{}_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    h2_gen_kin = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                    h2_gen_kin.GetYaxis().SetTitle('log10(weight^{truth})')
+                    h2_gen_kin.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                    setattr(self, name, h2_gen_kin)
+                      
+          #============================================
+          # Response matrix and purity hists for EEC
+          #============================================
+          for iRL in range(self.n_RLbins):
+            if not self.do_jetcone: 
+              # RMs     
+              if self.save_RUResponse:
+                ######### only signal pairs in jet ##########
+                # save response matrix in RooUnfoldResponse format directly
+                # fill misses pair by pair
+                name = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
+                response.SetName(name)
+                setattr(self, name, response)
+              else:
+                ######### only signal pairs in jet ##########
+                # save response matrix in THnF format
+                dim = 4
+                title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
+                nbins = [30, 20, 20, 20]
+                min = [0., 0., -5., -5.]
+                max = [150., 200., 0., 0.]
+                name = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
                 self.create_thn(name, title, dim, nbins, min, max)
 
+                # fill misses in separate histograms
+                dim = 3
+                # save the matched det jet pt for study of kinematic effect later
+                title = ['p^{truth}_{T,ch jet}', 'log10(weight^{truth})', 'p^{det}_{T,ch jet}']
+                nbins = [20, 20, 30]
+                min = [0., -5., 0.]
+                max = [200., 0., 150.]
+                name = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                self.create_thn(name, title, dim, nbins, min, max)
+
+                ######### all pair types in jet ##########
+                dim = 4
+                title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
+                nbins = [30, 20, 20, 20]
+                min = [0., 0., -5., -5.]
+                max = [150., 200., 0., 0.]
+                for pair_type_label in self.pair_type_labels:
+                  name = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                  self.create_thn(name, title, dim, nbins, min, max)
+
+                ######### all pair types in perpcone ##########
                 if self.do_perpcone:
-                  for perpcone_R in self.perpcone_R_list:
+                  perpcone_R = jetR
+                  for pair_type_label in self.pair_type_labels:
                     name = 'THnF_perpcone{}_{}{:d}{}_response_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
                     self.create_thn(name, title, dim, nbins, min, max)
 
-            # for purity correction
-            name = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
-            h.GetYaxis().SetTitle('log10(weight^{det})')
-            h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
-            setattr(self, name, h) 
+              # for purity correction
+              name = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+              h.GetYaxis().SetTitle('log10(weight^{det})')
+              h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+              setattr(self, name, h) 
 
-            # for purity correction after unfolding
-            name = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
-            h = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
-            h.GetYaxis().SetTitle('log10(weight^{truth})')
-            h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
-            setattr(self, name, h) 
+              # for purity correction after unfolding
+              name = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              h = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+              h.GetYaxis().SetTitle('log10(weight^{truth})')
+              h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+              setattr(self, name, h) 
 
+            else:
+              for jetcone_R in self.jetcone_R_list:
+                # RMs
+                if self.save_RUResponse:
+                  ######### only signal pairs in jetcone ##########
+                  # save response matrix in RooUnfoldResponse format directly
+                  # fill misses pair by pair
+                  name = 'h_jetcone{}_{}{:d}_response_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                  response = ROOT.RooUnfoldResponse(h2_reco, h2_gen)
+                  response.SetName(name)
+                  setattr(self, name, response)
+                else:
+                  ######### only signal pairs in jetcone ##########
+                  # save response matrix in THnF format
+                  dim = 4
+                  title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
+                  nbins = [30, 20, 20, 20]
+                  min = [0., 0., -5., -5.]
+                  max = [150., 200., 0., 0.]
+                  name = 'THnF_jetcone{}_{}{:d}_response_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                  self.create_thn(name, title, dim, nbins, min, max)
+
+                  # fill misses in separate histograms
+                  dim = 3
+                  # save the matched det jet pt for study of kinematic effect later
+                  title = ['p^{truth}_{T,ch jet}', 'log10(weight^{truth})', 'p^{det}_{T,ch jet}']
+                  nbins = [20, 20, 30]
+                  min = [0., -5., 0.]
+                  max = [200., 0., 150.]
+                  name = 'THnF_jetcone{}_{}{:d}_response_miss_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                  self.create_thn(name, title, dim, nbins, min, max)
+
+                  ######### all pair types in jetcone ##########
+                  dim = 4
+                  title = ['p^{det}_{T,ch jet}', 'p^{truth}_{T,ch jet}', 'log10(weight^{det})', 'log10(weight^{truth})']
+                  nbins = [30, 20, 20, 20]
+                  min = [0., 0., -5., -5.]
+                  max = [150., 200., 0., 0.]
+                  for pair_type_label in self.pair_type_labels:
+                    name = 'THnF_jetcone{}_{}{:d}{}_response_R{}_{}'.format(jetcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                    self.create_thn(name, title, dim, nbins, min, max)
+
+                  ######### all pair types in perpcone ##########
+                  if self.do_perpcone:
+                    perpcone_R = jetcone_R
+                    for pair_type_label in self.pair_type_labels:
+                      name = 'THnF_perpcone{}_{}{:d}{}_response_R{}_{}'.format(perpcone_R, observable, iRL, pair_type_label, jetR, obs_label)
+                      self.create_thn(name, title, dim, nbins, min, max)
+
+                # for purity correction
+                name = 'h_jetcone{}_{}{:d}_reco_unmatched_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h = ROOT.TH2D(name, name, n_bins_reco[1], binnings_reco[1], n_bins_reco[0], binnings_reco[0])
+                h.GetYaxis().SetTitle('log10(weight^{det})')
+                h.GetXaxis().SetTitle('p^{det}_{T,ch jet}')
+                setattr(self, name, h) 
+
+                # for purity correction after unfolding
+                name = 'h_jetcone{}_{}{:d}_ss_reco_matched_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                h = ROOT.TH2D(name, name, n_bins_truth[1], binnings_truth[1], n_bins_truth[0], binnings_truth[0])
+                h.GetYaxis().SetTitle('log10(weight^{truth})')
+                h.GetXaxis().SetTitle('p^{truth}_{T,ch jet}')
+                setattr(self, name, h) 
+          
+          #=======================================
           # RL resolution check for pairs
-          name = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
-          h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
-          h.GetXaxis().SetTitle('R_{L}^{det}')
-          h.GetYaxis().SetTitle('R_{L}^{truth}')
-          setattr(self, name, h)       
-
+          #=======================================
+          if not self.do_jetcone:
+            name = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
+            h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
+            h.GetXaxis().SetTitle('R_{L}^{det}')
+            h.GetYaxis().SetTitle('R_{L}^{truth}')
+            setattr(self, name, h)  
+          else:
+            for jetcone_R in self.jetcone_R_list:
+              name = 'h2d_jetcone{}_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetcone_R, jetR, obs_label)
+              h = ROOT.TH2D(name, name, self.n_RLbins, self.RLbins, self.n_RLbins, self.RLbins)
+              h.GetXaxis().SetTitle('R_{L}^{det}')
+              h.GetYaxis().SetTitle('R_{L}^{truth}')
+              setattr(self, name, h)  
+  
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
   # Fill 2D histogram of (pt, obs)
@@ -526,7 +811,8 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     for observable in self.observable_list:
 
       if observable == 'jet_ENC_RL':
-        pairs_all = self.get_EEC_pairs(jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=False)
+        cone_parts = None # no cone parts when looking at the jet EEC
+        pairs_all = self.get_EEC_pairs(jet, cone_parts, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=False)
         for pair in pairs_all:
           pair_type = pair.jet_pair_type() 
           pair_type_label = self.pair_type_labels[pair_type]
@@ -549,7 +835,44 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   # EEC for unmatched jets (used in the thermal closure test)
   # only filled for the det-level histograms
   #---------------------------------------------------------------
-  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_jetcone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix):
+
+    trk_thrd = obs_setting
+
+    if self.do_rho_subtraction:
+      jet_pt = jet_pt_ungroomed # jet_pt_ungroomed stores subtracted jet pt for energy weight calculation and pt selection for there is a non-zero UE energy density
+      if jet.area() == 0:
+        return # NB: skip the zero area jets for now (also skip the perp-cone and jet-cone w.r.t. the zero area jets)
+    else:
+      jet_pt = jet.perp()
+
+    for observable in self.observable_list:
+
+      if observable == 'jet_ENC_RL':
+        pairs_all = self.get_EEC_pairs(jet, cone_parts, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=False)
+        for pair in pairs_all:
+          pair_type = pair.jet_pair_type() 
+          pair_type_label = self.pair_type_labels[pair_type]
+
+          RL = pair.r
+          weight = pair.weight
+          
+          hname = 'h_jetcone{}_{}_sigma{}_R{}_{}'.format(cone_R, observable, pair_type_label, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt, RL, weight)
+
+          # determine RL bin for det pairs
+          iRL = bisect(self.RLbins, RL)-1 # index from 0
+
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_jetcone{}_{}{:d}{}_R{}_{}'.format(cone_R, observable, iRL, pair_type_label, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt, np.log10(weight))
+
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  # EEC for unmatched jets (used in the thermal closure test)
+  # only filled for the det-level histograms
+  #---------------------------------------------------------------
+  def fill_perpcone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix):
 
     # combine sig jet and perp cone with trk threshold cut
     trk_thrd = obs_setting
@@ -615,12 +938,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
     for observable in self.observable_list:
       
       if observable == 'jet_ENC_RL':
-        
-        # type 1 -- fill for jet constituents
-        if (cone_R == 0) and (cone_parts_in_det_jet == None):
 
-          ####### Fill jet pt histogram only once for jet EEC #######
-          # to avoid double/triple-counting when perpcone or jetcone is enabled
+        ####### Fill jet pt histogram only once for each jet R #######
+        # to avoid double/triple-counting when perpcone or jetcone is enabled
+        if (not self.do_jetcone and (cone_R == 0) and (cone_parts_in_det_jet == None)) or (self.do_jetcone and cone_R == self.jetcone_R_list[0]):
           hname = 'h_jetpt_reco1D_matched_R{}_{}'.format(jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det)
           hname = 'h_jetpt_gen1D_matched_R{}_{}'.format(jetR, obs_label)
@@ -635,68 +956,74 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           else:
             hname = 'THnF_jetpt_response1D_R{}_{}'.format(jetR, obs_label)
             getattr(self, hname).Fill(jet_pt_det, jet_truth.perp())
-
+        
+        # type 1 -- fill EEC for jet constituents or jet cone parts
+        if (cone_R == 0) or ((cone_R!=0) and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None)):
+          cone_label=''
+          if cone_R!=0:
+            cone_label='_jetcone{}'.format(cone_R)
+            
           ################### all pair types ###################
-          det_pairs_all = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
+          det_pairs_all = self.get_EEC_pairs(jet_det, cone_parts_in_det_jet, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=False)
 
           for d_pair in det_pairs_all:
             pair_type = d_pair.jet_pair_type() 
             pair_type_label = self.pair_type_labels[pair_type]
 
-            hname = 'h_{}_sigma{}_reco_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            hname = 'h{}_{}_sigma{}_reco_unmatched_R{}_{}'.format(cone_label, observable, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
 
             t_pair_pt = jet_truth.pt()
             t_pair_weight = d_pair.weight*d_pair.pt*d_pair.pt/(t_pair_pt*t_pair_pt) # replace det jet pt by truth jet pt in the energy weight calculation
 
-            hname = 'h_{}_sigma{}_gen_unmatched_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+            hname = 'h{}_{}_sigma{}_gen_unmatched_R{}_{}'.format(cone_label, observable, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(t_pair_pt, d_pair.r, t_pair_weight) # fill det RL (assuming very similar det RL and truth RL)
 
             if jet_pt_det > 40:
-              hname = 'h_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(observable, pair_type_label, jetR, obs_label)
+              hname = 'h{}_{}_sigma{}_gen_unmatched_kin_R{}_{}'.format(cone_label, observable, pair_type_label, jetR, obs_label)
               getattr(self, hname).Fill(t_pair_pt, d_pair.r, t_pair_weight) # fill det RL (assuming very similar det RL and truth RL)
 
             # determine RL bin for det pairs
             iRL = bisect(self.RLbins, d_pair.r)-1 # index from 0
 
             if iRL >= 0 and iRL < self.n_RLbins:
-              hname = 'h_{}{:d}{}_reco_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+              hname = 'h{}_{}{:d}{}_reco_unmatched_R{}_{}'.format(cone_label, observable, iRL, pair_type_label, jetR, obs_label)
               getattr(self, hname).Fill(d_pair.pt, np.log10(d_pair.weight)) 
 
-              hname = 'h_{}{:d}{}_gen_unmatched_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+              hname = 'h{}_{}{:d}{}_gen_unmatched_R{}_{}'.format(cone_label, observable, iRL, pair_type_label, jetR, obs_label)
               getattr(self, hname).Fill(t_pair_pt, np.log10(t_pair_weight)) 
 
               if jet_pt_det > 40:
-                hname = 'h_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                hname = 'h{}_{}{:d}{}_gen_unmatched_kin_R{}_{}'.format(cone_label, observable, iRL, pair_type_label, jetR, obs_label)
                 getattr(self, hname).Fill(t_pair_pt, np.log10(t_pair_weight)) 
 
               if not self.save_RUResponse:
-                hname = 'THnF_{}{:d}{}_response_R{}_{}'.format(observable, iRL, pair_type_label, jetR, obs_label)
+                hname = 'THnF{}_{}{:d}{}_response_R{}_{}'.format(cone_label, observable, iRL, pair_type_label, jetR, obs_label)
                 x = ([d_pair.pt, t_pair_pt, np.log10(d_pair.weight), np.log10(t_pair_weight)])
                 x_array = array.array('d', x)
                 getattr(self, hname).Fill(x_array)
 
           
-          ################### Onlt signal pairs ###################
+          ################### Only signal pairs ###################
           # truth level EEC pairs
-          truth_pairs = self.get_EEC_pairs(jet_truth, jet_truth.perp(), trk_thrd, ipoint=2, only_signal_pairs=True)
+          truth_pairs = self.get_EEC_pairs(jet_truth, cone_parts_in_truth_jet, jet_truth.perp(), trk_thrd, ipoint=2, only_signal_pairs=True)
 
           # det level EEC pairs (only ss pairs)
-          det_pairs = self.get_EEC_pairs(jet_det, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=True)          
+          det_pairs = self.get_EEC_pairs(jet_det, cone_parts_in_det_jet, jet_pt_det, trk_thrd, ipoint=2, only_signal_pairs=True)
 
           ######### purity correction #########
           # calculate det EEC cross section irregardless if truth match exists
 
           for d_pair in det_pairs:
 
-            hname = 'h_{}_sigma_reco_unmatched_R{}_{}'.format(observable, jetR, obs_label)
+            hname = 'h{}_{}_sigma_reco_unmatched_R{}_{}'.format(cone_label, observable, jetR, obs_label)
             getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
 
             # determine RL bin for det pairs
             iRL = bisect(self.RLbins, d_pair.r)-1 # index from 0
 
             if iRL >= 0 and iRL < self.n_RLbins:
-              hname = 'h_{}{:d}_reco_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              hname = 'h{}_{}{:d}_reco_unmatched_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
               getattr(self, hname).Fill(d_pair.pt, np.log10(d_pair.weight))
 
           ########################## Fill RM (matched and missed) #########################
@@ -705,11 +1032,11 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
           # pair matching
           for t_pair in truth_pairs:
 
-            hname = 'h_{}_sigma_gen_unmatched_R{}_{}'.format(observable, jetR, obs_label)
+            hname = 'h{}_{}_sigma_gen_unmatched_R{}_{}'.format(cone_label, observable, jetR, obs_label)
             getattr(self, hname).Fill(t_pair.pt, t_pair.r, t_pair.weight)
 
             if jet_pt_det > 40:
-              hname = 'h_{}_sigma_gen_unmatched_kin_R{}_{}'.format(observable, jetR, obs_label)
+              hname = 'h{}_{}_sigma_gen_unmatched_kin_R{}_{}'.format(cone_label, observable, jetR, obs_label)
               getattr(self, hname).Fill(t_pair.pt, t_pair.r, t_pair.weight)
 
             # determine RL bin fr truth pairs
@@ -719,12 +1046,12 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
             #   print("new trurh pair")
 
             if iRL >= 0 and iRL < self.n_RLbins:
-              hname = 'h_{}{:d}_gen_unmatched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+              hname = 'h{}_{}{:d}_gen_unmatched_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
               getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
 
               # kinematic effect because of truncation in matched det pT
               if jet_pt_det > 40: # hard code the truncation value as 40 for now
-                hname = 'h_{}{:d}_gen_unmatched_kin_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                hname = 'h{}_{}{:d}_gen_unmatched_kin_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                 getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
               # if iRL == 40:
               #   print('gen pair with distance',t_pair.r,'weight',t_pair.weight,'pt',t_pair.pt)
@@ -734,14 +1061,14 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
               if d_pair.is_equal(t_pair):
 
-                hname = 'h_{}_sigma_gen_matched_R{}_{}'.format(observable, jetR, obs_label)
+                hname = 'h{}_{}_sigma_gen_matched_R{}_{}'.format(cone_label, observable, jetR, obs_label)
                 getattr(self, hname).Fill(t_pair.pt, t_pair.r, t_pair.weight)
 
-                hname = 'h_{}_sigma_reco_matched_R{}_{}'.format(observable, jetR, obs_label)
+                hname = 'h{}_{}_sigma_reco_matched_R{}_{}'.format(cone_label, observable, jetR, obs_label)
                 getattr(self, hname).Fill(d_pair.pt, d_pair.r, d_pair.weight)
 
                 # fill the RL at det v.s. truth level (no energy weight)
-                hname = 'h2d_matched_pair_RL_truth_vs_det_R{}_{}'.format(jetR, obs_label)
+                hname = 'h2d{}_matched_pair_RL_truth_vs_det_R{}_{}'.format(cone_label, jetR, obs_label)
                 getattr(self, hname).Fill(d_pair.r, t_pair.r)
                 
                 # if iRL == 40:
@@ -750,24 +1077,24 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
                 # NB: assuming very similar d_pair.r and t_pair.r
                 if iRL >= 0 and iRL < self.n_RLbins:
 
-                  hname = 'h_{}{:d}_gen_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  hname = 'h{}_{}{:d}_gen_matched_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                   getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
 
-                  hname = 'h_{}{:d}_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  hname = 'h{}_{}{:d}_reco_matched_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                   getattr(self, hname).Fill(d_pair.pt, np.log10(d_pair.weight))
 
                   # this is for purity correction after unfolding and bkg subtraction
                   # NB1: two ways to fill weight here: 1. use det particle pT; 2. use truth particle pT (meaning truth for both jet pT and particle pT)
                   # NB2: one other implicit assumption is small migration for RL (in fact iRL used here is determined from truth RL)
                   # FIX ME: option 2 mention in NB1 is hard coded here
-                  hname = 'h_{}{:d}_ss_reco_matched_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  hname = 'h{}_{}{:d}_ss_reco_matched_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                   getattr(self, hname).Fill(t_pair.pt, np.log10(t_pair.weight))
                   
                   if self.save_RUResponse:
-                    hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label, self.pt_hat) # NB: if RooUnfoldResponse format, applying scaling during while processing
+                    hname = 'h{}_{}{:d}_response_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label, self.pt_hat) # NB: if RooUnfoldResponse format, applying scaling during while processing
                     getattr(self, hname).Fill(d_pair.pt, d_pair.weight, t_pair.pt, t_pair.weight)
                   else:
-                    hname = 'THnF_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                    hname = 'THnF{}_{}{:d}_response_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                     x = ([d_pair.pt, t_pair.pt, np.log10(d_pair.weight), np.log10(t_pair.weight)])
                     x_array = array.array('d', x)
                     getattr(self, hname).Fill(x_array)
@@ -783,10 +1110,10 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
               if iRL >= 0 and iRL < self.n_RLbins:
                 
                 if self.save_RUResponse:
-                  hname = 'h_{}{:d}_response_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  hname = 'h{}_{}{:d}_response_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                   getattr(self, hname).Miss(t_pair.pt, t_pair.weight, self.pt_hat)  # NB: if RooUnfoldResponse format, applying scaling during while processing
                 else:
-                  hname = 'THnF_{}{:d}_response_miss_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                  hname = 'THnF{}_{}{:d}_response_miss_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
                   x = ([t_pair.pt, np.log10(t_pair.weight), jet_pt_det])
                   x_array = array.array('d', x)
                   getattr(self, hname).Fill(x_array)
@@ -841,11 +1168,15 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   # NB: this is not the most efficient implementation 
   # when using multiple threshold cuts 
   #---------------------------------------------------------------
-  def get_EEC_pairs(self, jet, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=True):
+  def get_EEC_pairs(self, jet, cone_parts, jet_pt, trk_thrd, ipoint=2, only_signal_pairs=True):
 
     pairs = []
 
-    constituents = fj.sorted_by_pt(jet.constituents())
+    if cone_parts == None:
+      constituents = fj.sorted_by_pt(jet.constituents())
+    else:
+      constituents = fj.sorted_by_pt(cone_parts)
+
     c_select = fj.vectorPJ()
 
     for c in constituents:
