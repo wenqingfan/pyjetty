@@ -941,7 +941,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
 
         ####### Fill jet pt histogram only once for each jet R #######
         # to avoid double/triple-counting when perpcone or jetcone is enabled
-        if (not self.do_jetcone and (cone_R == 0) and (cone_parts_in_det_jet == None)) or (self.do_jetcone and cone_R == self.jetcone_R_list[0]):
+        if (not self.do_jetcone and (cone_R == 0) and (cone_parts_in_det_jet == None)) or (self.do_jetcone and cone_R == self.jetcone_R_list[0] and (cone_parts_in_det_jet != None) and (cone_parts_in_truth_jet != None)):
           hname = 'h_jetpt_reco1D_matched_R{}_{}'.format(jetR, obs_label)
           getattr(self, hname).Fill(jet_pt_det)
           hname = 'h_jetpt_gen1D_matched_R{}_{}'.format(jetR, obs_label)
