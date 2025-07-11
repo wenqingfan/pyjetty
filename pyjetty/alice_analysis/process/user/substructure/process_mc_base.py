@@ -163,13 +163,14 @@ class ProcessMCBase(process_base.ProcessBase):
       self.jetcone_R_list = config['jetcone_R_list']
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
-    # for speed reason, if this is enabled, then only contruct EECs for jetcone and related perpcone (skip the EECs for the standard jet constituents)
-    if 'do_only_jetcone' in config:
-      self.do_only_jetcone = config['do_only_jetcone']
-    else:
-      self.do_only_jetcone = False
     
     # Now allow perpcone and jetcone to be enabled as the same time
+    # Now implementated the perpcone for both jet constituents and jet cones
+    # NB: this implementation can only check jet EEC and cone EEC separately (jet EEC will not be saved when do_jetcone is enabled)
+    # example 1: jetR_list = [0.2], do_jetdone = False, do_perpcone = True
+    # -- fill and save perpcone hists for the jet constituents
+    # example 2: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.2, 0.4]), do_perpcone = True
+    # -- fill and save perpcone hists for the jet cone parts with cone size 0.2 and 0.4
     if 'do_perpcone' in config:
       self.do_perpcone = config['do_perpcone']
     else:
@@ -178,28 +179,6 @@ class ProcessMCBase(process_base.ProcessBase):
         self.static_perpcone = config['static_perpcone']
     else:
         self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
-
-    if self.do_perpcone:
-      # Now implementated the perpcone for both jet constituents and jet cones with radius larger than the jet radius used in the AK clustering algorithm
-      # example 1: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.2]), do_perpcone = True
-      # -- fill and save perpcone hists for the jet constituents
-      # example 2: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.4]), do_perpcone = True
-      # -- fill and save perpcone hists for the jet constituents and jet cone with size 0.4
-      # a special case: if analyze jet cones and only analyze jet cones, then skip the EEC histograms for perpcones of jetR if jetR is not in the jetcone_R_list (just to speed things up)
-      self.perpcone_R_list = []
-      # NB: Have only tested for the input configuration with only one jetR
-      for jetR in self.jetR_list:
-        if self.do_jetcone:
-          if self.do_only_jetcone:
-            for jetcone_R in self.jetcone_R_list:
-              self.perpcone_R_list.append(jetcone_R)
-          else:
-            self.perpcone_R_list.append(jetR)
-            for jetcone_R in self.jetcone_R_list:
-              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-                self.perpcone_R_list.append(jetcone_R)
-        else:
-          self.perpcone_R_list.append(jetR)
 
     if 'leading_pt' in config:
         self.leading_pt = config['leading_pt']
@@ -250,8 +229,7 @@ class ProcessMCBase(process_base.ProcessBase):
       self.do_2D_unfold = False
 
     if self.do_2D_unfold == True:
-      # NB: have not implemented 2D unfolding for jet cone or fast simulation setup
-      self.do_jetcone = False 
+      # NB: have not implemented 2D unfolding for fast simulation setup
       self.ENC_fastsim = False 
 
     # unless this flag is set to true, save RM in ThnF format
@@ -1141,18 +1119,30 @@ class ProcessMCBase(process_base.ProcessBase):
 
         # fill unmatched det-level histograms for the thermal closure test
         if self.thermal_model and (not 'Truth' in hname):
-          self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+
+          if not self.do_jetcone:
+            self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix) # or fill unmatched jet histogram (should be defined in process_mc_ENC_2D)
+          else:
+            for jetcone_R in self.jetcone_R_list:
+              parts_in_cone = self.find_parts_around_jet(fj_particles_cones, jet, jetcone_R)
+              self.fill_jetcone_histograms(parts_in_cone, jetcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix)
 
           if self.do_perpcone:
+            perpcone_R_list = []
+            if self.do_jetcone:
+              for jetcone_R in self.jetcone_R_list:
+                perpcone_R_list.append(jetcone_R)
+            else:
+              perpcone_R_list.append(jetR)
 
-            for perpcone_R in self.perpcone_R_list:
+            for perpcone_R in perpcone_R_list:
 
               parts_in_cone1 = self.construct_parts_in_perpcone(fj_particles_cones, jet, jetR, perpcone_R, +1)
-              self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
+              self.fill_perpcone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix)
               
               parts_in_cone2 = self.construct_parts_in_perpcone(fj_particles_cones, jet, jetR, perpcone_R, -1)
-              self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
+              self.fill_perpcone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix)
   
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
@@ -1160,8 +1150,8 @@ class ProcessMCBase(process_base.ProcessBase):
     perp_jet.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + rotation_sign*np.pi/2, jet.m())
 
     perpcone_R_effective = perpcone_R # effective cone size when finding perpcone particles
-    # Use jet cone parts as "signal" for perp cone if cone radius != jetR or if we are only checking the jetcones (in this case, use cone particles for jetcone R = jetR also), else use jet constituents as "signal" for perp cone
-    if self.do_only_jetcone or perpcone_R != jetR:
+    # Use jet cone parts as "signal" for perp cone if do_jetcone is enabled
+    if self.do_jetcone:
       parts_in_jet = self.find_parts_around_jet(parts, jet, perpcone_R)
     else:
       constituents = jet.constituents()
@@ -1335,15 +1325,16 @@ class ProcessMCBase(process_base.ProcessBase):
                 jet_pt_truth_ungroomed -= hadron.pt()
 
           # Call user function to fill histos
-          self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+          # only fill jet constituents EEC when do_jetcone is not enabled
+          if not self.do_jetcone:
+            self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
                                jet_truth_groomed_lund, jet_pp_det, jetR,
                                obs_setting, grooming_setting, obs_label,
                                jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                R_max, suffix, holes_in_det_jet=holes_in_det_jet,
                                holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0)
-          
-          # If check cone, pass the list of cone particles
-          if self.do_jetcone:
+          # for jet cone EEC, pass the list of cone particles
+          else:
             for jetcone_R in self.jetcone_R_list:
               
               cone_parts_in_det_jet = self.find_parts_around_jet(fj_particles_det_cones, jet_det, jetcone_R)
@@ -1359,8 +1350,14 @@ class ProcessMCBase(process_base.ProcessBase):
 
           # If check perpendicular cone, pass the list of perp cone particles (NB: re-label particle origins according to whether they are from perp or jet instead of pythia or PbPb. Need to make sure this part does not interfere with the ss, sb, bb classification in standard embedding procedures)
           if self.do_perpcone:
+            perpcone_R_list = []
+            if self.do_jetcone:
+              for jetcone_R in self.jetcone_R_list:
+                perpcone_R_list.append(jetcone_R)
+            else:
+              perpcone_R_list.append(jetR)
 
-            for perpcone_R in self.perpcone_R_list:
+            for perpcone_R in perpcone_R_list:
 
               parts_in_cone1 = self.construct_parts_in_perpcone(fj_particles_det_cones, jet_det, jetR, perpcone_R, +1)
 
@@ -1448,10 +1445,17 @@ class ProcessMCBase(process_base.ProcessBase):
   # This function is called once for each jet subconfiguration
   # You must implement this
   #---------------------------------------------------------------
-  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                          obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_jetcone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix):
   
-    raise NotImplementedError('You must implement fill_perp_cone_histograms()!')
+    raise NotImplementedError('You must implement fill_jetcone_histograms()!')
+
+  #---------------------------------------------------------------
+  # This function is called once for each jet subconfiguration
+  # You must implement this
+  #---------------------------------------------------------------
+  def fill_perpcone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix):
+  
+    raise NotImplementedError('You must implement fill_perpcone_histograms()!')
 
   #---------------------------------------------------------------
   # This function is called once for each matched jet subconfiguration
