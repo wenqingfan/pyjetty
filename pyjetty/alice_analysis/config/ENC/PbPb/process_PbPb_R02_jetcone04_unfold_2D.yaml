@@ -28,7 +28,6 @@ do_rho_subtraction: True
 do_perpcone: True
 static_perpcone: False
 do_jetcone: True
-do_only_jetcone: True
 jetcone_R_list: [0.4]
 
 constituent_subtractor:
