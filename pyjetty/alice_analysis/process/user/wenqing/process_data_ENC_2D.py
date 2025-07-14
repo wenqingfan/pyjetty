@@ -84,19 +84,6 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
       self.RLbins = logbins(1E-2,1,self.n_RLbins)
 
     for jetR in self.jetR_list:
-      perpcone_R_list = []
-      if self.do_jetcone:
-        if self.do_only_jetcone:
-          for jetcone_R in self.jetcone_R_list:
-            perpcone_R_list.append(jetcone_R)
-        else:
-          perpcone_R_list.append(jetR)
-          for jetcone_R in self.jetcone_R_list:
-            if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-              perpcone_R_list.append(jetcone_R)
-      else:
-        perpcone_R_list.append(jetR)
-
       for observable in self.observable_list:
         for trk_thrd in self.obs_settings[observable]:
 
@@ -104,16 +91,6 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           
           # can take EEC with different energy power (currently only EEC with power n = 1 implemented)
           if 'jet_ENC_RL' in observable:
-
-            #=======================================
-            #        Sigma_ENC histogram
-            #=======================================
-            name = 'h_{}_sigma_R{}_{}'.format(observable, jetR, obs_label)
-            pt_bins = linbins(0,200,40)
-            h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
 
             #=======================================
             #      1D unfolding for jet pT
@@ -124,33 +101,76 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
             h.GetXaxis().SetTitle('p_{T,ch jet}')
             h.GetYaxis().SetTitle('Counts')
             setattr(self, name, h)
-            
-            for iRL in range(self.n_RLbins):
 
+            # jet EEC histograms
+            if not self.do_jetcone:
               #=======================================
-              # 2D unfolding for energy correlators
+              #        Sigma_ENC histogram
               #=======================================
-              name = 'h_{}{:d}_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
-              h.GetYaxis().SetTitle('log10(weight)')
+              name = 'h_{}_sigma_R{}_{}'.format(observable, jetR, obs_label)
+              pt_bins = linbins(0,200,40)
+              h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
               h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
               setattr(self, name, h)
+              
+              for iRL in range(self.n_RLbins):
 
-          # fill perp cone histograms
-          self.pair_type_labels = ['']
+                #=======================================
+                # 2D unfolding for energy correlators
+                #=======================================
+                name = 'h_{}{:d}_R{}_{}'.format(observable, iRL, jetR, obs_label)
+                h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
+                h.GetYaxis().SetTitle('log10(weight)')
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                setattr(self, name, h)
 
-          if self.do_rho_subtraction:
-            self.pair_type_labels = ['_ss','_sb','_bb']
-          if self.is_pp:
-            self.pair_type_labels = ['_ss']
-          
-          if self.do_perpcone:
-            
-            for perpcone_R in perpcone_R_list:
+            # jet cone EEC histograms
+            if self.do_jetcone:
 
-              for pair_type_label in self.pair_type_labels:
+              for jetcone_R in self.jetcone_R_list:
+                
+                #=======================================
+                #        Sigma_ENC histogram
+                #=======================================
+                name = 'h_jetcone{}_{}_sigma_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
+                pt_bins = linbins(0,200,40)
+                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+                
+                for iRL in range(self.n_RLbins):
 
-                if 'jet_ENC_RL' in observable:
+                  #=======================================
+                  # 2D unfolding for energy correlators
+                  #=======================================
+                  name = 'h_jetcone{}_{}{:d}_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
+                  h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
+                  h.GetYaxis().SetTitle('log10(weight)')
+                  h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  setattr(self, name, h)
+
+            # fill perp cone histograms
+            if self.do_perpcone:
+
+              self.pair_type_labels = ['']
+              if self.do_rho_subtraction:
+                self.pair_type_labels = ['_ss','_sb','_bb']
+              if self.is_pp:
+                self.pair_type_labels = ['_ss']
+                
+              perpcone_R_list = []
+              if self.do_jetcone:
+                for jetcone_R in self.jetcone_R_list:
+                  perpcone_R_list.append(jetcone_R)
+              else:
+                perpcone_R_list.append(jetR)
+              
+              for perpcone_R in perpcone_R_list:
+
+                # one perpcone
+                for pair_type_label in self.pair_type_labels:
                   
                   #=======================================
                   #        Sigma_ENC histogram
@@ -173,33 +193,30 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
                     h.GetXaxis().SetTitle('p_{T,ch jet}')
                     setattr(self, name, h)
 
-          if self.do_jetcone:
-
-            for jetcone_R in self.jetcone_R_list:
-              
-              if 'jet_ENC_RL' in observable:
-                
-                #=======================================
-                #        Sigma_ENC histogram
-                #=======================================
-                name = 'h_jetcone{}_{}_sigma_R{}_{}'.format(jetcone_R, observable, jetR, obs_label)
-                pt_bins = linbins(0,200,40)
-                h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
-                h.GetXaxis().SetTitle('p_{T,ch jet}')
-                h.GetYaxis().SetTitle('R_{L}')
-                setattr(self, name, h)
-                
-                for iRL in range(self.n_RLbins):
-
+                # two perpcones
+                if self.do_2cones:
+                  
                   #=======================================
-                  # 2D unfolding for energy correlators
+                  #        Sigma_ENC histogram
                   #=======================================
-                  name = 'h_jetcone{}_{}{:d}_R{}_{}'.format(jetcone_R, observable, iRL, jetR, obs_label)
-                  h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
-                  h.GetYaxis().SetTitle('log10(weight)')
+                  name = 'h_2perpcone{}_{}_sigma_R{}_{}'.format(perpcone_R, observable + '_sb', jetR, obs_label)
+                  pt_bins = linbins(0,200,40)
+                  h = ROOT.TH2D(name, name, 40, pt_bins, self.n_RLbins, self.RLbins)
                   h.GetXaxis().SetTitle('p_{T,ch jet}')
+                  h.GetYaxis().SetTitle('R_{L}')
                   setattr(self, name, h)
-                    
+                  
+                  for iRL in range(self.n_RLbins):
+
+                    #=======================================
+                    # 2D unfolding for energy correlators
+                    #=======================================
+                    name = 'h_2perpcone{}_{}{:d}{}_R{}_{}'.format(perpcone_R, observable, iRL, '_sb', jetR, obs_label)
+                    h = ROOT.TH2D(name, name, n_bins[1], binnings[1], n_bins[0], binnings[0])
+                    h.GetYaxis().SetTitle('log10(weight)')
+                    h.GetXaxis().SetTitle('p_{T,ch jet}')
+                    setattr(self, name, h)
+
   #---------------------------------------------------------------
   # Calculate pair distance of two fastjet particles
   #---------------------------------------------------------------
@@ -230,7 +247,7 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
     type1 = constituents[part1].user_index()
     type2 = constituents[part2].user_index()
 
-    # NB: match the strings in self.pair_type_label = ['ss','sb','bb']
+    # NB: match the strings in self.pair_type_label = ['_ss','_sb','_bb']
     if type1 < 0 and type2 < 0:
       # print('bkg-bkg (',type1,type2,') pt1',constituents[part1].perp()
       return 2 # means bkg-bkg
@@ -282,40 +299,37 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
         hname = 'h_jetpt1D_R{}_{}'.format(jetR, obs_label)
         getattr(self, hname).Fill(jet_pt)
         
-        # if analyze jet cones and only analyze jet cones, then only fill jet pt histograms for standard jets (just to speed things up)
-        if self.do_jetcone and self.do_only_jetcone:
-          pass
-        else:
-          new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
+        # Fill jet or jet EEC one at a time (do not run both at the same time)
+        new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
 
-          ipoint = 2
-          for index in range(new_corr.correlator(ipoint).rs().size()):
+        ipoint = 2
+        for index in range(new_corr.correlator(ipoint).rs().size()):
 
-            # processing only like-sign pairs when self.ENC_pair_like is on
-            if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
-              continue
+          # processing only like-sign pairs when self.ENC_pair_like is on
+          if self.ENC_pair_like and (not self.is_same_charge(new_corr, ipoint, c_select, index)):
+            continue
 
-            # processing only unlike-sign pairs when self.ENC_pair_unlike is on
-            if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
-              continue
+          # processing only unlike-sign pairs when self.ENC_pair_unlike is on
+          if self.ENC_pair_unlike and self.is_same_charge(new_corr, ipoint, c_select, index):
+            continue
 
-            RL = new_corr.correlator(ipoint).rs()[index]
-            weight = new_corr.correlator(ipoint).weights()[index]
-            
-            hname = 'h_{}_sigma_R{}_{}'.format(observable, jetR, obs_label)
-            getattr(self, hname).Fill(jet_pt, RL, weight)
+          RL = new_corr.correlator(ipoint).rs()[index]
+          weight = new_corr.correlator(ipoint).weights()[index]
+          
+          hname = 'h_{}_sigma_R{}_{}'.format(observable, jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt, RL, weight)
 
-            # determine RL bin for det pairs
-            iRL = bisect(self.RLbins, RL)-1 # index from 0
+          # determine RL bin for det pairs
+          iRL = bisect(self.RLbins, RL)-1 # index from 0
 
-            if iRL >= 0 and iRL < self.n_RLbins:
-              hname = 'h_{}{:d}_R{}_{}'.format(observable, iRL, jetR, obs_label)
-              getattr(self, hname).Fill(jet_pt, np.log10(weight))
+          if iRL >= 0 and iRL < self.n_RLbins:
+            hname = 'h_{}{:d}_R{}_{}'.format(observable, iRL, jetR, obs_label)
+            getattr(self, hname).Fill(jet_pt, np.log10(weight))
           
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
   #---------------------------------------------------------------
-  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_perp_cone_histograms(self, cone_parts, cone_label, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
 
     # combine sig jet and perp cone with trk threshold cut
     trk_thrd = obs_setting
@@ -365,23 +379,26 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
             pair_type = self.check_pair_type(new_corr, ipoint, c_select, index)
             pair_type_label = self.pair_type_labels[pair_type]
 
+            if '2perpcone' in cone_label and pair_type_label != '_sb':
+              continue
+
           RL = new_corr.correlator(ipoint).rs()[index]
           weight = new_corr.correlator(ipoint).weights()[index]
           
-          hname = 'h_perpcone{}_{}_sigma_R{}_{}'.format(cone_R, observable + pair_type_label, jetR, obs_label)
+          hname = 'h{}_{}_sigma_R{}_{}'.format(cone_label, observable + pair_type_label, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt, RL, weight)
 
           # determine RL bin for det pairs
           iRL = bisect(self.RLbins, RL)-1 # index from 0
 
           if iRL >= 0 and iRL < self.n_RLbins:
-            hname = 'h_perpcone{}_{}{:d}{}_R{}_{}'.format(cone_R, observable, iRL, pair_type_label, jetR, obs_label)
+            hname = 'h{}_{}{:d}{}_R{}_{}'.format(cone_label, observable, iRL, pair_type_label, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt, np.log10(weight))
 
   #---------------------------------------------------------------
   # This function is called once for each jet subconfiguration
   #---------------------------------------------------------------
-  def fill_jet_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_jet_cone_histograms(self, cone_parts, cone_label, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
 
     # combine sig jet and perp cone with trk threshold cut
     trk_thrd = obs_setting
@@ -412,6 +429,11 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
 
       if observable == 'jet_ENC_RL':
 
+        # avoid counting jets multiple times when more than one jet cone R are enabled
+        if cone_label == '_jetcone{}'.format(self.jetcone_R_list[0]):
+          hname = 'h_jetpt1D_R{}_{}'.format(jetR, obs_label)
+          getattr(self, hname).Fill(jet_pt)
+
         new_corr = ecorrel.CorrelatorBuilder(c_select, jet_pt, 2, 1, dphi_cut, deta_cut)
 
         ipoint = 2
@@ -428,14 +450,14 @@ class ProcessData_ENC(process_data_base.ProcessDataBase):
           RL = new_corr.correlator(ipoint).rs()[index]
           weight = new_corr.correlator(ipoint).weights()[index]
           
-          hname = 'h_jetcone{}_{}_sigma_R{}_{}'.format(cone_R, observable, jetR, obs_label)
+          hname = 'h{}_{}_sigma_R{}_{}'.format(cone_label, observable, jetR, obs_label)
           getattr(self, hname).Fill(jet_pt, RL, weight)
 
           # determine RL bin for det pairs
           iRL = bisect(self.RLbins, RL)-1 # index from 0
 
           if iRL >= 0 and iRL < self.n_RLbins:
-            hname = 'h_jetcone{}_{}{:d}_R{}_{}'.format(cone_R, observable, iRL, jetR, obs_label)
+            hname = 'h{}_{}{:d}_R{}_{}'.format(cone_label, observable, iRL, jetR, obs_label)
             getattr(self, hname).Fill(jet_pt, np.log10(weight))
 
 ##################################################################
