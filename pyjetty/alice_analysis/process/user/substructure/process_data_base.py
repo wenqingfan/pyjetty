@@ -119,10 +119,6 @@ class ProcessDataBase(process_base.ProcessBase):
       self.jetcone_R_list = config['jetcone_R_list']
     else:
       self.jetcone_R_list = [0.4] # NB: set default value to 0.4
-    if 'do_only_jetcone' in config:
-      self.do_only_jetcone = config['do_only_jetcone']
-    else:
-      self.do_only_jetcone = False
 
     if 'do_2cones' in config:
       self.do_2cones = config['do_2cones']
@@ -497,72 +493,45 @@ class ProcessDataBase(process_base.ProcessBase):
         jet_groomed_lund = None
 
       # Call user function to fill histograms
-      self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
+      if not self.do_jetcone:
+        self.fill_jet_histograms(jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
                                obs_label, jet_pt_ungroomed, suffix)
-
       # Fill histograms for jetcone
-      if self.do_jetcone:
+      else:
         for jetcone_R in self.jetcone_R_list:
           parts_in_cone = self.find_parts_around_jet(parts, jet, jetcone_R)
-          self.fill_jet_cone_histograms(parts_in_cone, jetcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+          self.fill_jet_cone_histograms(parts_in_cone, '_jetcone{}'.format(jetcone_R), jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
-      # Control rotation angle = rotation_sign*pi/2
-      rotation_sign = 1.
-      if self.do_randomcone:
-          rotation_sign = np.random.uniform(4./3., 2./3.)
-      
-      # Fill histograms for perpcone
-      if self.do_perpcone and not self.do_2cones:
-        
-        # construct perpcone size list
+      if self.do_perpcone:
         perpcone_R_list = []
         if self.do_jetcone:
-          if self.do_only_jetcone:
-            for jetcone_R in self.jetcone_R_list:
-              perpcone_R_list.append(jetcone_R)
-          else:
-            perpcone_R_list.append(jetR)
-            for jetcone_R in self.jetcone_R_list:
-              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-                perpcone_R_list.append(jetcone_R)
+          for jetcone_R in self.jetcone_R_list:
+            perpcone_R_list.append(jetcone_R)
         else:
           perpcone_R_list.append(jetR)
+        
+        # Control rotation angle = rotation_sign*pi/2
+        rotation_sign = 1.
+        if self.do_randomcone:
+          rotation_sign = np.random.uniform(4./3., 2./3.)
 
         # construct perp cones and fill histograms
+        # one perpcone
         for perpcone_R in perpcone_R_list:
 
           parts_in_cone1 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, +rotation_sign)
-          self.fill_perp_cone_histograms(parts_in_cone1, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+          self.fill_perp_cone_histograms(parts_in_cone1, '_perpcone{}'.format(perpcone_R), jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
           parts_in_cone2 = self.construct_parts_in_perpcone(parts, jet, jetR, perpcone_R, -rotation_sign)
-          self.fill_perp_cone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                               obs_label, jet_pt_ungroomed, suffix, rho_bge)
+          self.fill_perp_cone_histograms(parts_in_cone2, '_perpcone{}'.format(perpcone_R), jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
 
-      # Fill histograms for two perpcone (currently cannot run both 1 cone and 2 cones for perpcone)
-      if self.do_perpcone and self.do_2cones:
-        
-        # construct perpcone size list
-        perpcone_R_list = []
-        if self.do_jetcone:
-          if self.do_only_jetcone:
-            for jetcone_R in self.jetcone_R_list:
-              perpcone_R_list.append(jetcone_R)
-          else:
-            perpcone_R_list.append(jetR)
-            for jetcone_R in self.jetcone_R_list:
-              if jetcone_R != jetR: # just a safeguard since jetR is already added in the list
-                perpcone_R_list.append(jetcone_R)
-        else:
-          perpcone_R_list.append(jetR)
+        # two perpcones
+        if self.do_2cones:
+          for perpcone_R in perpcone_R_list:
 
-        # construct perp cones and fill histograms
-        for perpcone_R in perpcone_R_list:
-
-          parts_in_cone = self.construct_parts_in_2perpcone(parts, jet, jetR, perpcone_R, rotation_sign)
-          self.fill_perp_cone_histograms(parts_in_cone, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
-
+            parts_in_cone = self.construct_parts_in_2perpcone(parts, jet, jetR, perpcone_R, rotation_sign)
+            self.fill_perp_cone_histograms(parts_in_cone, '_2perpcone{}'.format(perpcone_R), jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge)
+  
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
     # print('jet pt',jet.perp()-rho_bge*jet.area(),'phi',jet.phi(),'eta',jet.eta(),'area',jet.area())
@@ -572,7 +541,7 @@ class ProcessDataBase(process_base.ProcessBase):
 
     perpcone_R_effective = perpcone_R
     # Use jet cone parts as "signal" for perp cone if cone radius != jetR or if we are only checking the jetcones (in this case, use cone particles for jetcone R = jetR also), else use jet constituents as "signal" for perp cone
-    if self.do_only_jetcone or perpcone_R != jetR:
+    if self.do_jetcone:
       parts_in_jet = self.find_parts_around_jet(parts, jet, perpcone_R)
     else:
       constituents = jet.constituents()
@@ -602,7 +571,7 @@ class ProcessDataBase(process_base.ProcessBase):
   def construct_parts_in_2perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
     perpcone_R_effective = perpcone_R
-    if self.do_rho_subtraction and self.static_perpcone == False and perpcone_R == jetR:
+    if not self.do_jetcone and self.do_rho_subtraction and self.static_perpcone == False:
       perpcone_R_effective = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
 
     # find perpcone at +pi/2 away and rotate it to jet direction
@@ -691,8 +660,7 @@ class ProcessDataBase(process_base.ProcessBase):
   # This function is called once for each jet subconfiguration
   # You must implement this
   #---------------------------------------------------------------
-  def fill_jet_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                          obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_jet_cone_histograms(self, cone_parts, cone_label, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
   
     raise NotImplementedError('You must implement fill_perp_cone_histograms()!')
 
@@ -700,7 +668,6 @@ class ProcessDataBase(process_base.ProcessBase):
   # This function is called once for each jet subconfiguration
   # You must implement this
   #---------------------------------------------------------------
-  def fill_perp_cone_histograms(self, cone_parts, cone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting,
-                          obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
+  def fill_perp_cone_histograms(self, cone_parts, cone_label, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix, rho_bge = 0):
   
     raise NotImplementedError('You must implement fill_perp_cone_histograms()!')
