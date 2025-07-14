@@ -167,41 +167,45 @@ class ProcessMCBase(process_base.ProcessBase):
     # Now allow perpcone and jetcone to be enabled as the same time
     # Now implementated the perpcone for both jet constituents and jet cones
     # NB: this implementation can only check jet EEC and cone EEC separately (jet EEC will not be saved when do_jetcone is enabled)
-    # example 1: jetR_list = [0.2], do_jetdone = False, do_perpcone = True
+    # example 1: jetR_list = [0.2], do_jetcone = False, do_perpcone = True
     # -- fill and save perpcone hists for the jet constituents
-    # example 2: jetR_list = [0.2], do_jetdone = True (jetcone_R_list = [0.2, 0.4]), do_perpcone = True
+    # example 2: jetR_list = [0.2], do_jetcone = True (jetcone_R_list = [0.2, 0.4]), do_perpcone = True
     # -- fill and save perpcone hists for the jet cone parts with cone size 0.2 and 0.4
     if 'do_perpcone' in config:
       self.do_perpcone = config['do_perpcone']
     else:
       self.do_perpcone = False
     if 'static_perpcone' in config:
-        self.static_perpcone = config['static_perpcone']
+      self.static_perpcone = config['static_perpcone']
     else:
-        self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
+      self.static_perpcone = True # NB: set default to rigid cone (less fluctuations)
+    if 'do_2cones' in config:
+      self.do_2cones = config['do_2cones']
+    else:
+      self.do_2cones = False
 
     if 'leading_pt' in config:
-        self.leading_pt = config['leading_pt']
+      self.leading_pt = config['leading_pt']
     else:
-        self.leading_pt = -1 # negative means no leading track cut
+      self.leading_pt = -1 # negative means no leading track cut
 
     if 'remove_outlier' in config:
-        self.remove_outlier = config['remove_outlier']
+      self.remove_outlier = config['remove_outlier']
     else:
-        self.remove_outlier = False
+      self.remove_outlier = False
 
     if 'do_only_track_matching' in config:
-        self.do_only_track_matching = config['do_only_track_matching']
+      self.do_only_track_matching = config['do_only_track_matching']
     else:
-        self.do_only_track_matching = False
+      self.do_only_track_matching = False
     
     if self.do_constituent_subtraction:
-        self.is_pp = False
-        self.emb_file_list = config['emb_file_list']
-        self.main_R_max = config['constituent_subtractor']['main_R_max']
+      self.is_pp = False
+      self.emb_file_list = config['emb_file_list']
+      self.main_R_max = config['constituent_subtractor']['main_R_max']
     else:
-        self.is_pp = True
-        
+      self.is_pp = True
+    
     if 'thermal_model' in config:
       self.thermal_model = True
       beta = config['thermal_model']['beta']
@@ -1136,6 +1140,7 @@ class ProcessMCBase(process_base.ProcessBase):
             else:
               perpcone_R_list.append(jetR)
 
+            # one perpcone
             for perpcone_R in perpcone_R_list:
 
               parts_in_cone1 = self.construct_parts_in_perpcone(fj_particles_cones, jet, jetR, perpcone_R, +1)
@@ -1143,6 +1148,13 @@ class ProcessMCBase(process_base.ProcessBase):
               
               parts_in_cone2 = self.construct_parts_in_perpcone(fj_particles_cones, jet, jetR, perpcone_R, -1)
               self.fill_perpcone_histograms(parts_in_cone2, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix)
+            
+            # two perpcones
+            if self.do_2cones:
+              for perpcone_R in perpcone_R_list:
+
+                parts_in_cone = self.construct_parts_in_2perpcone(fj_particles_cones, jet, jetR, perpcone_R, +1)
+                self.fill_2perpcone_histograms(parts_in_cone, perpcone_R, jet, jet_groomed_lund, jetR, obs_setting, grooming_setting, obs_label, jet_pt_ungroomed, suffix)
   
   def construct_parts_in_perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
 
@@ -1176,6 +1188,35 @@ class ProcessMCBase(process_base.ProcessBase):
       parts_in_cone.append(part)
     # fill parts from perp cone
     for part in parts_in_perpcone:
+      part.set_user_index(-999)
+      parts_in_cone.append(part)
+
+    return parts_in_cone
+
+  def construct_parts_in_2perpcone(self, parts, jet, jetR, perpcone_R, rotation_sign):
+
+    perpcone_R_effective = perpcone_R
+    if not self.do_jetcone and self.do_rho_subtraction and self.static_perpcone == False:
+        perpcone_R_effective = math.sqrt(jet.area()/np.pi) # NB: for dynamic cone size
+
+    # find perpcone at +pi/2 away and rotate it to jet direction
+    perp_jet1 = fj.PseudoJet()
+    perp_jet1.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() + rotation_sign*np.pi/2, jet.m())
+    parts_in_perpcone1 = self.find_parts_around_jet(parts, perp_jet1, perpcone_R_effective)
+    parts_in_perpcone1 = self.rotate_parts(parts_in_perpcone1, -rotation_sign*np.pi/2)
+
+    # perpcone at -pi/2 away and rotate it to jet direction
+    perp_jet2 = fj.PseudoJet()
+    perp_jet2.reset_PtYPhiM(jet.pt(), jet.rapidity(), jet.phi() - rotation_sign*np.pi/2, jet.m())
+    parts_in_perpcone2 = self.find_parts_around_jet(parts, perp_jet2, perpcone_R_effective)
+    parts_in_perpcone2 = self.rotate_parts(parts_in_perpcone2, +rotation_sign*np.pi/2)
+
+    # label one perpcone as "sig" and the other as "bkg" so the perp1-perp2 and perp1(2)-perp1(2) correlations can be saved separately
+    parts_in_cone = fj.vectorPJ()
+    for part in parts_in_perpcone1:
+      part.set_user_index(999)
+      parts_in_cone.append(part)
+    for part in parts_in_perpcone2:
       part.set_user_index(-999)
       parts_in_cone.append(part)
 
@@ -1332,7 +1373,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                obs_setting, grooming_setting, obs_label,
                                jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                               holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0)
+                               holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=None, cone_parts_in_truth_jet=None, cone_R=0, cone_label='')
           # for jet cone EEC, pass the list of cone particles
           else:
             for jetcone_R in self.jetcone_R_list:
@@ -1346,7 +1387,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                  obs_setting, grooming_setting, obs_label,
                                  jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                  R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=jetcone_R)
+                                 holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=cone_parts_in_truth_jet, cone_R=jetcone_R, cone_label='_jetcone{}'.format(jetcone_R))
 
           # If check perpendicular cone, pass the list of perp cone particles (NB: re-label particle origins according to whether they are from perp or jet instead of pythia or PbPb. Need to make sure this part does not interfere with the ss, sb, bb classification in standard embedding procedures)
           if self.do_perpcone:
@@ -1357,6 +1398,7 @@ class ProcessMCBase(process_base.ProcessBase):
             else:
               perpcone_R_list.append(jetR)
 
+            # one perpcone
             for perpcone_R in perpcone_R_list:
 
               parts_in_cone1 = self.construct_parts_in_perpcone(fj_particles_det_cones, jet_det, jetR, perpcone_R, +1)
@@ -1371,7 +1413,7 @@ class ProcessMCBase(process_base.ProcessBase):
                                    obs_setting, grooming_setting, obs_label,
                                    jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                    R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
+                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R, cone_label='_perpcone{}'.format(perpcone_R)) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
 
               cone_parts_in_det_jet = parts_in_cone2
 
@@ -1381,7 +1423,23 @@ class ProcessMCBase(process_base.ProcessBase):
                                    obs_setting, grooming_setting, obs_label,
                                    jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
                                    R_max, suffix, holes_in_det_jet=holes_in_det_jet,
-                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
+                                   holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R, cone_label='_perpcone{}'.format(perpcone_R)) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
+
+            # two perpcones
+            if self.do_2cones:
+              for perpcone_R in perpcone_R_list:
+
+                parts_in_cone = self.construct_parts_in_2perpcone(fj_particles_det_cones, jet_det, jetR, perpcone_R, +1)
+
+                cone_parts_in_det_jet = parts_in_cone
+
+                # Call user function to fill histos
+                self.fill_matched_jet_histograms(jet_det, jet_det_groomed_lund, jet_truth,
+                                    jet_truth_groomed_lund, jet_pp_det, jetR,
+                                    obs_setting, grooming_setting, obs_label,
+                                    jet_pt_det_ungroomed, jet_pt_truth_ungroomed,
+                                    R_max, suffix, holes_in_det_jet=holes_in_det_jet,
+                                    holes_in_truth_jet=holes_in_truth_jet, cone_parts_in_det_jet=cone_parts_in_det_jet, cone_parts_in_truth_jet=None, cone_R=perpcone_R, cone_label='_2perpcone{}'.format(perpcone_R)) # NB: remember to keep cone_parts_in_truth_jet=None to differentiate from the jet cone histogram filling part
 
   #---------------------------------------------------------------
   # Fill response histograms -- common utility function
