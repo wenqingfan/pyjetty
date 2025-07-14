@@ -26,6 +26,7 @@ remove_outlier: True
 
 do_rho_subtraction: True
 do_perpcone: True
+do_2cones: True
 static_perpcone: False
 do_jetcone: True
 jetcone_R_list: [0.4]
