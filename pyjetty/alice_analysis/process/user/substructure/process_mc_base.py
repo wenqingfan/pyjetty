@@ -764,7 +764,7 @@ class ProcessMCBase(process_base.ProcessBase):
         jets_truth = fj.sorted_by_pt(cs_truth.inclusive_jets())
         jets_truth_selected = jet_selector_det(jets_truth)
       
-        self.analyze_jets_gen(jets_truth_selected, jetR)
+        self.analyze_jets_gen(jets_truth_selected, jetR, fj_particles_truth)
         continue # skip the rest
 
       if self.is_pp:
@@ -904,13 +904,13 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   # Analyze jets of a given event.
   #---------------------------------------------------------------
-  def analyze_jets_gen(self, jets_truth_selected, jetR):
+  def analyze_jets_gen(self, jets_truth_selected, jetR, fj_particles_truth_cones = None):
   
     if self.debug_level > 1:
       print('Number of det-level jets: {}'.format(len(jets_det_selected)))
 
     for jet_truth in jets_truth_selected:
-      self.fill_truth_before_matching(jet_truth, jetR)
+      self.fill_truth_before_matching(jet_truth, jetR, fj_particles_truth_cones)
       
   #---------------------------------------------------------------
   # Analyze jets of a given event.
@@ -1035,7 +1035,7 @@ class ProcessMCBase(process_base.ProcessBase):
   #---------------------------------------------------------------
   # Fill truth jet histograms
   #---------------------------------------------------------------
-  def fill_truth_before_matching(self, jet, jetR):
+  def fill_truth_before_matching(self, jet, jetR, fj_particles_cones = None):
     
     jet_pt = jet.pt()
     for constituent in jet.constituents():
@@ -1043,8 +1043,12 @@ class ProcessMCBase(process_base.ProcessBase):
       getattr(self, 'hZ_Truth_R{}'.format(jetR)).Fill(jet.pt(), z)
           
     # Fill 2D histogram of truth (pt, obs)
-    hname = 'h_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
-    self.fill_unmatched_jet_histograms(jet, jetR, hname)
+    if not self.do_jetcone:
+      hname = 'h_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname)
+    else:
+      hname = 'h_{{}}_JetPt_Truth_R{}_{{}}'.format(jetR)
+      self.fill_unmatched_jet_histograms(jet, jetR, hname, 0, fj_particles_cones)
 
     if self.do_3D_unfold or self.do_2D_unfold:
       hname = 'h_jetpt_gen1D_unmatched_R{}'.format(jetR)
@@ -1116,8 +1120,14 @@ class ProcessMCBase(process_base.ProcessBase):
         jet_pt_ungroomed = jet.perp()
 
       # Call user function to fill histograms
-      self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                      grooming_setting, obs_label, jet_pt_ungroomed)
+      if not self.do_jetcone:
+        self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
+                                      grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=None, cone_R=0, cone_label='')
+      else:
+        for jetcone_R in self.jetcone_R_list:
+          cone_parts = self.find_parts_around_jet(fj_particles_cones, jet, jetcone_R)
+          self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
+                                      grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=cone_parts, cone_R=jetcone_R, cone_label='jetcone{}_'.format(jetcone_R)) # NB: used in gen-only setup, '_' has to be after the jetcone{} due to the specific implementation in process_mc_ENC_gen.py
 
       if self.do_3D_unfold or self.do_2D_unfold:
 
