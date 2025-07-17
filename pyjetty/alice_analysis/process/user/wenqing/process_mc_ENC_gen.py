@@ -70,23 +70,42 @@ class ProcessMC_ENC_Gen(process_mc_base.ProcessMCBase):
 
         # Init ENC histograms (truth level only)
         if 'ENC' in observable:
+          
           for ipoint in range(2, 3):
-            # Truth histograms
-            name = 'h_{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label)
-            pt_bins = linbins(0,200,200)
-            RL_bins = logbins(1E-4,1,50)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('R_{L}')
-            setattr(self, name, h)
 
-            name = 'h_{}{}Pt_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
-            pt_bins = linbins(0,200,200)
-            ptRL_bins = logbins(1E-3,1E2,60)
-            h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
-            h.GetXaxis().SetTitle('p_{T,ch jet}')
-            h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
-            setattr(self, name, h)
+            if not self.do_jetcone:
+              name = 'h_{}{}_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label)
+              pt_bins = linbins(0,200,200)
+              RL_bins = logbins(1E-4,1,50)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('R_{L}')
+              setattr(self, name, h)
+
+              name = 'h_{}{}Pt_JetPt_Truth_R{}_{}'.format(observable, ipoint, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
+              pt_bins = linbins(0,200,200)
+              ptRL_bins = logbins(1E-3,1E2,60)
+              h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+              h.GetXaxis().SetTitle('p_{T,ch jet}')
+              h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+              setattr(self, name, h)
+            else:
+              for jetcone_R in self.jetcone_R_list:
+                name = 'h_jetcone{}_{}{}_JetPt_Truth_R{}_{}'.format(jetcone_R, observable, ipoint, jetR, obs_label)
+                pt_bins = linbins(0,200,200)
+                RL_bins = logbins(1E-4,1,50)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 50, RL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('R_{L}')
+                setattr(self, name, h)
+
+                name = 'h_jetcone{}_{}{}Pt_JetPt_Truth_R{}_{}'.format(jetcone_R, observable, ipoint, jetR, obs_label) # pt scaled histograms (currently only for unmatched jets)
+                pt_bins = linbins(0,200,200)
+                ptRL_bins = logbins(1E-3,1E2,60)
+                h = ROOT.TH2D(name, name, 200, pt_bins, 60, ptRL_bins)
+                h.GetXaxis().SetTitle('p_{T,ch jet}')
+                h.GetYaxis().SetTitle('p_{T,ch jet}R_{L}') # NB: y axis scaled by jet pt (applied jet by jet)
+                setattr(self, name, h)
         
         if 'jet_pt' in observable:
           name = 'h_{}_JetPt_Truth_R{}_{}'.format(observable, jetR, obs_label)
@@ -119,9 +138,19 @@ class ProcessMC_ENC_Gen(process_mc_base.ProcessMCBase):
   # Fill 2D histogram of (pt, obs)
   #---------------------------------------------------------------
   def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                 grooming_setting, obs_label, jet_pt_ungroomed):
+                                 grooming_setting, obs_label, jet_pt_ungroomed, **kwargs):
+    
     # For ENC in PbPb, jet_pt_ungroomed stores the corrected jet pT
-    constituents = fj.sorted_by_pt(jet.constituents())
+
+    cone_parts = kwargs['cone_parts']
+    cone_R = kwargs['cone_R']
+    cone_label = kwargs['cone_label']
+
+    if cone_parts == None:
+      constituents = fj.sorted_by_pt(jet.constituents())
+    else:
+      constituents = fj.sorted_by_pt(cone_parts)
+    
     c_select = fj.vectorPJ()
     trk_thrd = obs_setting
 
@@ -155,20 +184,23 @@ class ProcessMC_ENC_Gen(process_mc_base.ProcessMCBase):
             
             if 'ENC' in observable:
               if self.smearRL:
-                  getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
-                  getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(cone_label+observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(cone_label+observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index]+noise[index], new_corr.correlator(ipoint).weights()[index])
               else:
-                  getattr(self, hname.format(observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
-                  getattr(self, hname.format(observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(cone_label+observable + str(ipoint),obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
+                  getattr(self, hname.format(cone_label+observable + str(ipoint) + 'Pt',obs_label)).Fill(jet_pt, jet_pt*new_corr.correlator(ipoint).rs()[index], new_corr.correlator(ipoint).weights()[index])
 
             if ipoint==2 and 'EEC_noweight' in observable:
-              getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
+              getattr(self, hname.format(cone_label+observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index])
 
             if ipoint==2 and 'EEC_weight2' in observable:
-              getattr(self, hname.format(observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
+              getattr(self, hname.format(cone_label+observable,obs_label)).Fill(jet_pt, new_corr.correlator(ipoint).rs()[index], pow(new_corr.correlator(ipoint).weights()[index],2))
 
       if 'jet_pt' in observable:
-        getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
+        # to avoid double/triple-counting when jetcone is enabled
+        # DO NOT run jet and jetcone EEC the same time (ensured by the if statement in process_mc_base.py), or else the jet pt histograms will be filled twice
+        if (cone_label == '') or ('jetcone{}'.format(self.jetcone_R_list[0]) in cone_label):
+          getattr(self, hname.format(observable,obs_label)).Fill(jet_pt)
 
   #---------------------------------------------------------------
   # This function is called per jet subconfigration 
