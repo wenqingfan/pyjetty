@@ -896,6 +896,13 @@ class ProcessMCBase(process_base.ProcessBase):
         else:
           is_jet_selected = False
 
+      # if jetcone EEC enabled with one cone size and the cone size is larger than jetR, tighten the eta fiducial cut
+      if self.do_jetcone and len(self.jetcone_R_list) == 1 and self.jetcone_R_list[0] > jetR:
+        if abs(jet.rapidity()) < 0.9-self.jetcone_R_list[0]:
+          is_jet_selected = True
+        else:
+          is_jet_selected = False
+
       if is_jet_selected:
         jets_reselected.append(jet)
 
@@ -943,7 +950,7 @@ class ProcessMCBase(process_base.ProcessBase):
     for jet_truth in jets_truth_selected:
     
       if self.is_pp or self.fill_Rmax_indep_hists:
-        self.fill_truth_before_matching(jet_truth, jetR)
+        self.fill_truth_before_matching(jet_truth, jetR, fj_particles_truth_cones)
   
     # Loop through jets and set jet matching candidates for each jet in user_info
     if self.is_pp:
@@ -1120,14 +1127,15 @@ class ProcessMCBase(process_base.ProcessBase):
         jet_pt_ungroomed = jet.perp()
 
       # Call user function to fill histograms
-      if not self.do_jetcone:
-        self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                      grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=None, cone_R=0, cone_label='')
-      else:
-        for jetcone_R in self.jetcone_R_list:
-          cone_parts = self.find_parts_around_jet(fj_particles_cones, jet, jetcone_R)
+      if not (self.do_3D_unfold or self.do_2D_unfold):
+        if not self.do_jetcone:
           self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                      grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=cone_parts, cone_R=jetcone_R, cone_label='jetcone{}_'.format(jetcone_R)) # NB: used in gen-only setup, '_' has to be after the jetcone{} due to the specific implementation in process_mc_ENC_gen.py
+                                        grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=None, cone_R=0, cone_label='')
+        else:
+          for jetcone_R in self.jetcone_R_list:
+            cone_parts = self.find_parts_around_jet(fj_particles_cones, jet, jetcone_R)
+            self.fill_observable_histograms(hname, jet, jet_groomed_lund, jetR, obs_setting,
+                                        grooming_setting, obs_label, jet_pt_ungroomed, cone_parts=cone_parts, cone_R=jetcone_R, cone_label='jetcone{}_'.format(jetcone_R)) # NB: used in gen-only setup, '_' has to be after the jetcone{} due to the specific implementation in process_mc_ENC_gen.py
 
       if self.do_3D_unfold or self.do_2D_unfold:
 
@@ -1496,7 +1504,7 @@ class ProcessMCBase(process_base.ProcessBase):
   # You must implement this
   #---------------------------------------------------------------
   def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                 grooming_setting, obs_label, jet_pt_ungroomed):
+                                 grooming_setting, obs_label, jet_pt_ungroomed, **kwargs):
 
     raise NotImplementedError('You must implement fill_observable_histograms()!')
 
