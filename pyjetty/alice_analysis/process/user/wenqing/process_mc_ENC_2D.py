@@ -921,7 +921,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
   # This is just a dummy function here
   #---------------------------------------------------------------
   def fill_observable_histograms(self, hname, jet, jet_groomed_lund, jetR, obs_setting,
-                                 grooming_setting, obs_label, jet_pt_ungroomed):
+                                 grooming_setting, obs_label, jet_pt_ungroomed, **kwargs):
     return
 
   #---------------------------------------------------------------
