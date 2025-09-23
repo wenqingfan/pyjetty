@@ -805,7 +805,15 @@ class ProcessMCBase(process_base.ProcessBase):
         jets_truth_selected = jet_selector_det(jets_truth)
         jets_truth_selected_matched = jet_selector_truth_matched(jets_truth)
       
-        self.analyze_jets(jets_det_pp_selected, jets_truth_selected, jets_truth_selected_matched, jetR)
+        # FIX ME: a small test showed it works, but need to confirm with more statistics
+        # if not analyzing any cones, then just need to pass jets to analyze_jets function
+        if not (self.do_jetcone or self.do_perpcone):
+          self.analyze_jets(jets_det_pp_selected, jets_truth_selected, jets_truth_selected_matched, jetR)
+        else:
+          self.analyze_jets(jets_det_pp_selected, jets_truth_selected, jets_truth_selected_matched, jetR,
+                            jets_det_pp_selected = None, R_max = None,
+                            fj_particles_det_holes = None,
+                            fj_particles_truth_holes = None, rho_bge = 0, fj_particles_det_cones = fj_particles_det, fj_particles_truth_cones = fj_particles_truth)
         
       else:
       
