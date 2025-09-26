@@ -308,7 +308,10 @@ class ProcessDataBase(process_base.ProcessBase):
         jets = fj.sorted_by_pt(cs.inclusive_jets())
         jets_selected = jet_selector(jets)
       
-        self.analyze_jets(jets_selected, jetR)
+        if not self.do_jetcone:
+          self.analyze_jets(jets_selected, jetR)
+        else:
+          self.analyze_jets(jets_selected, jetR, R_max = None, rho_bge = 0, parts = fj_particles)
         
       else:
       
