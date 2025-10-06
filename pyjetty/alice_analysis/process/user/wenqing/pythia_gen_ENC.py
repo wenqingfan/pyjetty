@@ -26,6 +26,7 @@ import pythiaext
 import ecorrel
 
 from pyjetty.alice_analysis.process.base import process_base
+from bisect import bisect
 
 # Prevent ROOT from stealing focus when plotting
 ROOT.gROOT.SetBatch(True)
@@ -166,6 +167,11 @@ class PythiaGenENC(process_base.ProcessBase):
         else:
             self.leading_pt = -1 # negative means no leading track cut
 
+        if 'do_ktbins' in config:
+            self.do_ktbins = config['do_ktbins']
+        else:
+            self.do_ktbins = False
+
     #---------------------------------------------------------------
     # Main processing function
     #---------------------------------------------------------------
@@ -212,6 +218,9 @@ class PythiaGenENC(process_base.ProcessBase):
         self.hJetPt_leading_gluons.SetTitle('pT (jet)')
         self.hJetPt_leading_quarks = ROOT.TH1D("hJetPt_leading_quarks", 'Jet pt spectrum of leading quarks', 500, pt_bins)
         self.hJetPt_leading_quarks.SetTitle('pT (jet)')
+
+        self.n_ktbins = 40
+        self.ktbins = logbins(1E-3,1E1,self.n_ktbins)
 
         for jetR in self.jetR_list:
 
@@ -325,6 +334,28 @@ class PythiaGenENC(process_base.ProcessBase):
                         setattr(self, name, h)
                         getattr(self, hist_list_name).append(h)
 
+                        if self.do_ktbins:
+                            for ikt in range(self.n_ktbins):
+                                name = 'h_ENC{}_kt{:d}_JetPt_{}_R{}_trk00'.format(str(ipoint), ikt, jet_level, R_label)
+                                print('Initialize histogram',name)
+                                pt_bins = linbins(0,1000,500)
+                                RL_bins = logbins(1E-4,1,50)
+                                h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
+                                h.GetXaxis().SetTitle('pT (jet)')
+                                h.GetYaxis().SetTitle('R_{L}')
+                                setattr(self, name, h)
+                                getattr(self, hist_list_name).append(h)
+
+                                name = 'h_ENC{}_kt{:d}_JetPt_{}_R{}_trk10'.format(str(ipoint), ikt, jet_level, R_label)
+                                print('Initialize histogram',name)
+                                pt_bins = linbins(0,1000,500)
+                                RL_bins = logbins(1E-4,1,50)
+                                h = ROOT.TH2D(name, name, 500, pt_bins, 50, RL_bins)
+                                h.GetXaxis().SetTitle('pT (jet)')
+                                h.GetYaxis().SetTitle('R_{L}')
+                                setattr(self, name, h)
+                                getattr(self, hist_list_name).append(h)
+
                 # Jet pt vs N constituents
                 name = 'h_Nconst_JetPt_{}_R{}_trk00'.format(jet_level, R_label)
                 print('Initialize histogram',name)
@@ -411,7 +442,62 @@ class PythiaGenENC(process_base.ProcessBase):
                     print('Initialize histogram',name)
                     h = ROOT.TH1D(name, name, 2, -0.5, 1.5)
                     setattr(self, name, h)
-                    getattr(self, hist_list_name).append(h)             
+                    getattr(self, hist_list_name).append(h)   
+
+                    if self.do_ktbins:
+                        name = 'h_ENC2_kt_JetPt2040_{}_R{}_trk00'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)  
+
+                        name = 'h_ENC2_kt_JetPt4060_{}_R{}_trk00'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC2_kt_JetPt6080_{}_R{}_trk00'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC2_kt_JetPt2040_{}_R{}_trk10'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC2_kt_JetPt4060_{}_R{}_trk10'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)
+
+                        name = 'h_ENC2_kt_JetPt6080_{}_R{}_trk10'.format(jet_level, R_label)
+                        print('Initialize histogram',name)
+                        RL_bins = logbins(1E-4,1,50)
+                        h = ROOT.TH2D(name, name, self.n_ktbins, self.ktbins, 50, RL_bins)
+                        h.GetXaxis().SetTitle('R_{L}')
+                        h.GetYaxis().SetTitle('k_{T}')
+                        setattr(self, name, h)
+                        getattr(self, hist_list_name).append(h)         
 
                 # NB: Only do the cone check for one reference radius and charged jets for now
                 if self.beyond_jetR and (jetR == self.ref_jetR) and (jet_level == self.ref_jet_level):
@@ -873,13 +959,37 @@ class PythiaGenENC(process_base.ProcessBase):
 
         for ipoint in range(2, self.npoint+1):
             for index in range(cb0.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_ENC{}PtlnPt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb0.correlator(ipoint).rs()[index], math.log(jet.perp())*cb0.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}PtlnPt_JetPt_{}_R{}_trk00'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb0.correlator(ipoint).rs()[index], math.log(jet.perp())*cb0.correlator(ipoint).weights()[index])
+
+                if self.do_ktbins:
+                    part1 = int(cb0.correlator(ipoint).indices1()[index])
+                    part2 = int(cb0.correlator(ipoint).indices2()[index])
+                    c1 = _c_select0[part1]
+                    c2 = _c_select0[part2]
+                    kt = min(c1.perp(), c2.perp()) * cb0.correlator(ipoint).rs()[index]
+                    # Find which ikt this kt corresponds to according to self.ktbins
+                    ikt = bisect(self.ktbins, kt) - 1
+                    if 0 <= ikt < len(self.ktbins) - 1:
+                        # print('filling kt bin',ikt,'for kt',kt,'GeV for jet pt',jet.perp(),'GeV','and pair with R',cb0.correlator(ipoint).rs()[index],'part1 pt',c1.perp(),'part2 pt',c2.perp())
+                        getattr(self, 'h_ENC{}_kt{:d}_JetPt_{}_R{}_trk00'.format(str(ipoint), ikt, level, R_label)).Fill(jet.perp(), cb0.correlator(ipoint).rs()[index], cb0.correlator(ipoint).weights()[index])
+            
             for index in range(cb1.correlator(ipoint).rs().size()):
-                    getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
-                    getattr(self, 'h_ENC{}PtlnPt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb1.correlator(ipoint).rs()[index], math.log(jet.perp())*cb1.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}Pt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
+                getattr(self, 'h_ENC{}PtlnPt_JetPt_{}_R{}_trk10'.format(str(ipoint), level, R_label)).Fill(jet.perp(), jet.perp()*cb1.correlator(ipoint).rs()[index], math.log(jet.perp())*cb1.correlator(ipoint).weights()[index])
+
+                if self.do_ktbins:
+                    part1 = int(cb1.correlator(ipoint).indices1()[index])
+                    part2 = int(cb1.correlator(ipoint).indices2()[index])
+                    c1 = _c_select1[part1]
+                    c2 = _c_select1[part2]
+                    kt = min(c1.perp(), c2.perp()) * cb1.correlator(ipoint).rs()[index]
+                    # Find which ikt this kt corresponds to according to self.ktbins
+                    ikt = bisect(self.ktbins, kt) - 1
+                    if 0 <= ikt < len(self.ktbins) - 1:
+                        getattr(self, 'h_ENC{}_kt{:d}_JetPt_{}_R{}_trk10'.format(str(ipoint), ikt, level, R_label)).Fill(jet.perp(), cb1.correlator(ipoint).rs()[index], cb1.correlator(ipoint).weights()[index])
             
         if level == "ch":
             for ipoint in range(2, self.npoint+1):
@@ -929,6 +1039,19 @@ class PythiaGenENC(process_base.ProcessBase):
                 if jet.perp()>60 and jet.perp()<80:
                     getattr(self, 'h_ENC2_JetPt6080_{}_R{}_trk00'.format(level, R_label)).Fill(cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
 
+                if self.do_ktbins:
+                    part1 = int(cb0.correlator(ipoint).indices1()[index])
+                    part2 = int(cb0.correlator(ipoint).indices2()[index])
+                    c1 = _c_select0[part1]
+                    c2 = _c_select0[part2]
+                    kt = min(c1.perp(), c2.perp()) * cb0.correlator(ipoint).rs()[index]
+                    if jet.perp()>20 and jet.perp()<40:
+                        getattr(self, 'h_ENC2_kt_JetPt2040_{}_R{}_trk00'.format(level, R_label)).Fill(kt, cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+                    if jet.perp()>40 and jet.perp()<60:
+                        getattr(self, 'h_ENC2_kt_JetPt4060_{}_R{}_trk00'.format(level, R_label)).Fill(kt, cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+                    if jet.perp()>60 and jet.perp()<80:
+                        getattr(self, 'h_ENC2_kt_JetPt6080_{}_R{}_trk00'.format(level, R_label)).Fill(kt, cb0.correlator(2).rs()[index], cb0.correlator(2).weights()[index])
+
             for index in range(cb1.correlator(2).rs().size()):
                 if jet.perp()>20 and jet.perp()<40:
                     getattr(self, 'h_ENC2_JetPt2040_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
@@ -936,6 +1059,19 @@ class PythiaGenENC(process_base.ProcessBase):
                     getattr(self, 'h_ENC2_JetPt4060_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
                 if jet.perp()>60 and jet.perp()<80:
                     getattr(self, 'h_ENC2_JetPt6080_{}_R{}_trk10'.format(level, R_label)).Fill(cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
+
+                if self.do_ktbins:
+                    part1 = int(cb1.correlator(ipoint).indices1()[index])
+                    part2 = int(cb1.correlator(ipoint).indices2()[index])
+                    c1 = _c_select1[part1]
+                    c2 = _c_select1[part2]
+                    kt = min(c1.perp(), c2.perp()) * cb1.correlator(ipoint).rs()[index]
+                    if jet.perp()>20 and jet.perp()<40:
+                        getattr(self, 'h_ENC2_kt_JetPt2040_{}_R{}_trk10'.format(level, R_label)).Fill(kt, cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
+                    if jet.perp()>40 and jet.perp()<60:
+                        getattr(self, 'h_ENC2_kt_JetPt4060_{}_R{}_trk10'.format(level, R_label)).Fill(kt, cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
+                    if jet.perp()>60 and jet.perp()<80:
+                        getattr(self, 'h_ENC2_kt_JetPt6080_{}_R{}_trk10'.format(level, R_label)).Fill(kt, cb1.correlator(2).rs()[index], cb1.correlator(2).weights()[index])
 
     #---------------------------------------------------------------
     # Form EEC using jet constituents for matched jets
