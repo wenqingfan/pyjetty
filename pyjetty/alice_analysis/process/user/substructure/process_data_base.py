@@ -386,12 +386,12 @@ class ProcessDataBase(process_base.ProcessBase):
           # FIX ME: not sure whether to apply the area selection or not yet. jet.area() > 0.6*np.pi*jetR*jetR
           is_jet_selected = False
 
-      # if jetcone EEC enabled with one cone size and the cone size is larger than jetR, tighten the eta fiducial cut
-      if self.do_jetcone and len(self.jetcone_R_list) == 1 and self.jetcone_R_list[0] > jetR:
-        if abs(jet.rapidity()) < 0.9-self.jetcone_R_list[0]:
-          is_jet_selected = True
-        else:
-          is_jet_selected = False
+      # # if jetcone EEC enabled with one cone size and the cone size is larger than jetR, tighten the eta fiducial cut
+      # if self.do_jetcone and len(self.jetcone_R_list) == 1 and self.jetcone_R_list[0] > jetR:
+      #   if abs(jet.rapidity()) < 0.9-self.jetcone_R_list[0]:
+      #     is_jet_selected = True
+      #   else:
+      #     is_jet_selected = False
       
       if is_jet_selected:
         jets_reselected.append(jet)
