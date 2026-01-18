@@ -1,0 +1,64 @@
+# Configuration for:
+#   (a) Processing of ROOT trees into histograms
+#   (b) Analysis of histograms into final result
+#
+# The observables are structured into observable blocks (e.g. theta_g, subjet_z, etc.)
+# each containing multiple individual subconfigurations (e.g. zcut, beta, subjetR, etc.),
+# where each subconfiguration corresponds to a single unfolded result.
+# One can also specify a list of jetR, which will be looped over.
+#
+# The process step is intended to loop over all observables simultaneously
+# The analysis step is intended to run for a single observable block
+
+process_observables: ['jet_ENC_RL']
+jetR: [0.2]
+jet_matching_distance: 0.6        # Match jets with deltaR < jet_matching_distance*jetR
+mc_fraction_threshold: 0.5
+reject_tracks_fraction: 0.0
+eta_max: 0.9
+debug_level: 0
+dry_run: False
+do_2D_unfold: True
+fast_simulation: True
+ENC_fastsim: False # only set to True when fast_simulation is set to True
+ENC_pair_cut: False
+remove_outlier: True
+
+do_rho_subtraction: True
+do_perpcone: True
+do_2cones: True
+static_perpcone: False
+do_jetcone: True
+jetcone_R_list: [0.4]
+
+constituent_subtractor:
+  max_distance: [0.1]
+  main_R_max: 0.1
+  alpha: 0
+  max_eta: 0.9
+  bge_rho_grid_size: 1.0
+  max_pt_correct: 100
+  ghost_area: 0.01
+
+emb_file_list: '/global/cfs/cdirs/alice/wenqing/ENC/files_LHC18qr.txt'
+
+# Observable block
+jet_ENC_RL:
+
+  common_settings:
+    xtitle: '#it{R_{L}}'
+    ytitle: '#frac{1}{#it{#sigma}_{jet}} #frac{d#it{#sigma}}{d#it{R_{L}}}'
+    pt_bins_reported: [40, 80, 120]
+    max_reg_param: 10
+    plot_overlay_list:
+      - ['config1']
+
+  config1:
+    trk_thrd: 1.0
+    pt_bins_truth: [5, 20, 40, 60, 80, 120, 150, 200]
+    pt_bins_det: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120, 150]
+    pt_bins_det_sys_truncation: [10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100, 120]
+    obs_bins_truth: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det: [0., 0.02, 0.04, 0.1, 0.3, 0.6, 0.7, 0.77, 0.83, 0.89, 0.95, 1.0]
+    obs_bins_det_sys_binning: [0., 0.01, 0.02, 0.03, 0.04, 0.06, 0.12, 0.18, 0.24, 0.3, 0.36, 0.42, 0.48, 0.54, 0.6, 0.66, 0.72, 0.8, 0.9, 0.96, 0.98, 0.99, 1.0]
+
