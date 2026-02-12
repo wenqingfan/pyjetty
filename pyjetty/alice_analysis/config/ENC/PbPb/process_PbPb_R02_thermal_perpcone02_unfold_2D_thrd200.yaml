@@ -29,7 +29,6 @@ do_perpcone: True
 do_2cones: True
 static_perpcone: False
 do_jetcone: False
-do_only_jetcone: False
 jetcone_R_list: [0.2]
 
 thermal_model:
