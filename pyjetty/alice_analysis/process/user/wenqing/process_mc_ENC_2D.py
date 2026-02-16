@@ -165,7 +165,7 @@ class ProcessMC_ENC_2D(process_mc_base.ProcessMCBase):
       binnings_reco = [np.linspace(-5,0,n_bins_reco[0]+1), \
                   np.linspace(0,150,n_bins_reco[1]+1) ]
 
-      self.n_RLbins = 25
+      self.n_RLbins = 30
       self.RLbins = logbins(1E-2,1,self.n_RLbins)
     else:
       # define binnings
